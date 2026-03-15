@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { BottomNav } from "@/shared/ui/bottom-nav/bottom-nav";
 import styles from "./home-screen.module.css";
 
@@ -15,6 +16,7 @@ const HOME_TILES = [
     iconSrc: "/main/card.svg",
     iconAlt: "Карта",
     className: [styles.tile, styles.tileBuy].join(" "),
+    href: "/passes",
   },
   {
     title: "Мои абонементы",
@@ -57,28 +59,44 @@ export function HomeScreen() {
         </header>
 
         <section className={styles.tiles} aria-label="Главные разделы">
-          {HOME_TILES.map(({ title, subtitle, iconSrc, iconAlt, className }) => (
-            <article key={title} className={className}>
-              <div className={styles.tileCopy}>
-                <h2 className={styles.tileTitle}>
-                  {title.split("\n").map((line) => (
-                    <span key={line} className={styles.tileLine}>
-                      {line}
-                    </span>
-                  ))}
-                </h2>
-                {subtitle ? <p className={styles.tileSubtitle}>{subtitle}</p> : null}
-              </div>
+          {HOME_TILES.map(({ title, subtitle, iconSrc, iconAlt, className, href }) => {
+            const content = (
+              <>
+                <div className={styles.tileCopy}>
+                  <h2 className={styles.tileTitle}>
+                    {title.split("\n").map((line) => (
+                      <span key={line} className={styles.tileLine}>
+                        {line}
+                      </span>
+                    ))}
+                  </h2>
+                  {subtitle ? <p className={styles.tileSubtitle}>{subtitle}</p> : null}
+                </div>
 
-              <Image
-                src={iconSrc}
-                alt={iconAlt}
-                width={74}
-                height={74}
-                className={styles.tileIcon}
-              />
-            </article>
-          ))}
+                <Image
+                  src={iconSrc}
+                  alt={iconAlt}
+                  width={74}
+                  height={74}
+                  className={styles.tileIcon}
+                />
+              </>
+            );
+
+            if (href) {
+              return (
+                <Link key={title} href={href} className={[className, styles.tileLink].join(" ")}>
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <article key={title} className={className}>
+                {content}
+              </article>
+            );
+          })}
         </section>
 
         <BottomNav activeItem="home" />

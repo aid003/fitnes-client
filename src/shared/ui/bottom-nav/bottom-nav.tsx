@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   CalendarCheck2,
   CreditCard,
@@ -16,9 +17,10 @@ const NAV_ITEMS: Array<{
   id: BottomNavItem;
   label: string;
   Icon: typeof House;
+  href?: string;
 }> = [
-  { id: "home", label: "Главная", Icon: House },
-  { id: "passes", label: "Абонементы", Icon: CreditCard },
+  { id: "home", label: "Главная", Icon: House, href: "/" },
+  { id: "passes", label: "Абонементы", Icon: CreditCard, href: "/passes" },
   { id: "memberships", label: "Мои абонементы", Icon: IdCard },
   { id: "schedule", label: "Расписание", Icon: CalendarCheck2 },
 ];
@@ -26,18 +28,39 @@ const NAV_ITEMS: Array<{
 export function BottomNav({ activeItem }: BottomNavProps) {
   return (
     <nav className={styles.nav} aria-label="Основная навигация">
-      {NAV_ITEMS.map(({ id, label, Icon }) => {
+      {NAV_ITEMS.map(({ id, label, Icon, href }) => {
         const isActive = id === activeItem;
-
-        return (
-          <div
-            key={id}
-            className={[styles.item, isActive ? styles.itemActive : ""].filter(Boolean).join(" ")}
-            aria-current={isActive ? "page" : undefined}
-          >
+        const itemClassName = [styles.item, isActive ? styles.itemActive : ""]
+          .filter(Boolean)
+          .join(" ");
+        const content = (
+          <>
             <Icon className={styles.icon} strokeWidth={2.2} aria-hidden="true" />
             <span className={styles.label}>{label}</span>
-          </div>
+          </>
+        );
+
+        if (!href) {
+          return (
+            <div
+              key={id}
+              className={[itemClassName, styles.itemStatic].filter(Boolean).join(" ")}
+              aria-current={isActive ? "page" : undefined}
+            >
+              {content}
+            </div>
+          );
+        }
+
+        return (
+          <Link
+            key={id}
+            href={href}
+            className={itemClassName}
+            aria-current={isActive ? "page" : undefined}
+          >
+            {content}
+          </Link>
         );
       })}
     </nav>

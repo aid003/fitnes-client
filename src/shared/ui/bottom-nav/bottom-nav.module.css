@@ -1,12 +1,18 @@
 .nav {
-  margin-top: auto;
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, calc(env(safe-area-inset-bottom) + 12px));
+  transform: translateX(-50%);
+  z-index: 5;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
+  width: min(calc(100vw - 36px), calc(var(--mobile-max-width) - 24px));
   padding: 16px 12px 18px;
   border-radius: 28px;
   border: 2px solid #395066;
   background: #1d1d2a;
+  box-sizing: border-box;
 }
 
 .item {
@@ -17,10 +23,17 @@
   gap: 8px;
   min-width: 0;
   color: #ffffff;
+  text-decoration: none;
+  border-radius: 18px;
+  transition: color 160ms ease, background-color 160ms ease;
 }
 
 .itemActive {
   color: #ff9719;
+}
+
+.itemStatic {
+  cursor: default;
 }
 
 .icon {
@@ -37,8 +50,18 @@
   letter-spacing: -0.03em;
 }
 
+.item[href]:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.item[href]:focus-visible {
+  outline: 2px solid rgba(255, 151, 25, 0.75);
+  outline-offset: 2px;
+}
+
 @media (max-width: 420px) {
   .nav {
+    bottom: max(10px, calc(env(safe-area-inset-bottom) + 10px));
     gap: 6px;
     padding: 14px 10px 16px;
   }

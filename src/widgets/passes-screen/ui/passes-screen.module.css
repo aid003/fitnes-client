@@ -1,0 +1,174 @@
+.screen {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(120, 92, 108, 0.24), transparent 30%),
+    radial-gradient(circle at 86% 100%, rgba(70, 45, 84, 0.36), transparent 28%),
+    linear-gradient(180deg, #2b2023 0%, #251c1e 44%, #291f34 100%);
+}
+
+.panel {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    18px
+    calc(132px + env(safe-area-inset-bottom))
+    18px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex: 0 0 auto;
+}
+
+.logo {
+  width: 150px;
+  height: auto;
+  margin-left: 4px;
+}
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 2px;
+  color: #ffffff;
+  font-size: 35px;
+  line-height: 0.92;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.greetingLine {
+  display: block;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 2px;
+}
+
+.title {
+  color: #ffffff;
+  font-size: 27px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  position: relative;
+  min-height: 152px;
+  overflow: hidden;
+  border-radius: 26px;
+  background: #2d252e;
+}
+
+.cardMedia {
+  position: absolute;
+  inset: 0;
+}
+
+.cardImage {
+  object-fit: cover;
+}
+
+.cardOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(31, 25, 31, 0.82) 0%, rgba(31, 25, 31, 0.52) 48%, rgba(31, 25, 31, 0.34) 100%),
+    linear-gradient(180deg, rgba(24, 18, 23, 0.16) 0%, rgba(24, 18, 23, 0.38) 100%);
+}
+
+.cardBody {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  height: 100%;
+  padding: 12px 18px 16px;
+}
+
+.cardTitle {
+  max-width: 79%;
+  color: #ffffff;
+  font-size: 21px;
+  line-height: 0.96;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.cardAction {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #cf6e20;
+  color: #ffffff;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+@media (min-width: 768px) {
+  .screen,
+  .panel {
+    min-height: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .logo {
+    width: 136px;
+  }
+
+  .greeting {
+    font-size: 31px;
+  }
+
+  .content {
+    gap: 14px;
+    padding: 0;
+  }
+
+  .title {
+    font-size: 25px;
+  }
+
+  .card {
+    min-height: 146px;
+    border-radius: 24px;
+  }
+
+  .cardBody {
+    gap: 12px;
+    padding: 10px 16px 14px;
+  }
+
+  .cardTitle {
+    max-width: 82%;
+    font-size: 19px;
+  }
+}
