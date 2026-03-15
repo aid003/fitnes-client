@@ -252,8 +252,11 @@ export function AdminPassesScreen() {
               <Plus size={16} />
               Создать категорию
             </button>
-            <Link href="/" className={styles.secondaryButton}>
-              На главную
+            <Link href="/admin" className={styles.secondaryButton}>
+              Все админки
+            </Link>
+            <Link href="/admin/memberships" className={styles.secondaryButton}>
+              Назначения
             </Link>
             <button
               type="button"
@@ -610,27 +613,25 @@ function TreeRow({
       className={[styles.treeRow, selected ? styles.treeRowSelected : ""].filter(Boolean).join(" ")}
       style={{ paddingLeft: `${12 + level * 18}px` }}
     >
+      <span className={styles.treeExpand}>
+        {canExpand ? (
+          <button
+            type="button"
+            className={styles.iconButton}
+            onClick={onToggle}
+            aria-label={expanded ? "Свернуть раздел" : "Развернуть раздел"}
+          >
+            {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </button>
+        ) : (
+          <span className={styles.dotMarker} />
+        )}
+      </span>
       <button
         type="button"
         className={styles.treeMain}
         onClick={onClick}
       >
-        <span className={styles.treeExpand}>
-          {canExpand ? (
-            <button
-              type="button"
-              className={styles.iconButton}
-              onClick={(event) => {
-                event.stopPropagation();
-                onToggle?.();
-              }}
-            >
-              {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </button>
-          ) : (
-            <span className={styles.dotMarker} />
-          )}
-        </span>
         <span className={styles.treeText}>
           <span className={styles.treeTitle}>{title}</span>
           <span className={styles.treeMeta}>{meta}</span>

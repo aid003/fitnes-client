@@ -21,7 +21,7 @@ const NAV_ITEMS: Array<{
 }> = [
   { id: "home", label: "Главная", Icon: House, href: "/" },
   { id: "passes", label: "Абонементы", Icon: CreditCard, href: "/passes" },
-  { id: "memberships", label: "Мои абонементы", Icon: IdCard },
+  { id: "memberships", label: "Мои абонементы", Icon: IdCard, href: "/memberships" },
   { id: "schedule", label: "Расписание", Icon: CalendarCheck2 },
 ];
 

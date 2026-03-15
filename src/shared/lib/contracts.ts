@@ -92,3 +92,112 @@ export type PassCategoryDetails = {
   isActive: boolean;
   variants: PassVariant[];
 };
+
+export type MembershipStatus = "ACTIVE" | "FROZEN" | "EXPIRED";
+
+export type MembershipFreezeStatus = "ACTIVE" | "COMPLETED" | "CANCELLED";
+
+export type MembershipRenewalStatus = "PENDING" | "PROCESSED" | "CANCELLED";
+
+export type MembershipTone = "success" | "warning" | "danger" | "muted";
+
+export type UserMembershipFeature = {
+  id: string;
+  label: string;
+  icon: PassFeatureIcon;
+};
+
+export type UserMembershipHistoryEntry = {
+  id: string;
+  label: string;
+  tone: "default" | "accent";
+};
+
+export type UserMembershipCard = {
+  id: string;
+  title: string;
+  subtitle: string;
+  startsAt: string;
+  status: MembershipStatus;
+  statusLabel: string;
+  statusTone: MembershipTone;
+  expiresAt: string;
+  daysLeft: number;
+  freezeDaysLeft: number;
+  features: UserMembershipFeature[];
+  canFreeze: boolean;
+  canRenew: boolean;
+  scheduleAvailable: boolean;
+  history: UserMembershipHistoryEntry[];
+  pendingRenewal: boolean;
+};
+
+export type UserMembershipHistoryItem = {
+  id: string;
+  title: string;
+  subtitle: string;
+  startsAt: string;
+  status: MembershipStatus;
+  statusLabel: string;
+  statusTone: MembershipTone;
+  expiresAt: string;
+  history: UserMembershipHistoryEntry[];
+  features: UserMembershipFeature[];
+};
+
+export type MyMembershipsResponse = {
+  activeMemberships: UserMembershipCard[];
+  completedMemberships: UserMembershipHistoryItem[];
+};
+
+export type FreezeMembershipPayload = {
+  days?: number;
+};
+
+export type RenewMembershipPayload = {
+  comment?: string;
+};
+
+export type AdminMembershipFreeze = {
+  id: string;
+  startsAt: string;
+  endsAt: string;
+  daysUsed: number;
+  status: MembershipFreezeStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminMembershipRenewalRequest = {
+  id: string;
+  comment: string | null;
+  status: MembershipRenewalStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminMembership = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  startsAt: string;
+  endsAt: string;
+  status: MembershipStatus;
+  freezeDaysLimit: number;
+  freezeDaysUsed: number;
+  canRenew: boolean;
+  sortOrder: number;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  passPlan: {
+    id: string;
+    title: string;
+    subtitle: string | null;
+  };
+  freezes: AdminMembershipFreeze[];
+  renewalRequests: AdminMembershipRenewalRequest[];
+};

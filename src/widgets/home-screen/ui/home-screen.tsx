@@ -55,6 +55,7 @@ export function HomeScreen() {
       iconSrc: "/main/user.svg",
       iconAlt: "Пользователь",
       className: [styles.tile, styles.tileMemberships].join(" "),
+      href: "/memberships",
     },
     {
       title: "Расписание\nзанятий",
@@ -96,14 +97,6 @@ export function HomeScreen() {
             <span className={styles.greetingLine}>{user.name}</span>
           </div>
         </header>
-
-        <div className={styles.actions}>
-          {user.role === "ADMIN" ? (
-            <Link href="/admin/passes" className={styles.adminLink}>
-              Админка абонементов
-            </Link>
-          ) : null}
-        </div>
 
         <section className={styles.tiles} aria-label="Главные разделы">
           {homeTiles.map(({ title, subtitle, iconSrc, iconAlt, className, href }) => {
