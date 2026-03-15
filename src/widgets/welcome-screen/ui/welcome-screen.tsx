@@ -1,8 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useRequireGuest } from "@/shared/auth/auth-guards";
+import { SessionStatus } from "@/shared/ui/session-status/session-status";
 import styles from "./welcome-screen.module.css";
 
 export function WelcomeScreen() {
+  const { canRender, isLoading } = useRequireGuest();
+
+  if (isLoading) {
+    return <SessionStatus title="Загрузка" text="Проверяем активную сессию." />;
+  }
+
+  if (!canRender) {
+    return <SessionStatus title="Переход" text="Перенаправляем в личный кабинет." />;
+  }
+
   return (
     <main className={styles.screen}>
       <section className={styles.panel}>

@@ -2,9 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import { useRequireGuest } from "@/shared/auth/auth-guards";
+import { useAuth } from "@/shared/auth/auth-context";
+import { ApiError } from "@/shared/lib/api";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthFormField } from "@/shared/ui/auth-form-field/auth-form-field";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
+import { SessionStatus } from "@/shared/ui/session-status/session-status";
 import styles from "./login-screen.module.css";
 
 type LoginFormState = {
@@ -21,15 +25,19 @@ const INITIAL_STATE: LoginFormState = {
 
 export function LoginScreen() {
   const router = useRouter();
+  const { login } = useAuth();
+  const { canRender, isLoading } = useRequireGuest();
   const [values, setValues] = useState<LoginFormState>(INITIAL_STATE);
   const [errors, setErrors] = useState<LoginFormErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (field: keyof LoginFormState, value: string) => {
     setValues((currentValue) => ({ ...currentValue, [field]: value }));
     setErrors((currentValue) => ({ ...currentValue, [field]: undefined }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors: LoginFormErrors = {};
@@ -50,8 +58,30 @@ export function LoginScreen() {
       return;
     }
 
-    router.push("/");
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
+      await login({
+        email: trimmedEmail,
+        password: values.password,
+      });
+      router.replace("/");
+    } catch (error) {
+      setSubmitError(
+        error instanceof ApiError ? error.message : "Не удалось войти в аккаунт",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return <SessionStatus title="Загрузка" text="Проверяем активную сессию." />;
+  }
+
+  if (!canRender) {
+    return <SessionStatus title="Переход" text="Перенаправляем в личный кабинет." />;
+  }
 
   return (
     <AuthScreen backHref="/auth" compactLogo>
@@ -95,8 +125,10 @@ export function LoginScreen() {
             </AuthAction>
           </div>
 
+          {submitError ? <p className={styles.errorText}>{submitError}</p> : null}
+
           <AuthAction type="submit" className={styles.submit}>
-            Продолжить
+            {isSubmitting ? "Входим..." : "Продолжить"}
           </AuthAction>
         </form>
       </div>

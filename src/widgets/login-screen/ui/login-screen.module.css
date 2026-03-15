@@ -44,6 +44,13 @@
   margin-top: 106px;
 }
 
+.errorText {
+  margin: 0;
+  color: #ffb4a8;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
 @media (max-width: 420px) {
   .screen {
     padding-top: 58px;

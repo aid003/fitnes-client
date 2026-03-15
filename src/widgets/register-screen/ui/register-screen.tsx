@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
-import { writeRegisterFlowDraft } from "@/shared/lib/auth-flow-storage";
+import { useRequireGuest } from "@/shared/auth/auth-guards";
+import { useAuth } from "@/shared/auth/auth-context";
+import { ApiError } from "@/shared/lib/api";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthFormField } from "@/shared/ui/auth-form-field/auth-form-field";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
+import { SessionStatus } from "@/shared/ui/session-status/session-status";
 import styles from "./register-screen.module.css";
 
 type RegisterFormState = {
@@ -27,15 +30,19 @@ const INITIAL_STATE: RegisterFormState = {
 
 export function RegisterScreen() {
   const router = useRouter();
+  const { register } = useAuth();
+  const { canRender, isLoading } = useRequireGuest();
   const [values, setValues] = useState<RegisterFormState>(INITIAL_STATE);
   const [errors, setErrors] = useState<RegisterFormErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (field: keyof RegisterFormState, value: string) => {
     setValues((currentValue) => ({ ...currentValue, [field]: value }));
     setErrors((currentValue) => ({ ...currentValue, [field]: undefined }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors: RegisterFormErrors = {};
@@ -69,13 +76,33 @@ export function RegisterScreen() {
       return;
     }
 
-    writeRegisterFlowDraft({
-      name: trimmedName,
-      email: trimmedEmail,
-    });
-
-    router.push("/register/verify");
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
+      await register({
+        name: trimmedName,
+        email: trimmedEmail,
+        password: values.password,
+      });
+      router.replace("/");
+    } catch (error) {
+      setSubmitError(
+        error instanceof ApiError
+          ? error.message
+          : "Не удалось создать аккаунт",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return <SessionStatus title="Загрузка" text="Проверяем активную сессию." />;
+  }
+
+  if (!canRender) {
+    return <SessionStatus title="Переход" text="Перенаправляем в личный кабинет." />;
+  }
 
   return (
     <AuthScreen backHref="/auth" compactLogo contentClassName={styles.panelScroll}>
@@ -129,8 +156,10 @@ export function RegisterScreen() {
             onChange={(value) => handleChange("confirmPassword", value)}
           />
 
+          {submitError ? <p className={styles.submitError}>{submitError}</p> : null}
+
           <AuthAction type="submit" className={styles.submit}>
-            Получить код
+            {isSubmitting ? "Создаем аккаунт..." : "Зарегистрироваться"}
           </AuthAction>
         </form>
       </div>

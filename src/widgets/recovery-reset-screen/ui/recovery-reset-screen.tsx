@@ -6,6 +6,7 @@ import {
   clearRecoveryFlowDraft,
   readRecoveryFlowDraft,
 } from "@/shared/lib/auth-flow-storage";
+import { ApiError, apiFetch } from "@/shared/lib/api";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthFormField } from "@/shared/ui/auth-form-field/auth-form-field";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
@@ -28,9 +29,11 @@ export function RecoveryResetScreen() {
   const [draft] = useState(() => readRecoveryFlowDraft());
   const [values, setValues] = useState(INITIAL_STATE);
   const [errors, setErrors] = useState<RecoveryResetErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!draft || !draft.codeVerified) {
+    if (!draft || !draft.codeVerified || !draft.code) {
       router.replace("/auth/recovery");
     }
   }, [draft, router]);
@@ -40,7 +43,7 @@ export function RecoveryResetScreen() {
     setErrors((currentValue) => ({ ...currentValue, [field]: undefined }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors: RecoveryResetErrors = {};
@@ -62,11 +65,38 @@ export function RecoveryResetScreen() {
       return;
     }
 
-    clearRecoveryFlowDraft();
-    router.push("/auth/login");
+    if (!draft?.code) {
+      setSubmitError("Сначала подтвердите код восстановления");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      await apiFetch<{ success: true }>("/auth/recovery/reset", {
+        method: "POST",
+        body: JSON.stringify({
+          email: draft.email,
+          code: draft.code,
+          password: values.password,
+        }),
+      });
+
+      clearRecoveryFlowDraft();
+      router.push("/auth/login");
+    } catch (error) {
+      setSubmitError(
+        error instanceof ApiError
+          ? error.message
+          : "Не удалось обновить пароль",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (!draft || !draft.codeVerified) {
+  if (!draft || !draft.codeVerified || !draft.code) {
     return null;
   }
 
@@ -89,7 +119,10 @@ export function RecoveryResetScreen() {
             autoComplete="new-password"
             value={values.password}
             error={errors.password}
-            onChange={(value) => handleChange("password", value)}
+            onChange={(value) => {
+              handleChange("password", value);
+              setSubmitError(null);
+            }}
           />
 
           <AuthFormField
@@ -99,11 +132,16 @@ export function RecoveryResetScreen() {
             autoComplete="new-password"
             value={values.confirmPassword}
             error={errors.confirmPassword}
-            onChange={(value) => handleChange("confirmPassword", value)}
+            onChange={(value) => {
+              handleChange("confirmPassword", value);
+              setSubmitError(null);
+            }}
           />
 
+          {submitError ? <p className={styles.error}>{submitError}</p> : null}
+
           <AuthAction type="submit" className={styles.submit}>
-            Продолжить
+            {isSubmitting ? "Сохраняем..." : "Продолжить"}
           </AuthAction>
         </form>
       </div>

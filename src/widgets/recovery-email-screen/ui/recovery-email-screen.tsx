@@ -6,6 +6,7 @@ import {
   clearRecoveryFlowDraft,
   writeRecoveryFlowDraft,
 } from "@/shared/lib/auth-flow-storage";
+import { ApiError, apiFetch } from "@/shared/lib/api";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthFormField } from "@/shared/ui/auth-form-field/auth-form-field";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
@@ -19,8 +20,10 @@ export function RecoveryEmailScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<RecoveryEmailErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors: RecoveryEmailErrors = {};
@@ -37,13 +40,33 @@ export function RecoveryEmailScreen() {
       return;
     }
 
-    clearRecoveryFlowDraft();
-    writeRecoveryFlowDraft({
-      email: trimmedEmail,
-      codeVerified: false,
-    });
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
 
-    router.push("/auth/recovery/verify");
+      await apiFetch<{ success: true }>("/auth/recovery/request", {
+        method: "POST",
+        body: JSON.stringify({
+          email: trimmedEmail,
+        }),
+      });
+
+      clearRecoveryFlowDraft();
+      writeRecoveryFlowDraft({
+        email: trimmedEmail,
+        codeVerified: false,
+      });
+
+      router.push("/auth/recovery/verify");
+    } catch (error) {
+      setSubmitError(
+        error instanceof ApiError
+          ? error.message
+          : "Не удалось начать восстановление пароля",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -68,11 +91,14 @@ export function RecoveryEmailScreen() {
             onChange={(value) => {
               setEmail(value);
               setErrors({ email: undefined });
+              setSubmitError(null);
             }}
           />
 
+          {submitError ? <p className={styles.error}>{submitError}</p> : null}
+
           <AuthAction type="submit" className={styles.submit}>
-            Продолжить
+            {isSubmitting ? "Проверяем..." : "Продолжить"}
           </AuthAction>
         </form>
       </div>

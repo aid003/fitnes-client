@@ -29,7 +29,7 @@ export function AuthAction(props: AuthActionProps) {
     .filter(Boolean)
     .join(" ");
 
-  if ("href" in props) {
+  if ("href" in props && props.href) {
     const { children, href } = props;
 
     return (
@@ -39,7 +39,11 @@ export function AuthAction(props: AuthActionProps) {
     );
   }
 
-  const { children, type = "button", ...buttonProps } = props;
+  const {
+    children,
+    type = "button",
+    ...buttonProps
+  } = props as AuthActionButtonProps;
 
   return (
     <button {...buttonProps} type={type} className={className}>

@@ -14,6 +14,7 @@ import {
   readRecoveryFlowDraft,
   writeRecoveryFlowDraft,
 } from "@/shared/lib/auth-flow-storage";
+import { ApiError, apiFetch } from "@/shared/lib/api";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
 import styles from "./recovery-verify-screen.module.css";
@@ -25,6 +26,7 @@ export function RecoveryVerifyScreen() {
   const [digits, setDigits] = useState<string[]>(() => Array.from({ length: CODE_LENGTH }, () => ""));
   const [draft] = useState(() => readRecoveryFlowDraft());
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -87,7 +89,7 @@ export function RecoveryVerifyScreen() {
     inputRefs.current[Math.min(pastedValue.length, CODE_LENGTH) - 1]?.focus();
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!draft) {
@@ -99,12 +101,36 @@ export function RecoveryVerifyScreen() {
       return;
     }
 
-    writeRecoveryFlowDraft({
-      email: draft.email,
-      codeVerified: true,
-    });
+    try {
+      setIsSubmitting(true);
+      setError("");
 
-    router.push("/auth/recovery/reset");
+      const code = digits.join("");
+
+      await apiFetch<{ success: true }>("/auth/recovery/verify", {
+        method: "POST",
+        body: JSON.stringify({
+          email: draft.email,
+          code,
+        }),
+      });
+
+      writeRecoveryFlowDraft({
+        email: draft.email,
+        codeVerified: true,
+        code,
+      });
+
+      router.push("/auth/recovery/reset");
+    } catch (submitError) {
+      setError(
+        submitError instanceof ApiError
+          ? submitError.message
+          : "Не удалось подтвердить код",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!draft) {
@@ -144,7 +170,7 @@ export function RecoveryVerifyScreen() {
         {error ? <p className={styles.error}>{error}</p> : null}
 
         <AuthAction type="submit" className={styles.submit}>
-          Продолжить
+          {isSubmitting ? "Проверяем..." : "Продолжить"}
         </AuthAction>
       </form>
     </AuthScreen>

@@ -6,6 +6,10 @@
   min-height: 100dvh;
 }
 
+.viewportDesktop {
+  min-height: 100dvh;
+}
+
 @media (min-width: 768px) {
   .shell {
     display: grid;

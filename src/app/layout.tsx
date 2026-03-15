@@ -1,5 +1,6 @@
 import "@fontsource-variable/nunito-sans";
 import type { Metadata } from "next";
+import { AuthProvider } from "@/shared/auth/auth-context";
 import { AppShell } from "@/shared/ui/app-shell/app-shell";
 import "../shared/styles/globals.css";
 
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <AppShell>{children}</AppShell>
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   );

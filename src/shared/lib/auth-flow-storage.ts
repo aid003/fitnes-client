@@ -9,6 +9,7 @@ export type RegisterFlowDraft = {
 export type RecoveryFlowDraft = {
   email: string;
   codeVerified: boolean;
+  code?: string;
 };
 
 export function readRegisterFlowDraft(): RegisterFlowDraft | null {
@@ -78,6 +79,10 @@ export function readRecoveryFlowDraft(): RecoveryFlowDraft | null {
       return {
         email: parsedValue.email,
         codeVerified: parsedValue.codeVerified,
+        code:
+          typeof parsedValue.code === "string" && parsedValue.code.length > 0
+            ? parsedValue.code
+            : undefined,
       };
     }
   } catch {

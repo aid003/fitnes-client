@@ -55,6 +55,21 @@
   padding: 0 2px;
 }
 
+.stateText,
+.errorText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.stateText {
+  opacity: 0.8;
+}
+
+.errorText {
+  color: #ffb4a8;
+}
+
 .title {
   color: #ffffff;
   font-size: 27px;
@@ -82,6 +97,8 @@
 }
 
 .cardImage {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
