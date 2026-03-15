@@ -1,0 +1,68 @@
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-top: 72px;
+}
+
+.intro {
+  padding-right: 8px;
+}
+
+.title {
+  font-size: 29px;
+  line-height: 1.14;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.form {
+  display: grid;
+  gap: 18px;
+  margin-top: 52px;
+}
+
+.recoveryLinkRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+}
+
+.recoveryLink {
+  min-height: auto;
+  width: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-muted-text);
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.submit {
+  margin-top: 106px;
+}
+
+@media (max-width: 420px) {
+  .screen {
+    padding-top: 58px;
+    margin-top: 0;
+  }
+
+  .title {
+    font-size: 27px;
+  }
+
+  .form {
+    margin-top: 42px;
+  }
+
+  .recoveryLink {
+    font-size: 11px;
+  }
+
+  .submit {
+    margin-top: 90px;
+  }
+}

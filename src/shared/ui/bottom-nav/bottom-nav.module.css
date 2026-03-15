@@ -1,0 +1,54 @@
+.nav {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 16px 12px 18px;
+  border-radius: 28px;
+  border: 2px solid #395066;
+  background: #1d1d2a;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  color: #ffffff;
+}
+
+.itemActive {
+  color: #ff9719;
+}
+
+.icon {
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+}
+
+.label {
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+@media (max-width: 420px) {
+  .nav {
+    gap: 6px;
+    padding: 14px 10px 16px;
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .label {
+    font-size: 10px;
+  }
+}

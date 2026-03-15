@@ -1,0 +1,31 @@
+:root {
+  --color-bg: #ece8ea;
+  --color-text: #f5f0f2;
+  --color-surface: #34292d;
+  --color-surface-muted: #57516f;
+  --color-surface-strong: #2f2528;
+  --color-input: #5b5674;
+  --color-input-placeholder: rgba(245, 240, 242, 0.42);
+  --color-muted-text: rgba(245, 240, 242, 0.7);
+  --color-button-primary: #ffffff;
+  --color-button-primary-text: #27212f;
+  --color-button-secondary: #5d5676;
+  --color-button-secondary-text: #f8f6f8;
+  --color-button-disabled: #5d5676;
+  --color-button-disabled-text: rgba(248, 246, 248, 0.92);
+  --color-code-border: rgba(255, 255, 255, 0.66);
+  --color-error: #ffb0b8;
+  --color-success-badge: #dceff0;
+  --color-success-icon: #252038;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-shadow: rgba(26, 16, 21, 0.18);
+  --color-shell-bg: #ece8ea;
+  --radius-device: 44px;
+  --radius-panel: 42px;
+  --radius-button: 30px;
+  --radius-control: 22px;
+  --mobile-max-width: 430px;
+  --mobile-min-height: 100dvh;
+  --font-sans: "Nunito Sans Variable", "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, monospace;
+}

@@ -1,0 +1,165 @@
+.screen {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(120, 92, 108, 0.28), transparent 34%),
+    radial-gradient(circle at 84% 94%, rgba(64, 45, 64, 0.3), transparent 24%),
+    linear-gradient(180deg, #2b2023 0%, #251c1e 72%, #2f263b 100%);
+}
+
+.panel {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    18px
+    max(18px, env(safe-area-inset-bottom))
+    18px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.logo {
+  width: 150px;
+  height: auto;
+  margin-left: 4px;
+}
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 2px;
+  color: #ffffff;
+  font-size: 35px;
+  line-height: 0.92;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.greetingLine {
+  display: block;
+}
+
+.tiles {
+  display: grid;
+  gap: 13px;
+  margin-top: 2px;
+  padding: 0 2px;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 114px;
+  border-radius: 25px;
+  padding: 16px 14px 16px 18px;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.tileToday {
+  background: #781b2b;
+  border-color: #944154;
+}
+
+.tileBuy {
+  background: #175863;
+  border-color: #26858f;
+}
+
+.tileMemberships {
+  background: #32588e;
+  border-color: #4f6fa1;
+}
+
+.tileSchedule {
+  background: #44434f;
+  border-color: #616374;
+}
+
+.tileContacts {
+  background: #11594a;
+  border-color: #23735d;
+}
+
+.tileCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tileTitle {
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.tileLine {
+  display: block;
+}
+
+.tileSubtitle {
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.14;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.tileIcon {
+  width: 50px;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 768px) {
+  .screen,
+  .panel {
+    min-height: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .logo {
+    width: 136px;
+  }
+
+  .greeting {
+    font-size: 31px;
+  }
+
+  .tiles {
+    gap: 12px;
+    margin-top: 0;
+  }
+
+  .tile {
+    min-height: 102px;
+    padding: 14px 12px 14px 14px;
+    border-width: 3px;
+  }
+
+  .tileTitle {
+    font-size: 20px;
+  }
+
+  .tileSubtitle {
+    font-size: 15px;
+  }
+
+  .tileIcon {
+    width: 44px;
+  }
+}
