@@ -62,12 +62,14 @@ export function HomeScreen() {
       iconSrc: "/main/calendar.svg",
       iconAlt: "Календарь",
       className: [styles.tile, styles.tileSchedule].join(" "),
+      href: "/schedule",
     },
     {
       title: "Наши контакты",
       iconSrc: "/main/map-phone.svg",
       iconAlt: "Контакты",
       className: [styles.tile, styles.tileContacts].join(" "),
+      href: "/contacts",
     },
   ];
 

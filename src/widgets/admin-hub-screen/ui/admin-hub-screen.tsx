@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, FolderTree, IdCard, LogOut } from "lucide-react";
+import { CalendarRange, ChevronRight, FolderTree, IdCard, LogOut } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
@@ -21,6 +21,13 @@ const ADMIN_SECTIONS = [
     href: "/admin/memberships",
     Icon: IdCard,
     toneClassName: "membershipsCard",
+  },
+  {
+    title: "Расписание",
+    description: "Недельная сетка, исключения по датам и клиентский календарь занятий.",
+    href: "/admin/schedule",
+    Icon: CalendarRange,
+    toneClassName: "scheduleCard",
   },
 ] as const;
 

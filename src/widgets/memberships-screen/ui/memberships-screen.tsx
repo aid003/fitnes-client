@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   Check,
@@ -25,6 +26,7 @@ const QUICK_FREEZE_DAYS = 7;
 
 export function MembershipsScreen() {
   const { canRender, isLoading, user } = useRequireAuth();
+  const router = useRouter();
   const [data, setData] = useState<MyMembershipsResponse | null>(null);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -144,7 +146,7 @@ export function MembershipsScreen() {
           {feedback ? <p className={styles.feedback}>{feedback}</p> : null}
 
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Активный абонемент</h2>
+            <h2 className={styles.sectionTitle}>Текущие абонементы</h2>
 
             {activeMemberships.length > 0 ? (
               <div className={styles.activeList}>
@@ -171,20 +173,23 @@ export function MembershipsScreen() {
                         `Абонемент заморожен на ${payload.days} дн.`,
                       );
                     }}
-                    onRenew={() =>
+                    onUnfreeze={() =>
                       runMembershipAction(
                         membership.id,
                         () =>
                           apiFetch<MyMembershipsResponse>(
-                            `/memberships/${membership.id}/renew`,
+                            `/memberships/${membership.id}/unfreeze`,
                             {
                               method: "POST",
                               body: JSON.stringify({}),
                             },
                           ),
-                        "Заявка на продление отправлена.",
+                        "Абонемент разморожен.",
                       )
                     }
+                    onRenew={async () => {
+                      router.push("/passes");
+                    }}
                   />
                 ))}
               </div>
@@ -192,7 +197,7 @@ export function MembershipsScreen() {
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>Пока нет активных абонементов</p>
                 <p className={styles.emptyText}>
-                  Как только администратор назначит абонемент, он появится здесь.
+                  Как только администратор назначит абонемент или откроется доступное продление, оно появится здесь.
                 </p>
                 <Link href="/passes" className={styles.emptyAction}>
                   Перейти в каталог
@@ -273,6 +278,7 @@ type MembershipCardProps = {
   membership: UserMembershipCard;
   isPending: boolean;
   onFreeze: () => Promise<void>;
+  onUnfreeze: () => Promise<void>;
   onRenew: () => Promise<void>;
 };
 
@@ -280,6 +286,7 @@ function MembershipCard({
   membership,
   isPending,
   onFreeze,
+  onUnfreeze,
   onRenew,
 }: MembershipCardProps) {
   const progress = useMemo(() => getRingProgress(membership.startsAt, membership.expiresAt), [
@@ -345,8 +352,12 @@ function MembershipCard({
         </div>
       </div>
 
-      {membership.pendingRenewal ? (
-        <p className={styles.pendingNote}>Заявка на продление уже отправлена и ждёт обработки.</p>
+      {membership.status === "FROZEN" ? (
+        <p className={styles.pendingNote}>Абонемент заморожен. Разморозить его можно в любой момент.</p>
+      ) : membership.status === "EXPIRED" && membership.canRequestRenewalNow ? (
+        <p className={styles.pendingNote}>Абонемент завершён. Можно перейти к оплате нового периода.</p>
+      ) : membership.canRenew && !membership.canRequestRenewalNow ? (
+        <p className={styles.pendingNote}>Кнопка продления откроется за 14 дней до окончания.</p>
       ) : null}
 
       <div className={styles.actions}>
@@ -354,25 +365,25 @@ function MembershipCard({
           type="button"
           className={styles.primaryAction}
           onClick={() => void onRenew()}
-          disabled={!membership.canRenew || isPending}
+          disabled={!membership.canRequestRenewalNow || isPending}
         >
-          {isPending ? "Обновляем..." : "Продлить"}
+          Продлить
         </button>
 
         <button
           type="button"
           className={styles.secondaryAction}
-          onClick={() => void onFreeze()}
-          disabled={!membership.canFreeze || isPending}
+          onClick={() => void (membership.canUnfreeze ? onUnfreeze() : onFreeze())}
+          disabled={(!membership.canFreeze && !membership.canUnfreeze) || isPending}
         >
-          Заморозить
+          {membership.canUnfreeze ? "Разморозить" : "Заморозить"}
         </button>
       </div>
 
-      <button type="button" className={styles.scheduleLink} disabled>
+      <Link href="/schedule" className={styles.scheduleLink}>
         Перейти к расписанию
         <ChevronRight className={styles.scheduleIcon} strokeWidth={2.8} />
-      </button>
+      </Link>
     </article>
   );
 }

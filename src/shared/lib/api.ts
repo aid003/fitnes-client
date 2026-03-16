@@ -20,11 +20,18 @@ export async function apiFetch<T>(
   path: string,
   init: ApiRequestInit = {},
 ): Promise<T> {
+  const shouldDisableCache =
+    init.cache === "no-store" ||
+    path.startsWith("/schedule") ||
+    path.startsWith("/admin/schedule");
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    cache: shouldDisableCache ? "no-store" : init.cache,
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...(shouldDisableCache ? { 'Cache-Control': 'no-store' } : {}),
       ...(init.headers ?? {}),
     },
   });

@@ -101,6 +101,77 @@ export type MembershipRenewalStatus = "PENDING" | "PROCESSED" | "CANCELLED";
 
 export type MembershipTone = "success" | "warning" | "danger" | "muted";
 
+export type ScheduleWeekday =
+  | "MONDAY"
+  | "TUESDAY"
+  | "WEDNESDAY"
+  | "THURSDAY"
+  | "FRIDAY"
+  | "SATURDAY"
+  | "SUNDAY";
+
+export type ScheduleDayTab = {
+  date: string;
+  weekday: ScheduleWeekday;
+  shortLabel: string;
+  label: string;
+  dayNumber: number;
+  monthLabel: string;
+  isToday: boolean;
+  isSunday: boolean;
+  hasClasses: boolean;
+};
+
+export type ScheduleItem = {
+  id: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  ageBadge: string | null;
+  secondaryBadge: string | null;
+  bookingEnabled: boolean;
+  sortOrder: number;
+};
+
+export type ScheduleDayResponse = {
+  date: string;
+  weekday: ScheduleWeekday;
+  shortLabel: string;
+  label: string;
+  isSunday: boolean;
+  isClosed: boolean;
+  items: ScheduleItem[];
+};
+
+export type AdminScheduleTemplateSlot = {
+  id: string;
+  weekday: ScheduleWeekday;
+  title: string;
+  startTime: string;
+  endTime: string;
+  ageBadge: string | null;
+  secondaryBadge: string | null;
+  bookingEnabled: boolean;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminScheduleTemplateDay = {
+  weekday: ScheduleWeekday;
+  label: string;
+  shortLabel: string;
+  slots: AdminScheduleTemplateSlot[];
+};
+
+export type AdminScheduleWorkspace = {
+  selectedDate: string;
+  tabs: ScheduleDayTab[];
+  templateDays: AdminScheduleTemplateDay[];
+  resolvedDay: ScheduleDayResponse;
+};
+
 export type UserMembershipFeature = {
   id: string;
   label: string;
@@ -126,10 +197,11 @@ export type UserMembershipCard = {
   freezeDaysLeft: number;
   features: UserMembershipFeature[];
   canFreeze: boolean;
+  canUnfreeze: boolean;
   canRenew: boolean;
+  canRequestRenewalNow: boolean;
   scheduleAvailable: boolean;
   history: UserMembershipHistoryEntry[];
-  pendingRenewal: boolean;
 };
 
 export type UserMembershipHistoryItem = {

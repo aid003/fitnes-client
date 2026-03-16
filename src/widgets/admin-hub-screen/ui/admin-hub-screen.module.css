@@ -113,6 +113,11 @@
     linear-gradient(180deg, rgba(72, 48, 100, 0.96) 0%, rgba(56, 37, 81, 0.98) 100%);
 }
 
+.scheduleCard {
+  background:
+    linear-gradient(180deg, rgba(104, 64, 23, 0.96) 0%, rgba(77, 44, 17, 0.98) 100%);
+}
+
 .cardTop {
   display: flex;
   align-items: flex-start;
