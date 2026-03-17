@@ -1,0 +1,243 @@
+.screen {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 14% 8%, rgba(52, 151, 103, 0.18), transparent 26%),
+    radial-gradient(circle at 86% 92%, rgba(31, 113, 157, 0.22), transparent 30%),
+    linear-gradient(180deg, #11181a 0%, #142024 42%, #17252a 100%);
+}
+
+.panel {
+  min-height: 100dvh;
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px 24px 40px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: rgba(137, 228, 190, 0.88);
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: 38px;
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  max-width: 680px;
+  color: rgba(255, 255, 255, 0.74);
+  line-height: 1.55;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.secondaryButton,
+.refreshButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.badge {
+  width: fit-content;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.scannerCard,
+.resultCard {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 28px;
+  background: rgba(14, 23, 25, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.22);
+}
+
+.scannerHeader,
+.resultHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cardTitle,
+.sectionTitle {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.cardText {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.5;
+}
+
+.previewWrap {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(20, 36, 39, 0.9) 0%, rgba(10, 18, 19, 0.96) 100%);
+}
+
+.preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanFrame {
+  position: absolute;
+  inset: 18% 12%;
+  border-radius: 24px;
+  border: 3px solid rgba(153, 244, 205, 0.72);
+  box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.18);
+}
+
+.cameraState {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(186, 247, 222, 0.92);
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.errorText {
+  margin: 0;
+  color: #ffb9b2;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.resultGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.infoSection {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.infoRows {
+  display: grid;
+  gap: 10px;
+}
+
+.infoRow {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.infoRow:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.infoLabel {
+  color: rgba(163, 235, 205, 0.7);
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.infoValue {
+  color: #ffffff;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.emptyState {
+  display: grid;
+  gap: 8px;
+  padding: 24px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+@media (max-width: 960px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .panel {
+    padding: 22px 16px 28px;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .scannerHeader,
+  .resultHeader {
+    flex-direction: column;
+  }
+}

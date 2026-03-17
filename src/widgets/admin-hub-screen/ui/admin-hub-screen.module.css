@@ -118,6 +118,11 @@
     linear-gradient(180deg, rgba(104, 64, 23, 0.96) 0%, rgba(77, 44, 17, 0.98) 100%);
 }
 
+.scannerCard {
+  background:
+    linear-gradient(180deg, rgba(32, 86, 64, 0.96) 0%, rgba(23, 65, 49, 0.98) 100%);
+}
+
 .cardTop {
   display: flex;
   align-items: flex-start;

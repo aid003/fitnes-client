@@ -202,6 +202,7 @@ export type UserMembershipCard = {
   canRenew: boolean;
   canRequestRenewalNow: boolean;
   scheduleAvailable: boolean;
+  hasQr: boolean;
   history: UserMembershipHistoryEntry[];
 };
 
@@ -214,6 +215,7 @@ export type UserMembershipHistoryItem = {
   statusLabel: string;
   statusTone: MembershipTone;
   expiresAt: string;
+  hasQr: boolean;
   history: UserMembershipHistoryEntry[];
   features: UserMembershipFeature[];
 };
@@ -314,3 +316,64 @@ export type PaymentStatusResponse = {
 };
 
 export type PaymentResultViewModel = PaymentStatusResponse;
+
+export type MembershipQrViewModel = {
+  membershipId: string;
+  qrCodeSvg: string;
+  generatedAt: string;
+  payloadSummary: {
+    customerName: string;
+    customerEmail: string;
+    planTitle: string;
+    planSubtitle: string | null;
+    amount: number;
+    currency: string;
+    paidAt: string | null;
+    merchantOrderNumber: string;
+    expiresAt: string;
+  };
+};
+
+export type AdminScannedMembershipQrViewModel = {
+  customer: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  membership: {
+    id: string;
+    title: string;
+    subtitle: string | null;
+    status: MembershipStatus;
+    startsAt: string;
+    endsAt: string;
+    freezeDaysLimit: number;
+  };
+  plan: {
+    id: string;
+    title: string;
+    subtitle: string | null;
+    description: string | null;
+    billingType: string | null;
+    durationValue: number | null;
+    durationUnit: string | null;
+  };
+  payment: {
+    paymentId: string;
+    merchantOrderNumber: string;
+    gatewayOrderId: string | null;
+    status: PaymentOrderStatus;
+    amount: number;
+    currency: string;
+    createdAt: string;
+    paidAt: string | null;
+    membershipIssuedAt: string | null;
+    actionCode: number | null;
+    actionCodeDescription: string | null;
+  };
+  verification: {
+    isSignatureValid: boolean;
+    version: string;
+    generatedAt: string;
+  };
+};

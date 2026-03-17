@@ -9,12 +9,15 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  QrCode,
   Snowflake,
+  X,
 } from "lucide-react";
 import { useRequireAuth } from "@/shared/auth/auth-guards";
 import { apiFetch, ApiError } from "@/shared/lib/api";
 import type {
   FreezeMembershipPayload,
+  MembershipQrViewModel,
   MyMembershipsResponse,
   UserMembershipCard,
 } from "@/shared/lib/contracts";
@@ -33,6 +36,9 @@ export function MembershipsScreen() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [pendingActionId, setPendingActionId] = useState<string | null>(null);
   const [expandedHistoryIds, setExpandedHistoryIds] = useState<string[]>([]);
+  const [qrModal, setQrModal] = useState<MembershipQrViewModel | null>(null);
+  const [qrLoadingMembershipId, setQrLoadingMembershipId] = useState<string | null>(null);
+  const [qrError, setQrError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!canRender) {
@@ -81,6 +87,21 @@ export function MembershipsScreen() {
         ? current.filter((itemId) => itemId !== membershipId)
         : [...current, membershipId],
     );
+  };
+
+  const openMembershipQr = async (membershipId: string) => {
+    try {
+      setQrLoadingMembershipId(membershipId);
+      const response = await apiFetch<MembershipQrViewModel>(`/memberships/${membershipId}/qr`);
+      setQrModal(response);
+      setQrError(null);
+    } catch (loadError) {
+      setQrError(
+        loadError instanceof ApiError ? loadError.message : "Не удалось загрузить QR-код абонемента",
+      );
+    } finally {
+      setQrLoadingMembershipId(null);
+    }
   };
 
   const runMembershipAction = async (
@@ -143,6 +164,7 @@ export function MembershipsScreen() {
 
         <section className={styles.content}>
           {error ? <p className={styles.errorText}>{error}</p> : null}
+          {qrError ? <p className={styles.errorText}>{qrError}</p> : null}
           {feedback ? <p className={styles.feedback}>{feedback}</p> : null}
 
           <section className={styles.section}>
@@ -190,6 +212,8 @@ export function MembershipsScreen() {
                     onRenew={async () => {
                       router.push("/passes");
                     }}
+                    onShowQr={() => void openMembershipQr(membership.id)}
+                    isQrLoading={qrLoadingMembershipId === membership.id}
                   />
                 ))}
               </div>
@@ -234,6 +258,18 @@ export function MembershipsScreen() {
 
                       {isExpanded ? (
                         <div className={styles.historyDetails}>
+                          {membership.hasQr ? (
+                            <button
+                              type="button"
+                              className={styles.historyQrButton}
+                              onClick={() => void openMembershipQr(membership.id)}
+                              disabled={qrLoadingMembershipId === membership.id}
+                            >
+                              <QrCode size={14} strokeWidth={2.4} />
+                              {qrLoadingMembershipId === membership.id ? "Загрузка QR..." : "Показать QR"}
+                            </button>
+                          ) : null}
+
                           <div className={styles.featureList}>
                             {membership.features.map((feature) => (
                               <div key={feature.id} className={styles.featureItem}>
@@ -270,6 +306,13 @@ export function MembershipsScreen() {
 
         <BottomNav activeItem="memberships" />
       </section>
+
+      {qrModal ? (
+        <MembershipQrModal
+          qr={qrModal}
+          onClose={() => setQrModal(null)}
+        />
+      ) : null}
     </main>
   );
 }
@@ -280,6 +323,8 @@ type MembershipCardProps = {
   onFreeze: () => Promise<void>;
   onUnfreeze: () => Promise<void>;
   onRenew: () => Promise<void>;
+  onShowQr: () => Promise<void> | void;
+  isQrLoading: boolean;
 };
 
 function MembershipCard({
@@ -288,6 +333,8 @@ function MembershipCard({
   onFreeze,
   onUnfreeze,
   onRenew,
+  onShowQr,
+  isQrLoading,
 }: MembershipCardProps) {
   const progress = useMemo(() => getRingProgress(membership.startsAt, membership.expiresAt), [
     membership.expiresAt,
@@ -316,6 +363,17 @@ function MembershipCard({
     >
       <div className={styles.cardHeader}>
         <span className={statusClassName}>{membership.statusLabel}</span>
+        {membership.hasQr ? (
+          <button
+            type="button"
+            className={styles.qrButton}
+            onClick={() => void onShowQr()}
+            disabled={isQrLoading}
+          >
+            <QrCode size={15} strokeWidth={2.4} />
+            {isQrLoading ? "QR..." : "QR"}
+          </button>
+        ) : null}
       </div>
 
       <div className={styles.cardTop}>
@@ -388,6 +446,70 @@ function MembershipCard({
   );
 }
 
+type MembershipQrModalProps = {
+  qr: MembershipQrViewModel;
+  onClose: () => void;
+};
+
+function MembershipQrModal({ qr, onClose }: MembershipQrModalProps) {
+  return (
+    <div className={styles.modalOverlay} role="presentation" onClick={onClose}>
+      <div
+        className={styles.modalCard}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="membership-qr-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={styles.modalHeader}>
+          <div>
+            <p className={styles.modalEyebrow}>QR абонемента</p>
+            <h2 id="membership-qr-title" className={styles.modalTitle}>
+              {qr.payloadSummary.customerName}
+            </h2>
+            <p className={styles.modalSubtitle}>{qr.payloadSummary.customerEmail}</p>
+          </div>
+
+          <button type="button" className={styles.modalClose} onClick={onClose} aria-label="Закрыть">
+            <X size={18} strokeWidth={2.4} />
+          </button>
+        </div>
+
+        <div
+          className={styles.qrCanvas}
+          dangerouslySetInnerHTML={{ __html: qr.qrCodeSvg }}
+        />
+
+        <div className={styles.modalMetaGrid}>
+          <InfoRow label="Тариф" value={qr.payloadSummary.planTitle} />
+          <InfoRow label="Подтариф" value={qr.payloadSummary.planSubtitle ?? "Без подзаголовка"} />
+          <InfoRow
+            label="Сумма"
+            value={`${new Intl.NumberFormat("ru-RU").format(qr.payloadSummary.amount)} ${qr.payloadSummary.currency === "RUB" ? "₽" : qr.payloadSummary.currency}`}
+          />
+          <InfoRow
+            label="Оплачено"
+            value={qr.payloadSummary.paidAt ? formatDateTime(qr.payloadSummary.paidAt) : "Не подтверждено"}
+          />
+          <InfoRow label="Номер заказа" value={qr.payloadSummary.merchantOrderNumber} />
+          <InfoRow label="Действует до" value={formatDateTime(qr.payloadSummary.expiresAt)} />
+        </div>
+
+        <p className={styles.modalFootnote}>QR сформирован {formatDateTime(qr.generatedAt)}</p>
+      </div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className={styles.infoRow}>
+      <span className={styles.infoLabel}>{label}</span>
+      <span className={styles.infoValue}>{value}</span>
+    </div>
+  );
+}
+
 function getRingProgress(startsAt: string, expiresAt: string) {
   const start = new Date(startsAt).getTime();
   const end = new Date(expiresAt).getTime();
@@ -402,5 +524,15 @@ function formatDisplayDate(value: string) {
     day: "numeric",
     month: "long",
     year: "numeric",
+  }).format(new Date(value));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(new Date(value));
 }

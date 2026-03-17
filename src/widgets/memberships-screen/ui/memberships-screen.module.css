@@ -105,7 +105,10 @@
 
 .cardHeader {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .statusBadge {
@@ -136,6 +139,24 @@
 
 .statusDanger {
   background: #8d1424;
+}
+
+.qrButton,
+.historyQrButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.78);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 800;
 }
 
 .cardTop {
@@ -374,6 +395,10 @@
   border-top: 1px solid rgba(248, 154, 62, 0.26);
 }
 
+.historyQrButton {
+  width: fit-content;
+}
+
 .timeline {
   display: grid;
   gap: 8px;
@@ -438,6 +463,126 @@
   color: #ffcc83;
 }
 
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  align-items: end;
+  padding: 18px;
+  background: rgba(12, 9, 17, 0.76);
+  backdrop-filter: blur(10px);
+}
+
+.modalCard {
+  width: min(100%, 520px);
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(252, 249, 243, 0.98) 0%, rgba(241, 235, 227, 0.98) 100%);
+  color: #251a12;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.26);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modalEyebrow {
+  margin: 0 0 6px;
+  color: #97591d;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.modalSubtitle {
+  margin: 8px 0 0;
+  color: rgba(37, 26, 18, 0.62);
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.modalClose {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 14px;
+  background: rgba(37, 26, 18, 0.08);
+  color: #251a12;
+}
+
+.qrCanvas {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(37, 26, 18, 0.08);
+}
+
+.qrCanvas :global(svg) {
+  width: min(100%, 280px);
+  height: auto;
+}
+
+.modalMetaGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.infoRow {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(37, 26, 18, 0.06);
+}
+
+.infoLabel {
+  color: rgba(37, 26, 18, 0.56);
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.infoValue {
+  color: #251a12;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+
+.modalFootnote {
+  margin: 0;
+  color: rgba(37, 26, 18, 0.56);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
 @media (max-width: 400px) {
   .cardTop {
     grid-template-columns: minmax(0, 1fr);
@@ -447,5 +592,13 @@
     width: 118px;
     height: 118px;
     justify-self: center;
+  }
+
+  .modalOverlay {
+    padding: 12px;
+  }
+
+  .modalCard {
+    padding: 16px;
   }
 }
