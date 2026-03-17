@@ -100,6 +100,7 @@ export type MembershipFreezeStatus = "ACTIVE" | "COMPLETED" | "CANCELLED";
 export type MembershipRenewalStatus = "PENDING" | "PROCESSED" | "CANCELLED";
 
 export type MembershipTone = "success" | "warning" | "danger" | "muted";
+export type PaymentTone = MembershipTone;
 
 export type ScheduleWeekday =
   | "MONDAY"
@@ -273,3 +274,43 @@ export type AdminMembership = {
   freezes: AdminMembershipFreeze[];
   renewalRequests: AdminMembershipRenewalRequest[];
 };
+
+export type PaymentOrderStatus =
+  | "CREATED"
+  | "FORM_REGISTERED"
+  | "REDIRECTED"
+  | "PAID"
+  | "FAILED"
+  | "EXPIRED"
+  | "CANCELLED";
+
+export type PaymentSessionResponse = {
+  paymentId: string;
+  formUrl: string;
+  expiresAt: string;
+};
+
+export type PaymentStatusResponse = {
+  paymentId: string;
+  status: PaymentOrderStatus;
+  statusLabel: string;
+  statusTone: PaymentTone;
+  message: string;
+  amount: number;
+  currency: string;
+  planTitle: string;
+  planSubtitle: string | null;
+  createdAt: string;
+  updatedAt: string;
+  paidAt: string | null;
+  failedAt: string | null;
+  formUrl: string | null;
+  actionCode: number | null;
+  actionCodeDescription: string | null;
+  membershipId: string | null;
+  membershipIssuedAt: string | null;
+  canRetry: boolean;
+  isFinal: boolean;
+};
+
+export type PaymentResultViewModel = PaymentStatusResponse;

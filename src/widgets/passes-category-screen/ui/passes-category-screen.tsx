@@ -21,6 +21,7 @@ import type {
   PassCategoryDetails,
   PassFeatureIcon,
   PassPlan,
+  PaymentSessionResponse,
   PassVariant,
 } from "@/shared/lib/contracts";
 import { BottomNav } from "@/shared/ui/bottom-nav/bottom-nav";
@@ -38,6 +39,7 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
   const [canScrollTabs, setCanScrollTabs] = useState(false);
   const [isTabsAtEnd, setIsTabsAtEnd] = useState(false);
   const tabsRef = useRef<HTMLElement | null>(null);
@@ -237,9 +239,32 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
                         <PlanCard
                           key={plan.id}
                           plan={plan}
-                          onSelect={() =>
-                            setFeedback(`Покупка для тарифа "${plan.title}" будет подключена позже.`)
-                          }
+                          isPending={pendingPlanId === plan.id}
+                          onSelect={async () => {
+                            try {
+                              setPendingPlanId(plan.id);
+                              setError(null);
+                              setFeedback(null);
+
+                              const session = await apiFetch<PaymentSessionResponse>(
+                                `/payments/passes/${plan.id}`,
+                                {
+                                  method: "POST",
+                                  body: JSON.stringify({}),
+                                },
+                              );
+
+                              window.location.href = session.formUrl;
+                            } catch (paymentError) {
+                              setError(
+                                paymentError instanceof ApiError
+                                  ? paymentError.message
+                                  : "Не удалось перейти к оплате",
+                              );
+                            } finally {
+                              setPendingPlanId(null);
+                            }
+                          }}
                         />
                       ))}
                     </div>
@@ -264,10 +289,12 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
 
 function PlanCard({
   plan,
+  isPending,
   onSelect,
 }: {
   plan: PassPlan;
-  onSelect: () => void;
+  isPending: boolean;
+  onSelect: () => void | Promise<void>;
 }) {
   const topBadges = plan.badges.filter((badge) => badge.style !== "success");
   const footerBadge = plan.badges.find((badge) => badge.style === "success");
@@ -320,8 +347,8 @@ function PlanCard({
 
         <div className={styles.planAside}>
           <div className={styles.planPrice}>{formatPlanPrice(plan.price, plan.currency)}</div>
-          <button type="button" className={styles.planAction} onClick={onSelect}>
-            Выбрать
+          <button type="button" className={styles.planAction} onClick={onSelect} disabled={isPending}>
+            {isPending ? "Переход..." : "Выбрать"}
           </button>
         </div>
       </div>
