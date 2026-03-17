@@ -37,7 +37,8 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
   const [category, setCategory] = useState<PassCategoryDetails | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [isDataLoading, setIsDataLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
   const [canScrollTabs, setCanScrollTabs] = useState(false);
@@ -59,7 +60,7 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
 
         setCategory(data);
         setSelectedVariantId(data.variants[0]?.id ?? null);
-        setError(null);
+        setLoadError(null);
       })
       .catch((loadError) => {
         if (cancelled) {
@@ -67,7 +68,7 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
         }
 
         setCategory(null);
-        setError(
+        setLoadError(
           loadError instanceof ApiError
             ? loadError.message
             : "Не удалось загрузить страницу абонемента",
@@ -133,12 +134,12 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
     return <SessionStatus title="Загрузка" text="Загружаем детали абонемента." />;
   }
 
-  if (error || !category) {
+  if (loadError || !category) {
     return (
       <main className={styles.screen}>
         <section className={styles.panel}>
           <div className={styles.stateBlock}>
-            <p className={styles.errorText}>{error ?? "Категория не найдена"}</p>
+            <p className={styles.errorText}>{loadError ?? "Категория не найдена"}</p>
             <Link href="/passes" className={styles.backLink}>
               Вернуться к каталогу
             </Link>
@@ -243,7 +244,7 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
                           onSelect={async () => {
                             try {
                               setPendingPlanId(plan.id);
-                              setError(null);
+                              setPaymentError(null);
                               setFeedback(null);
 
                               const session = await apiFetch<PaymentSessionResponse>(
@@ -256,7 +257,7 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
 
                               window.location.href = session.formUrl;
                             } catch (paymentError) {
-                              setError(
+                              setPaymentError(
                                 paymentError instanceof ApiError
                                   ? paymentError.message
                                   : "Не удалось перейти к оплате",
@@ -278,6 +279,7 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
             <p className={styles.emptyText}>Для этой категории пока нет активных форматов.</p>
           )}
 
+          {paymentError ? <p className={styles.errorText}>{paymentError}</p> : null}
           {feedback ? <p className={styles.feedback}>{feedback}</p> : null}
         </section>
 
