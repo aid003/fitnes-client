@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PaymentsResultScreen } from "@/widgets/payments-result-screen/ui/payments-result-screen";
 
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function PaymentsResultPage() {
-  return <PaymentsResultScreen />;
+  return (
+    <Suspense fallback={null}>
+      <PaymentsResultScreen />
+    </Suspense>
+  );
 }
