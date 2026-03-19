@@ -215,7 +215,7 @@ export function RecoveryVerifyScreen() {
 
         <AuthAction
           type="button"
-          className={styles.submit}
+          className={`${styles.submit} ${styles.resend}`}
           onClick={() => void handleResend()}
           disabled={isResending || resendCooldown > 0}
         >

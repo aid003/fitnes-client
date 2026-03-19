@@ -55,6 +55,15 @@
   margin-top: 32px;
 }
 
+.resend {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
 @media (max-width: 420px) {
   .screen {
     padding-top: 58px;
@@ -71,5 +80,10 @@
 
   .codeGroup {
     gap: 7px;
+  }
+
+  .resend {
+    min-height: 38px;
+    font-size: 12px;
   }
 }
