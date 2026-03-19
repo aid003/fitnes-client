@@ -62,8 +62,6 @@ export async function startQrScanner({
   let frameId: number | null = null;
   let stopped = false;
   let didDecode = false;
-  let reader: BrowserMultiFormatReader | null = null;
-
   const stop = () => {
     if (stopped) {
       return;
@@ -80,12 +78,6 @@ export async function startQrScanner({
       controlsStop?.();
     } catch {
       // Ignore cleanup failures from external scanner controls.
-    }
-
-    try {
-      reader?.reset();
-    } catch {
-      // Ignore cleanup failures from the decoder state.
     }
 
     if (stream) {
@@ -160,7 +152,7 @@ export async function startQrScanner({
       };
     }
 
-    reader = new BrowserMultiFormatReader(
+    const reader = new BrowserMultiFormatReader(
       new Map([[DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]]]),
     );
 
