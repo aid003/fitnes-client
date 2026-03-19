@@ -171,6 +171,17 @@
   gap: 8px;
 }
 
+.planOrigin,
+.historyOrigin {
+  margin: 0;
+  color: rgba(255, 206, 149, 0.86);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .cardTitle {
   margin: 0;
   color: #ffffff;
@@ -242,6 +253,11 @@
 .featureList {
   display: grid;
   gap: 8px;
+}
+
+.historyOrigin {
+  display: block;
+  margin-bottom: 4px;
 }
 
 .featureItem {

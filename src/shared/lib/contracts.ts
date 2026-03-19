@@ -189,6 +189,7 @@ export type UserMembershipCard = {
   id: string;
   title: string;
   subtitle: string;
+  planOrigin: string | null;
   startsAt: string;
   status: MembershipStatus;
   statusLabel: string;
@@ -210,6 +211,7 @@ export type UserMembershipHistoryItem = {
   id: string;
   title: string;
   subtitle: string;
+  planOrigin: string | null;
   startsAt: string;
   status: MembershipStatus;
   statusLabel: string;
@@ -327,6 +329,7 @@ export type MembershipQrViewModel = {
   payloadSummary: {
     customerName: string;
     customerEmail: string;
+    planOrigin: string | null;
     planTitle: string;
     planSubtitle: string | null;
     amount: number;

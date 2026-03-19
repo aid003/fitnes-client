@@ -246,6 +246,9 @@ export function MembershipsScreen() {
                         onClick={() => toggleHistoryItem(membership.id)}
                       >
                         <span className={styles.historyCopy}>
+                          {membership.planOrigin ? (
+                            <span className={styles.historyOrigin}>{membership.planOrigin}</span>
+                          ) : null}
                           <span className={styles.historyTitle}>{membership.title}</span>
                           <span className={styles.historySubtitle}>{membership.subtitle}</span>
                         </span>
@@ -378,6 +381,7 @@ function MembershipCard({
 
       <div className={styles.cardTop}>
         <div className={styles.cardCopy}>
+          {membership.planOrigin ? <p className={styles.planOrigin}>{membership.planOrigin}</p> : null}
           <h3 className={styles.cardTitle}>{membership.title}</h3>
           <p className={styles.cardSubtitle}>
             Действует до {formatDisplayDate(membership.expiresAt)}
@@ -481,6 +485,7 @@ function MembershipQrModal({ qr, onClose }: MembershipQrModalProps) {
         />
 
         <div className={styles.modalMetaGrid}>
+          <InfoRow label="Источник тарифа" value={qr.payloadSummary.planOrigin ?? "Не указано"} />
           <InfoRow label="Тариф" value={qr.payloadSummary.planTitle} />
           <InfoRow label="Подтариф" value={qr.payloadSummary.planSubtitle ?? "Без подзаголовка"} />
           <InfoRow
