@@ -1,13 +1,26 @@
 .shell {
+  min-height: 100vh;
   min-height: 100dvh;
 }
 
 .viewport {
+  min-height: 100vh;
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
 .viewportDesktop {
+  min-height: 100vh;
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewport > *,
+.viewportDesktop > * {
+  flex: 1 0 auto;
+  min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -19,6 +32,7 @@
 
   .viewport {
     width: min(100%, calc(var(--mobile-max-width) + 12px));
+    height: min(calc(100dvh - 36px), 932px);
     min-height: min(100dvh - 36px, 932px);
     padding: 0;
     border-radius: calc(var(--radius-device) + 2px);
@@ -28,6 +42,7 @@
 
   .viewport > * {
     width: 100%;
+    height: 100%;
     min-height: 100%;
     overflow: hidden;
     border-radius: var(--radius-device);
