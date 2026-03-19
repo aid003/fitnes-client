@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
 } from "react";
@@ -31,21 +32,36 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const providerIdRef = useRef(
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID().slice(0, 8)
+      : `auth-${Math.random().toString(36).slice(2, 10)}`,
+  );
 
   const refreshUser = async () => {
+    logAuthDebug(providerIdRef.current, "refreshUser:start");
+
     try {
       const nextUser = await apiFetch<AuthUser>("/auth/me");
       setUser(nextUser);
       setError(null);
+      logAuthDebug(providerIdRef.current, "refreshUser:success", {
+        userId: nextUser.id,
+        role: nextUser.role,
+      });
       return nextUser;
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         setUser(null);
         setError(null);
+        logAuthDebug(providerIdRef.current, "refreshUser:unauthorized");
         return null;
       }
 
       setError(error instanceof Error ? error.message : "Не удалось загрузить профиль");
+      logAuthDebug(providerIdRef.current, "refreshUser:error", {
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
       return null;
     } finally {
       setIsLoading(false);
@@ -53,7 +69,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
   };
 
   useEffect(() => {
+    const providerId = providerIdRef.current;
+
+    logAuthDebug(providerId, "provider:mounted", {
+      path: typeof window !== "undefined" ? window.location.pathname : undefined,
+    });
     void refreshUser();
+
+    return () => {
+      logAuthDebug(providerId, "provider:unmounted");
+    };
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -102,4 +127,20 @@ export function useAuth() {
   }
 
   return context;
+}
+
+function logAuthDebug(
+  providerId: string,
+  event: string,
+  details?: Record<string, unknown>,
+) {
+  if (process.env.NODE_ENV === "production") {
+    return;
+  }
+
+  console.info("[auth-debug]", {
+    providerId,
+    event,
+    ...details,
+  });
 }
