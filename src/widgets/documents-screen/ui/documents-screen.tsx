@@ -16,9 +16,6 @@ type DocumentsScreenProps =
 export function DocumentsScreen(props: DocumentsScreenProps) {
   const isHub = props.mode === "hub";
   const title = isHub ? "Документы" : props.document.title;
-  const lead = isHub
-    ? "Здесь собраны документы, с которыми можно ознакомиться перед регистрацией и использованием сервиса."
-    : "Статическая страница документа. Текст размещен для ознакомления внутри приложения.";
   const backHref = isHub ? "/register" : "/documents";
 
   return (
@@ -42,7 +39,12 @@ export function DocumentsScreen(props: DocumentsScreenProps) {
 
           <p className={styles.eyebrow}>Эра Спорта</p>
           <h1 className={styles.title}>{title}</h1>
-          <p className={styles.lead}>{lead}</p>
+          {isHub ? (
+            <p className={styles.lead}>
+              Здесь собраны документы, с которыми можно ознакомиться перед
+              регистрацией и использованием сервиса.
+            </p>
+          ) : null}
         </header>
 
         <div className={styles.content}>
@@ -66,8 +68,8 @@ export function DocumentsScreen(props: DocumentsScreenProps) {
         </div>
 
         <p className={styles.footer}>
-          Нажимая кнопку «Зарегистрироваться», пользователь подтверждает ознакомление с
-          документами, размещенными в приложении.
+          Нажимая кнопку «Зарегистрироваться», пользователь соглашается с
+          условиями документов, размещенных в приложении.
         </p>
       </section>
     </main>

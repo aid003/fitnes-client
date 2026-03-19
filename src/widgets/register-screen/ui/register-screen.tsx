@@ -163,9 +163,9 @@ export function RegisterScreen() {
           </AuthAction>
 
           <p className={styles.documentsHint}>
-            Нажимая кнопку «Зарегистрироваться», вы подтверждаете, что ознакомились с{" "}
+            Нажимая кнопку «Зарегистрироваться», вы соглашаетесь с условиями, изложенными в{" "}
             <Link href="/documents" className={styles.documentsLink}>
-              документами
+              документах
             </Link>
             .
           </p>

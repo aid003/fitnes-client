@@ -1,5 +1,7 @@
 .screen {
+  height: 100%;
   min-height: 100dvh;
+  overflow-y: auto;
   background:
     radial-gradient(circle at 16% 14%, rgba(122, 101, 113, 0.22), transparent 30%),
     radial-gradient(circle at 82% 88%, rgba(76, 56, 65, 0.18), transparent 26%),
@@ -7,7 +9,7 @@
 }
 
 .panel {
-  min-height: 100dvh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   padding:
@@ -72,16 +74,7 @@
 }
 
 .content {
-  flex: 1;
-  min-height: 0;
   margin-top: 22px;
-  overflow-y: auto;
-  padding-right: 4px;
-  scrollbar-width: none;
-}
-
-.content::-webkit-scrollbar {
-  display: none;
 }
 
 .cardList {
@@ -170,7 +163,7 @@
 }
 
 .footer {
-  margin-top: 18px;
+  margin-top: 22px;
   font-size: 12px;
   line-height: 1.45;
   color: rgba(245, 240, 242, 0.62);
