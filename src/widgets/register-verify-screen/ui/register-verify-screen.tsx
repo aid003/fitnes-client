@@ -3,25 +3,33 @@
 import { useRouter } from "next/navigation";
 import {
   type ClipboardEvent,
-  type FormEvent,
   type ChangeEvent,
+  type FormEvent,
   type KeyboardEvent,
   useEffect,
   useRef,
   useState,
 } from "react";
+import { useAuth } from "@/shared/auth/auth-context";
 import { readRegisterFlowDraft } from "@/shared/lib/auth-flow-storage";
+import { ApiError } from "@/shared/lib/api";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
 import styles from "./register-verify-screen.module.css";
 
 const CODE_LENGTH = 6;
+const RESEND_SECONDS = 60;
 
 export function RegisterVerifyScreen() {
   const router = useRouter();
+  const { resendRegisterCode, verifyRegisterCode } = useAuth();
   const [digits, setDigits] = useState<string[]>(() => Array.from({ length: CODE_LENGTH }, () => ""));
   const [hasDraft] = useState(() => readRegisterFlowDraft() !== null);
+  const [draft] = useState(() => readRegisterFlowDraft());
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(RESEND_SECONDS);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -29,6 +37,20 @@ export function RegisterVerifyScreen() {
       router.replace("/register");
     }
   }, [hasDraft, router]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setResendCooldown((currentValue) => Math.max(currentValue - 1, 0));
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [resendCooldown]);
 
   const setDigitAt = (index: number, value: string) => {
     setDigits((currentValue) =>
@@ -87,12 +109,57 @@ export function RegisterVerifyScreen() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (!draft) {
+      return;
+    }
+
     if (digits.some((digit) => digit === "")) {
       setError("Введите шестизначный код");
       return;
     }
 
-    router.push("/register/success");
+    void (async () => {
+      try {
+        setIsSubmitting(true);
+        setError("");
+        await verifyRegisterCode({
+          email: draft.email,
+          code: digits.join(""),
+        });
+        router.push("/register/success");
+      } catch (submitError) {
+        setError(
+          submitError instanceof ApiError
+            ? submitError.message
+            : "Не удалось подтвердить код",
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    })();
+  };
+
+  const handleResend = async () => {
+    if (!draft || resendCooldown > 0) {
+      return;
+    }
+
+    try {
+      setIsResending(true);
+      setError("");
+      await resendRegisterCode({
+        email: draft.email,
+      });
+      setResendCooldown(RESEND_SECONDS);
+    } catch (submitError) {
+      setError(
+        submitError instanceof ApiError
+          ? submitError.message
+          : "Не удалось отправить код повторно",
+      );
+    } finally {
+      setIsResending(false);
+    }
   };
 
   if (!hasDraft) {
@@ -105,8 +172,9 @@ export function RegisterVerifyScreen() {
         <div>
           <h1 className={styles.title}>Введите код</h1>
           <p className={styles.description}>
-            Сообщение с кодом отправленно на почту, которую вы ввели при регистрации
+            Мы отправили код подтверждения на {draft?.email}. Код действует 15 минут.
           </p>
+          <p className={styles.description}>Если письма нет, проверьте папку «Спам».</p>
         </div>
 
         <div className={styles.codeGroup} onPaste={handlePaste}>
@@ -132,7 +200,20 @@ export function RegisterVerifyScreen() {
         {error ? <p className={styles.error}>{error}</p> : null}
 
         <AuthAction type="submit" className={styles.submit}>
-          Продолжить
+          {isSubmitting ? "Проверяем..." : "Продолжить"}
+        </AuthAction>
+
+        <AuthAction
+          type="button"
+          className={styles.submit}
+          onClick={() => void handleResend()}
+          disabled={isResending || resendCooldown > 0}
+        >
+          {isResending
+            ? "Отправляем..."
+            : resendCooldown > 0
+              ? `Отправить код повторно через ${resendCooldown} c`
+              : "Отправить код повторно"}
         </AuthAction>
       </form>
     </AuthScreen>

@@ -10,23 +10,28 @@ import {
   useRef,
   useState,
 } from "react";
+import { useAuth } from "@/shared/auth/auth-context";
 import {
   readRecoveryFlowDraft,
   writeRecoveryFlowDraft,
 } from "@/shared/lib/auth-flow-storage";
-import { ApiError, apiFetch } from "@/shared/lib/api";
+import { ApiError } from "@/shared/lib/api";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
 import styles from "./recovery-verify-screen.module.css";
 
 const CODE_LENGTH = 6;
+const RESEND_SECONDS = 60;
 
 export function RecoveryVerifyScreen() {
   const router = useRouter();
+  const { resendRecoveryCode, verifyRecoveryCode } = useAuth();
   const [digits, setDigits] = useState<string[]>(() => Array.from({ length: CODE_LENGTH }, () => ""));
   const [draft] = useState(() => readRecoveryFlowDraft());
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(RESEND_SECONDS);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -34,6 +39,20 @@ export function RecoveryVerifyScreen() {
       router.replace("/auth/recovery");
     }
   }, [draft, router]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setResendCooldown((currentValue) => Math.max(currentValue - 1, 0));
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [resendCooldown]);
 
   const setDigitAt = (index: number, value: string) => {
     setDigits((currentValue) =>
@@ -107,12 +126,9 @@ export function RecoveryVerifyScreen() {
 
       const code = digits.join("");
 
-      await apiFetch<{ success: true }>("/auth/recovery/verify", {
-        method: "POST",
-        body: JSON.stringify({
-          email: draft.email,
-          code,
-        }),
+      await verifyRecoveryCode({
+        email: draft.email,
+        code,
       });
 
       writeRecoveryFlowDraft({
@@ -133,6 +149,29 @@ export function RecoveryVerifyScreen() {
     }
   };
 
+  const handleResend = async () => {
+    if (!draft || resendCooldown > 0) {
+      return;
+    }
+
+    try {
+      setIsResending(true);
+      setError("");
+      await resendRecoveryCode({
+        email: draft.email,
+      });
+      setResendCooldown(RESEND_SECONDS);
+    } catch (submitError) {
+      setError(
+        submitError instanceof ApiError
+          ? submitError.message
+          : "Не удалось отправить код повторно",
+      );
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   if (!draft) {
     return null;
   }
@@ -143,8 +182,9 @@ export function RecoveryVerifyScreen() {
         <div>
           <h1 className={styles.title}>Введите код</h1>
           <p className={styles.description}>
-            Сообщение с кодом отправленно на почту, которую вы ввели при регистрации
+            Мы отправили код восстановления на {draft.email}. Код действует 15 минут.
           </p>
+          <p className={styles.description}>Если письма нет, проверьте папку «Спам».</p>
         </div>
 
         <div className={styles.codeGroup} onPaste={handlePaste}>
@@ -171,6 +211,19 @@ export function RecoveryVerifyScreen() {
 
         <AuthAction type="submit" className={styles.submit}>
           {isSubmitting ? "Проверяем..." : "Продолжить"}
+        </AuthAction>
+
+        <AuthAction
+          type="button"
+          className={styles.submit}
+          onClick={() => void handleResend()}
+          disabled={isResending || resendCooldown > 0}
+        >
+          {isResending
+            ? "Отправляем..."
+            : resendCooldown > 0
+              ? `Отправить код повторно через ${resendCooldown} c`
+              : "Отправить код повторно"}
         </AuthAction>
       </form>
     </AuthScreen>

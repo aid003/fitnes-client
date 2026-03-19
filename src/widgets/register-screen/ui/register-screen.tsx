@@ -6,6 +6,10 @@ import { type FormEvent, useState } from "react";
 import { useRequireGuest } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { ApiError } from "@/shared/lib/api";
+import {
+  clearRegisterFlowDraft,
+  writeRegisterFlowDraft,
+} from "@/shared/lib/auth-flow-storage";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthFormField } from "@/shared/ui/auth-form-field/auth-form-field";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
@@ -30,7 +34,7 @@ const INITIAL_STATE: RegisterFormState = {
 
 export function RegisterScreen() {
   const router = useRouter();
-  const { register } = useAuth();
+  const { requestRegisterCode } = useAuth();
   const { canRender, isLoading } = useRequireGuest();
   const [values, setValues] = useState<RegisterFormState>(INITIAL_STATE);
   const [errors, setErrors] = useState<RegisterFormErrors>({});
@@ -79,17 +83,22 @@ export function RegisterScreen() {
     try {
       setIsSubmitting(true);
       setSubmitError(null);
-      await register({
+      await requestRegisterCode({
         name: trimmedName,
         email: trimmedEmail,
         password: values.password,
       });
-      router.replace("/");
+      clearRegisterFlowDraft();
+      writeRegisterFlowDraft({
+        name: trimmedName,
+        email: trimmedEmail,
+      });
+      router.push("/register/verify");
     } catch (error) {
       setSubmitError(
         error instanceof ApiError
           ? error.message
-          : "Не удалось создать аккаунт",
+          : "Не удалось отправить код подтверждения",
       );
     } finally {
       setIsSubmitting(false);
@@ -159,7 +168,7 @@ export function RegisterScreen() {
           {submitError ? <p className={styles.submitError}>{submitError}</p> : null}
 
           <AuthAction type="submit" className={styles.submit}>
-            {isSubmitting ? "Создаем аккаунт..." : "Зарегистрироваться"}
+            {isSubmitting ? "Отправляем код..." : "Зарегистрироваться"}
           </AuthAction>
 
           <p className={styles.documentsHint}>

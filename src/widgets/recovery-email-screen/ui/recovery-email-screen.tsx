@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import { useAuth } from "@/shared/auth/auth-context";
 import {
   clearRecoveryFlowDraft,
   writeRecoveryFlowDraft,
 } from "@/shared/lib/auth-flow-storage";
-import { ApiError, apiFetch } from "@/shared/lib/api";
+import { ApiError } from "@/shared/lib/api";
 import { AuthAction } from "@/shared/ui/auth-action/auth-action";
 import { AuthFormField } from "@/shared/ui/auth-form-field/auth-form-field";
 import { AuthScreen } from "@/shared/ui/auth-screen/auth-screen";
@@ -18,6 +19,7 @@ type RecoveryEmailErrors = {
 
 export function RecoveryEmailScreen() {
   const router = useRouter();
+  const { requestRecoveryCode } = useAuth();
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<RecoveryEmailErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -44,11 +46,8 @@ export function RecoveryEmailScreen() {
       setIsSubmitting(true);
       setSubmitError(null);
 
-      await apiFetch<{ success: true }>("/auth/recovery/request", {
-        method: "POST",
-        body: JSON.stringify({
-          email: trimmedEmail,
-        }),
+      await requestRecoveryCode({
+        email: trimmedEmail,
       });
 
       clearRecoveryFlowDraft();
@@ -98,7 +97,7 @@ export function RecoveryEmailScreen() {
           {submitError ? <p className={styles.error}>{submitError}</p> : null}
 
           <AuthAction type="submit" className={styles.submit}>
-            {isSubmitting ? "Проверяем..." : "Продолжить"}
+            {isSubmitting ? "Отправляем код..." : "Продолжить"}
           </AuthAction>
         </form>
       </div>

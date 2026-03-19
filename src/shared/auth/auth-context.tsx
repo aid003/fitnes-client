@@ -17,11 +17,22 @@ type AuthContextValue = {
   isLoading: boolean;
   error: string | null;
   login: (input: { email: string; password: string }) => Promise<AuthUser>;
-  register: (input: {
+  requestRegisterCode: (input: {
     name: string;
     email: string;
     password: string;
+  }) => Promise<{ success: true }>;
+  verifyRegisterCode: (input: {
+    email: string;
+    code: string;
   }) => Promise<AuthUser>;
+  resendRegisterCode: (input: { email: string }) => Promise<{ success: true }>;
+  requestRecoveryCode: (input: { email: string }) => Promise<{ success: true }>;
+  verifyRecoveryCode: (input: {
+    email: string;
+    code: string;
+  }) => Promise<{ success: true }>;
+  resendRecoveryCode: (input: { email: string }) => Promise<{ success: true }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<AuthUser | null>;
 };
@@ -95,14 +106,54 @@ export function AuthProvider({ children }: PropsWithChildren) {
         setError(null);
         return nextUser;
       },
-      async register(input) {
-        const nextUser = await apiFetch<AuthUser>("/auth/register", {
+      async requestRegisterCode(input) {
+        const result = await apiFetch<{ success: true }>("/auth/register", {
+          method: "POST",
+          body: JSON.stringify(input),
+        });
+        setError(null);
+        return result;
+      },
+      async verifyRegisterCode(input) {
+        const nextUser = await apiFetch<AuthUser>("/auth/register/verify", {
           method: "POST",
           body: JSON.stringify(input),
         });
         setUser(nextUser);
         setError(null);
         return nextUser;
+      },
+      async resendRegisterCode(input) {
+        const result = await apiFetch<{ success: true }>("/auth/register/resend", {
+          method: "POST",
+          body: JSON.stringify(input),
+        });
+        setError(null);
+        return result;
+      },
+      async requestRecoveryCode(input) {
+        const result = await apiFetch<{ success: true }>("/auth/recovery/request", {
+          method: "POST",
+          body: JSON.stringify(input),
+        });
+        setError(null);
+        return result;
+      },
+      async verifyRecoveryCode(input) {
+        const result = await apiFetch<{ success: true }>("/auth/recovery/verify", {
+          method: "POST",
+          body: JSON.stringify(input),
+        });
+        setError(null);
+        return result;
+      },
+      async resendRecoveryCode(input) {
+        const result = await apiFetch<{ success: true }>("/auth/recovery/resend", {
+          method: "POST",
+          body: JSON.stringify(input),
+        });
+        setError(null);
+        return result;
       },
       async logout() {
         await apiFetch<{ success: true }>("/auth/logout", {
