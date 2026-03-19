@@ -170,10 +170,7 @@ export function AdminPassesScreen() {
   const loadCategories = async () => {
     const data = await apiFetch<PassCategoryDetails[]>("/admin/passes/categories");
     setCategories(data);
-    setExpanded((current) => ({
-      ...buildExpandedState(data),
-      ...current,
-    }));
+    setExpanded((current) => preserveExpandedState(data, current));
   };
 
   useEffect(() => {
@@ -1661,19 +1658,33 @@ function buildExpandedState(categories: PassCategoryDetails[]) {
   const next: Record<string, boolean> = {};
 
   for (const category of categories) {
-    next[`category:${category.id}`] = true;
+    next[`category:${category.id}`] = false;
 
     for (const variant of category.variants) {
-      next[`variant:${variant.id}`] = true;
+      next[`variant:${variant.id}`] = false;
 
       for (const group of variant.groups) {
-        next[`group:${group.id}`] = true;
+        next[`group:${group.id}`] = false;
 
         for (const plan of group.plans) {
-          next[`plan:${plan.id}`] = plan.features.length + plan.badges.length > 0;
+          next[`plan:${plan.id}`] = false;
         }
       }
     }
+  }
+
+  return next;
+}
+
+function preserveExpandedState(
+  categories: PassCategoryDetails[],
+  current: Record<string, boolean>,
+) {
+  const base = buildExpandedState(categories);
+  const next: Record<string, boolean> = {};
+
+  for (const key of Object.keys(base)) {
+    next[key] = current[key] ?? base[key];
   }
 
   return next;
