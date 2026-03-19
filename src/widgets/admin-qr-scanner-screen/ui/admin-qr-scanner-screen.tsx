@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Camera, CameraOff, Keyboard, RefreshCcw, ScanLine } from "lucide-react";
+import { Camera, CameraOff, CheckCircle2, Keyboard, RefreshCcw, ScanLine } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { apiFetch, ApiError } from "@/shared/lib/api";
@@ -72,6 +72,8 @@ export function AdminQrScannerScreen() {
       setResult(response);
       setScanError(null);
       setManualContent("");
+      setIsManualEntryVisible(false);
+      stopScanner();
     } catch (error) {
       setScanError(
         error instanceof ApiError ? error.message : "Не удалось проверить QR-код",
@@ -137,6 +139,12 @@ export function AdminQrScannerScreen() {
     void submitScan(normalizedContent);
   }
 
+  function handleRescan() {
+    setResult(null);
+    setScanError(null);
+    void startScanner();
+  }
+
   useEffect(() => {
     if (!canRender) {
       return;
@@ -183,174 +191,225 @@ export function AdminQrScannerScreen() {
 
         <div className={styles.badge}>{user.name} · {user.email}</div>
 
-        <section className={styles.workspace}>
-          <article className={styles.scannerCard}>
-            <div className={styles.scannerHeader}>
-              <div>
-                <h2 className={styles.cardTitle}>Камера</h2>
-                <p className={styles.cardText}>Наведите камеру на QR-код из кабинета клиента.</p>
+        {result ? (
+          <section className={styles.resultMode}>
+            <article className={styles.resultSummaryCard}>
+              <div className={styles.resultSummaryHeader}>
+                <div>
+                  <p className={styles.resultEyebrow}>Результат проверки</p>
+                  <h2 className={styles.resultTitle}>QR-код подтверждён</h2>
+                  <p className={styles.cardText}>
+                    Сначала ключевые данные по абонементу и оплате, затем тариф и данные клиента.
+                  </p>
+                </div>
+
+                <button type="button" className={styles.primaryButton} onClick={handleRescan}>
+                  <RefreshCcw size={16} strokeWidth={2.2} />
+                  Сканировать другой QR
+                </button>
               </div>
 
-              <button type="button" className={styles.refreshButton} onClick={() => void startScanner()}>
-                <RefreshCcw size={16} strokeWidth={2.2} />
-                Перезапустить
-              </button>
-            </div>
-
-            <div className={styles.previewWrap}>
-              <video ref={videoRef} className={styles.preview} muted playsInline />
-              <div className={styles.scanFrame} />
-            </div>
-
-            <div className={styles.cameraState}>
-              {cameraState === "loading" ? <Camera size={16} /> : null}
-              {cameraState === "ready" || cameraState === "no_qr_found_yet" ? <ScanLine size={16} /> : null}
-              {cameraState === "permission_blocked" ||
-              cameraState === "unsupported_camera" ||
-              cameraState === "decode_error" ? (
-                <CameraOff size={16} />
-              ) : null}
-              <span>{getCameraStateLabel(cameraState, isSubmitting)}</span>
-            </div>
-
-            {scanError ? <p className={styles.errorText}>{scanError}</p> : null}
-
-            <div className={styles.fallbackArea}>
-              <button
-                type="button"
-                className={styles.fallbackToggle}
-                onClick={() => setIsManualEntryVisible((value) => !value)}
-              >
-                <Keyboard size={16} strokeWidth={2.2} />
-                {isManualEntryVisible ? "Скрыть ручной ввод" : "Ввести или вставить QR вручную"}
-              </button>
-
-              {isManualEntryVisible ? (
-                <form className={styles.manualForm} onSubmit={handleManualSubmit}>
-                  <label className={styles.cardText} htmlFor="manual-qr-content">
-                    Запасной сценарий на случай, если камера или доступ к ней недоступны.
-                  </label>
-                  <textarea
-                    id="manual-qr-content"
-                    className={styles.manualInput}
-                    value={manualContent}
-                    onChange={(event) => setManualContent(event.target.value)}
-                    placeholder="Вставьте JSON-содержимое QR-кода"
-                    rows={6}
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    spellCheck={false}
-                  />
-                  <div className={styles.manualActions}>
-                    <button
-                      type="submit"
-                      className={styles.primaryButton}
-                      disabled={isSubmitting || manualContent.trim().length === 0}
-                    >
-                      Проверить содержимое
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.secondaryGhostButton}
-                      onClick={() => setManualContent("")}
-                      disabled={isSubmitting}
-                    >
-                      Очистить
-                    </button>
-                  </div>
-                </form>
-              ) : null}
-            </div>
-          </article>
-
-          <article className={styles.resultCard}>
-            <div className={styles.resultHeader}>
-              <h2 className={styles.cardTitle}>Результат проверки</h2>
-              <p className={styles.cardText}>Данные раскладываются по блокам после успешного сканирования.</p>
-            </div>
-
-            {result ? (
-              <div className={styles.resultGrid}>
-                <InfoSection
-                  title="Клиент"
-                  rows={[
-                    ["ID", result.customer.id],
-                    ["Имя", result.customer.name],
-                    ["Email", result.customer.email],
-                  ]}
-                />
-
-                <InfoSection
-                  title="Абонемент"
-                  rows={[
-                    ["ID", result.membership.id],
-                    ["Название", result.membership.title],
-                    ["Подзаголовок", result.membership.subtitle ?? "Без подзаголовка"],
-                    ["Статус", result.membership.status],
-                    ["Начало", formatDateTime(result.membership.startsAt)],
-                    ["Окончание", formatDateTime(result.membership.endsAt)],
-                    ["Лимит заморозки", `${result.membership.freezeDaysLimit} дн.`],
-                  ]}
-                />
-
-                <InfoSection
-                  title="Тариф"
-                  rows={[
-                    ["ID", result.plan.id],
-                    ["Название", result.plan.title],
-                    ["Подзаголовок", result.plan.subtitle ?? "Без подзаголовка"],
-                    ["Описание", result.plan.description ?? "Без описания"],
-                    ["Тип биллинга", result.plan.billingType ?? "Не задан"],
-                    ["Срок", formatPlanDuration(result.plan.durationValue, result.plan.durationUnit)],
-                  ]}
-                />
-
-                <InfoSection
-                  title="Оплата"
-                  rows={[
-                    ["Payment ID", result.payment.paymentId],
-                    ["Номер заказа", result.payment.merchantOrderNumber],
-                    ["Gateway order", result.payment.gatewayOrderId ?? "Нет"],
-                    ["Статус", result.payment.status],
-                    ["Сумма", formatMoney(result.payment.amount, result.payment.currency)],
-                    ["Создан", formatDateTime(result.payment.createdAt)],
-                    ["Оплачен", result.payment.paidAt ? formatDateTime(result.payment.paidAt) : "Не подтверждено"],
-                    [
-                      "Выдан абонемент",
-                      result.payment.membershipIssuedAt
-                        ? formatDateTime(result.payment.membershipIssuedAt)
-                        : "Не зафиксировано",
-                    ],
-                    ["Action code", result.payment.actionCode?.toString() ?? "Нет"],
-                    ["Ответ шлюза", result.payment.actionCodeDescription ?? "Нет"],
-                  ]}
-                />
-
-                <InfoSection
-                  title="Проверка"
-                  rows={[
-                    ["Подпись", result.verification.isSignatureValid ? "Валидна" : "Ошибка"],
-                    ["Версия", result.verification.version],
-                    ["Сформирован", formatDateTime(result.verification.generatedAt)],
-                  ]}
-                />
+              <div className={styles.resultStatus}>
+                <CheckCircle2 size={18} strokeWidth={2.1} />
+                <span>Подпись валидна, версия {result.verification.version}</span>
+                <span>Сформирован {formatDateTime(result.verification.generatedAt)}</span>
               </div>
-            ) : (
+            </article>
+
+            <section className={styles.resultLayout}>
+              <DenseSection
+                title="Абонемент"
+                tone="primary"
+                rows={[
+                  ["ID", result.membership.id],
+                  ["Название", result.membership.title],
+                  ["Подзаголовок", result.membership.subtitle ?? "Без подзаголовка"],
+                  ["Статус", result.membership.status],
+                  ["Начало", formatDateTime(result.membership.startsAt)],
+                  ["Окончание", formatDateTime(result.membership.endsAt)],
+                  ["Лимит заморозки", `${result.membership.freezeDaysLimit} дн.`],
+                ]}
+              />
+
+              <DenseSection
+                title="Оплата"
+                tone="primary"
+                rows={[
+                  ["Payment ID", result.payment.paymentId],
+                  ["Номер заказа", result.payment.merchantOrderNumber],
+                  ["Gateway order", result.payment.gatewayOrderId ?? "Нет"],
+                  ["Статус", result.payment.status],
+                  ["Сумма", formatMoney(result.payment.amount, result.payment.currency)],
+                  ["Создан", formatDateTime(result.payment.createdAt)],
+                  ["Оплачен", result.payment.paidAt ? formatDateTime(result.payment.paidAt) : "Не подтверждено"],
+                  [
+                    "Выдан абонемент",
+                    result.payment.membershipIssuedAt
+                      ? formatDateTime(result.payment.membershipIssuedAt)
+                      : "Не зафиксировано",
+                  ],
+                  ["Action code", result.payment.actionCode?.toString() ?? "Нет"],
+                  ["Ответ шлюза", result.payment.actionCodeDescription ?? "Нет"],
+                ]}
+              />
+
+              <DenseSection
+                title="Тариф"
+                rows={[
+                  ["ID", result.plan.id],
+                  ["Название", result.plan.title],
+                  ["Подзаголовок", result.plan.subtitle ?? "Без подзаголовка"],
+                  ["Описание", result.plan.description ?? "Без описания"],
+                  ["Тип биллинга", result.plan.billingType ?? "Не задан"],
+                  ["Срок", formatPlanDuration(result.plan.durationValue, result.plan.durationUnit)],
+                ]}
+              />
+
+              <MetaSection
+                title="Проверка"
+                rows={[
+                  ["Подпись", result.verification.isSignatureValid ? "Валидна" : "Ошибка"],
+                  ["Версия", result.verification.version],
+                  ["Сформирован", formatDateTime(result.verification.generatedAt)],
+                ]}
+              />
+
+              <DenseSection
+                title="Клиент"
+                rows={[
+                  ["ID", result.customer.id],
+                  ["Имя", result.customer.name],
+                  ["Email", result.customer.email],
+                ]}
+              />
+            </section>
+          </section>
+        ) : (
+          <section className={styles.scanMode}>
+            <article className={styles.scannerCard}>
+              <div className={styles.scannerHeader}>
+                <div>
+                  <h2 className={styles.cardTitle}>Камера</h2>
+                  <p className={styles.cardText}>Наведите камеру на QR-код из кабинета клиента.</p>
+                </div>
+
+                <button type="button" className={styles.refreshButton} onClick={() => void startScanner()}>
+                  <RefreshCcw size={16} strokeWidth={2.2} />
+                  Перезапустить
+                </button>
+              </div>
+
+              <div className={styles.previewWrap}>
+                <video ref={videoRef} className={styles.preview} muted playsInline />
+                <div className={styles.scanFrame} />
+              </div>
+
+              <div className={styles.cameraState}>
+                {cameraState === "loading" ? <Camera size={16} /> : null}
+                {cameraState === "ready" || cameraState === "no_qr_found_yet" ? <ScanLine size={16} /> : null}
+                {cameraState === "permission_blocked" ||
+                cameraState === "unsupported_camera" ||
+                cameraState === "decode_error" ? (
+                  <CameraOff size={16} />
+                ) : null}
+                <span>{getCameraStateLabel(cameraState, isSubmitting)}</span>
+              </div>
+
+              {scanError ? <p className={styles.errorText}>{scanError}</p> : null}
+
+              <div className={styles.fallbackArea}>
+                <button
+                  type="button"
+                  className={styles.fallbackToggle}
+                  onClick={() => setIsManualEntryVisible((value) => !value)}
+                >
+                  <Keyboard size={16} strokeWidth={2.2} />
+                  {isManualEntryVisible ? "Скрыть ручной ввод" : "Ввести или вставить QR вручную"}
+                </button>
+
+                {isManualEntryVisible ? (
+                  <form className={styles.manualForm} onSubmit={handleManualSubmit}>
+                    <label className={styles.cardText} htmlFor="manual-qr-content">
+                      Запасной сценарий на случай, если камера или доступ к ней недоступны.
+                    </label>
+                    <textarea
+                      id="manual-qr-content"
+                      className={styles.manualInput}
+                      value={manualContent}
+                      onChange={(event) => setManualContent(event.target.value)}
+                      placeholder="Вставьте JSON-содержимое QR-кода"
+                      rows={5}
+                      autoCapitalize="off"
+                      autoCorrect="off"
+                      spellCheck={false}
+                    />
+                    <div className={styles.manualActions}>
+                      <button
+                        type="submit"
+                        className={styles.primaryButton}
+                        disabled={isSubmitting || manualContent.trim().length === 0}
+                      >
+                        Проверить содержимое
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.secondaryGhostButton}
+                        onClick={() => setManualContent("")}
+                        disabled={isSubmitting}
+                      >
+                        Очистить
+                      </button>
+                    </div>
+                  </form>
+                ) : null}
+              </div>
+            </article>
+
+            <article className={styles.resultPlaceholder}>
+              <div className={styles.resultHeader}>
+                <h2 className={styles.cardTitle}>Результат проверки</h2>
+                <p className={styles.cardText}>После чтения QR здесь появятся данные абонемента, оплаты и клиента.</p>
+              </div>
+
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>Ожидаем сканирование</p>
                 <p className={styles.cardText}>
-                  После чтения QR здесь появятся детальные данные абонемента и оплаты.
+                  Сфокусируйте QR-код внутри рамки. После успешного чтения экран переключится на подробный результат.
                 </p>
               </div>
-            )}
-          </article>
-        </section>
+            </article>
+          </section>
+        )}
       </section>
     </main>
   );
 }
 
-function InfoSection({
+function DenseSection({
+  title,
+  rows,
+  tone = "default",
+}: {
+  title: string;
+  rows: Array<[string, string]>;
+  tone?: "default" | "primary";
+}) {
+  return (
+    <section className={tone === "primary" ? styles.primarySection : styles.dataSection}>
+      <h3 className={styles.sectionTitle}>{title}</h3>
+      <div className={styles.dataGrid}>
+        {rows.map(([label, value]) => (
+          <div key={`${title}-${label}`} className={styles.dataItem}>
+            <span className={styles.infoLabel}>{label}</span>
+            <span className={styles.infoValue}>{value}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function MetaSection({
   title,
   rows,
 }: {
@@ -358,13 +417,13 @@ function InfoSection({
   rows: Array<[string, string]>;
 }) {
   return (
-    <section className={styles.infoSection}>
+    <section className={styles.metaSection}>
       <h3 className={styles.sectionTitle}>{title}</h3>
-      <div className={styles.infoRows}>
+      <div className={styles.metaRows}>
         {rows.map(([label, value]) => (
-          <div key={`${title}-${label}`} className={styles.infoRow}>
+          <div key={`${title}-${label}`} className={styles.metaItem}>
             <span className={styles.infoLabel}>{label}</span>
-            <span className={styles.infoValue}>{value}</span>
+            <span className={styles.metaValue}>{value}</span>
           </div>
         ))}
       </div>
