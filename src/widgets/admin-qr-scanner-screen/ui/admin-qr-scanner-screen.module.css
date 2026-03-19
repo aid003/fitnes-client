@@ -159,6 +159,81 @@
   line-height: 1.45;
 }
 
+.fallbackArea {
+  display: grid;
+  gap: 12px;
+}
+
+.fallbackToggle,
+.primaryButton,
+.secondaryGhostButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fallbackToggle {
+  width: fit-content;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(217, 255, 241, 0.92);
+}
+
+.manualForm {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.manualInput {
+  width: 100%;
+  min-height: 144px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(8, 15, 17, 0.74);
+  color: #ffffff;
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.manualInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.manualActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  border: none;
+  background: linear-gradient(135deg, #8ee7c2 0%, #69c9ff 100%);
+  color: #081112;
+}
+
+.secondaryGhostButton {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #ffffff;
+}
+
+.primaryButton:disabled,
+.secondaryGhostButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .resultGrid {
   display: grid;
   gap: 14px;
@@ -238,6 +313,10 @@
 
   .scannerHeader,
   .resultHeader {
+    flex-direction: column;
+  }
+
+  .manualActions {
     flex-direction: column;
   }
 }

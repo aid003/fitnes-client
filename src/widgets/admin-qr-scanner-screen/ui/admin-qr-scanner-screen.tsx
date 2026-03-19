@@ -2,58 +2,63 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Camera, CameraOff, RefreshCcw, ScanLine } from "lucide-react";
+import { Camera, CameraOff, Keyboard, RefreshCcw, ScanLine } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { apiFetch, ApiError } from "@/shared/lib/api";
 import type { AdminScannedMembershipQrViewModel } from "@/shared/lib/contracts";
+import { startQrScanner, type QrScannerSession } from "@/shared/lib/qr-scanner";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
 import styles from "./admin-qr-scanner-screen.module.css";
 
-type BarcodeDetectorLike = {
-  detect(source: ImageBitmapSource): Promise<Array<{ rawValue?: string }>>;
-};
+type CameraState =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "permission_blocked"
+  | "unsupported_camera"
+  | "no_qr_found_yet"
+  | "decode_error";
 
-type BarcodeDetectorCtor = {
-  new (options: { formats: string[] }): BarcodeDetectorLike;
-  getSupportedFormats?: () => Promise<string[]>;
-};
-
-declare global {
-  interface Window {
-    BarcodeDetector?: BarcodeDetectorCtor;
-  }
-}
+const NO_QR_HINT_DELAY_MS = 7000;
 
 export function AdminQrScannerScreen() {
   const { canRender, isLoading, user } = useRequireAdmin();
   const { logout } = useAuth();
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const frameRef = useRef<number | null>(null);
-  const detectorRef = useRef<BarcodeDetectorLike | null>(null);
-  const isBusyRef = useRef(false);
-  const [cameraState, setCameraState] = useState<
-    "idle" | "loading" | "ready" | "unsupported" | "blocked" | "error"
-  >("idle");
+  const scannerSessionRef = useRef<QrScannerSession | null>(null);
+  const noQrHintTimeoutRef = useRef<number | null>(null);
+  const [cameraState, setCameraState] = useState<CameraState>("idle");
   const [scanError, setScanError] = useState<string | null>(null);
   const [result, setResult] = useState<AdminScannedMembershipQrViewModel | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isManualEntryVisible, setIsManualEntryVisible] = useState(false);
+  const [manualContent, setManualContent] = useState("");
+
+  function clearNoQrHintTimer() {
+    if (noQrHintTimeoutRef.current !== null) {
+      window.clearTimeout(noQrHintTimeoutRef.current);
+      noQrHintTimeoutRef.current = null;
+    }
+  }
+
+  function scheduleNoQrHint() {
+    clearNoQrHintTimer();
+    noQrHintTimeoutRef.current = window.setTimeout(() => {
+      setCameraState((currentState) => {
+        if (currentState === "ready") {
+          return "no_qr_found_yet";
+        }
+
+        return currentState;
+      });
+    }, NO_QR_HINT_DELAY_MS);
+  }
 
   function stopScanner() {
-    if (frameRef.current) {
-      window.cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
+    clearNoQrHintTimer();
+    scannerSessionRef.current?.stop();
+    scannerSessionRef.current = null;
   }
 
   async function submitScan(content: string) {
@@ -66,6 +71,7 @@ export function AdminQrScannerScreen() {
 
       setResult(response);
       setScanError(null);
+      setManualContent("");
     } catch (error) {
       setScanError(
         error instanceof ApiError ? error.message : "Не удалось проверить QR-код",
@@ -76,87 +82,59 @@ export function AdminQrScannerScreen() {
     }
   }
 
-  async function scanFrame() {
-    if (!detectorRef.current || !videoRef.current || isBusyRef.current) {
-      frameRef.current = window.requestAnimationFrame(scanFrame);
-      return;
-    }
-
-    const video = videoRef.current;
-
-    if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
-      frameRef.current = window.requestAnimationFrame(scanFrame);
-      return;
-    }
-
-    try {
-      const codes = await detectorRef.current.detect(video);
-      const rawValue = codes[0]?.rawValue?.trim();
-
-      if (rawValue) {
-        isBusyRef.current = true;
-        stopScanner();
-        await submitScan(rawValue);
-        isBusyRef.current = false;
-        return;
-      }
-    } catch (error) {
-      setScanError(error instanceof Error ? error.message : "Ошибка чтения QR-кода");
-      setCameraState("error");
-      return;
-    }
-
-    frameRef.current = window.requestAnimationFrame(scanFrame);
-  }
-
   async function startScanner() {
+    const videoElement = videoRef.current;
+
+    if (!videoElement) {
+      return;
+    }
+
     stopScanner();
     setScanError(null);
-    setCameraState("loading");
     setResult(null);
-
-    if (!window.BarcodeDetector) {
-      setCameraState("unsupported");
-      return;
-    }
+    setCameraState("loading");
 
     try {
-      const supportedFormats = await window.BarcodeDetector.getSupportedFormats?.();
-
-      if (supportedFormats && !supportedFormats.includes("qr_code")) {
-        setCameraState("unsupported");
-        return;
-      }
-
-      detectorRef.current = new window.BarcodeDetector({ formats: ["qr_code"] });
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
+      const session = await startQrScanner({
+        videoElement,
+        onDecode: (content) => {
+          clearNoQrHintTimer();
+          void submitScan(content);
         },
-        audio: false,
+        onFailure: (kind, message) => {
+          clearNoQrHintTimer();
+          setCameraState(kind);
+          setScanError(message);
+        },
       });
 
-      streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-
+      scannerSessionRef.current = session;
       setCameraState("ready");
-      frameRef.current = window.requestAnimationFrame(scanFrame);
+      scheduleNoQrHint();
     } catch (error) {
-      const message =
-        error instanceof Error && error.name === "NotAllowedError"
-          ? "blocked"
-          : "error";
+      const state =
+        error instanceof Error && "kind" in error
+          ? (error.kind as Exclude<CameraState, "idle" | "loading" | "ready" | "no_qr_found_yet">)
+          : "decode_error";
 
-      setCameraState(message);
+      setCameraState(state);
       setScanError(
         error instanceof Error ? error.message : "Не удалось запустить камеру",
       );
     }
+  }
+
+  function handleManualSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const normalizedContent = manualContent.trim();
+
+    if (!normalizedContent || isSubmitting) {
+      return;
+    }
+
+    stopScanner();
+    void submitScan(normalizedContent);
   }
 
   useEffect(() => {
@@ -226,14 +204,63 @@ export function AdminQrScannerScreen() {
 
             <div className={styles.cameraState}>
               {cameraState === "loading" ? <Camera size={16} /> : null}
-              {cameraState === "ready" ? <ScanLine size={16} /> : null}
-              {cameraState === "blocked" || cameraState === "unsupported" || cameraState === "error" ? (
+              {cameraState === "ready" || cameraState === "no_qr_found_yet" ? <ScanLine size={16} /> : null}
+              {cameraState === "permission_blocked" ||
+              cameraState === "unsupported_camera" ||
+              cameraState === "decode_error" ? (
                 <CameraOff size={16} />
               ) : null}
               <span>{getCameraStateLabel(cameraState, isSubmitting)}</span>
             </div>
 
             {scanError ? <p className={styles.errorText}>{scanError}</p> : null}
+
+            <div className={styles.fallbackArea}>
+              <button
+                type="button"
+                className={styles.fallbackToggle}
+                onClick={() => setIsManualEntryVisible((value) => !value)}
+              >
+                <Keyboard size={16} strokeWidth={2.2} />
+                {isManualEntryVisible ? "Скрыть ручной ввод" : "Ввести или вставить QR вручную"}
+              </button>
+
+              {isManualEntryVisible ? (
+                <form className={styles.manualForm} onSubmit={handleManualSubmit}>
+                  <label className={styles.cardText} htmlFor="manual-qr-content">
+                    Запасной сценарий на случай, если камера или доступ к ней недоступны.
+                  </label>
+                  <textarea
+                    id="manual-qr-content"
+                    className={styles.manualInput}
+                    value={manualContent}
+                    onChange={(event) => setManualContent(event.target.value)}
+                    placeholder="Вставьте JSON-содержимое QR-кода"
+                    rows={6}
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                  <div className={styles.manualActions}>
+                    <button
+                      type="submit"
+                      className={styles.primaryButton}
+                      disabled={isSubmitting || manualContent.trim().length === 0}
+                    >
+                      Проверить содержимое
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.secondaryGhostButton}
+                      onClick={() => setManualContent("")}
+                      disabled={isSubmitting}
+                    >
+                      Очистить
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+            </div>
           </article>
 
           <article className={styles.resultCard}>
@@ -345,10 +372,7 @@ function InfoSection({
   );
 }
 
-function getCameraStateLabel(
-  state: "idle" | "loading" | "ready" | "unsupported" | "blocked" | "error",
-  isSubmitting: boolean,
-) {
+function getCameraStateLabel(state: CameraState, isSubmitting: boolean) {
   if (isSubmitting) {
     return "Проверяем содержимое QR-кода.";
   }
@@ -358,12 +382,14 @@ function getCameraStateLabel(
       return "Запускаем камеру.";
     case "ready":
       return "Камера активна. Наведите её на QR-код.";
-    case "unsupported":
-      return "Этот браузер не поддерживает распознавание QR через BarcodeDetector.";
-    case "blocked":
-      return "Доступ к камере запрещён. Разрешите его в браузере.";
-    case "error":
-      return "Камера недоступна или чтение завершилось ошибкой.";
+    case "permission_blocked":
+      return "Доступ к камере запрещён. Разрешите его в Safari и перезапустите сканер.";
+    case "unsupported_camera":
+      return "Камера недоступна. Проверьте HTTPS, наличие камеры и что страница открыта в обычной вкладке браузера.";
+    case "no_qr_found_yet":
+      return "Камера работает, но QR пока не найден. Поднесите код ближе и держите его в рамке.";
+    case "decode_error":
+      return "Камера открылась, но чтение завершилось ошибкой. Попробуйте перезапустить сканер.";
     default:
       return "Сканер готовится к запуску.";
   }
