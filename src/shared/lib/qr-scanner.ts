@@ -105,8 +105,10 @@ export async function startQrScanner({
     videoElement.srcObject = stream;
     await videoElement.play();
 
-    if (await canUseBarcodeDetectorFastPath()) {
-      const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+    const barcodeDetectorCtor = await getBarcodeDetectorCtor();
+
+    if (barcodeDetectorCtor) {
+      const detector = new barcodeDetectorCtor({ formats: ["qr_code"] });
 
       const scanFrame = async () => {
         if (stopped || didDecode) {
@@ -193,14 +195,18 @@ export async function startQrScanner({
   }
 }
 
-async function canUseBarcodeDetectorFastPath() {
+async function getBarcodeDetectorCtor(): Promise<BarcodeDetectorCtor | null> {
   if (!window.BarcodeDetector || isLikelySafari()) {
-    return false;
+    return null;
   }
 
   const supportedFormats = await window.BarcodeDetector.getSupportedFormats?.();
 
-  return !supportedFormats || supportedFormats.includes("qr_code");
+  if (supportedFormats && !supportedFormats.includes("qr_code")) {
+    return null;
+  }
+
+  return window.BarcodeDetector;
 }
 
 function isLikelySafari() {
