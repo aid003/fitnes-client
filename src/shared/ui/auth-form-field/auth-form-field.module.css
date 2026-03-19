@@ -3,6 +3,10 @@
   gap: 6px;
 }
 
+.inputWrap {
+  position: relative;
+}
+
 .meta {
   display: flex;
   align-items: baseline;
@@ -30,6 +34,10 @@
   line-height: 1.2;
 }
 
+.inputWithToggle {
+  padding-right: 108px;
+}
+
 .input::placeholder {
   color: var(--color-input-placeholder);
 }
@@ -40,6 +48,31 @@
 
 .inputError {
   border-color: rgba(255, 176, 184, 0.72);
+}
+
+.toggle {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-muted-text);
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  color: var(--color-text);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.44);
+  outline-offset: 4px;
+  border-radius: 999px;
 }
 
 .error {

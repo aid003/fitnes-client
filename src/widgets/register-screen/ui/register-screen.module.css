@@ -40,6 +40,20 @@
   margin-top: 6px;
 }
 
+.documentsHint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(245, 240, 242, 0.72);
+}
+
+.documentsLink {
+  color: #f0df8e;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .submitError {
   margin: 0;
   color: #ffb4a8;

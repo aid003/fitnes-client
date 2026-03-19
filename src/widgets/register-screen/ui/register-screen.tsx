@@ -161,6 +161,14 @@ export function RegisterScreen() {
           <AuthAction type="submit" className={styles.submit}>
             {isSubmitting ? "Создаем аккаунт..." : "Зарегистрироваться"}
           </AuthAction>
+
+          <p className={styles.documentsHint}>
+            Нажимая кнопку «Зарегистрироваться», вы подтверждаете, что ознакомились с{" "}
+            <Link href="/documents" className={styles.documentsLink}>
+              документами
+            </Link>
+            .
+          </p>
         </form>
       </div>
 
