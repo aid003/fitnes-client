@@ -85,12 +85,14 @@
 }
 
 .planTitle {
-  margin: 18px 0 8px;
+  margin: 12px 0 8px;
   font-size: 26px;
   line-height: 1.1;
 }
 
 .planSubtitle,
+.planOriginLabel,
+.planOriginValue,
 .message,
 .metaText,
 .emptyTitle,
@@ -100,6 +102,24 @@
 
 .planSubtitle {
   color: rgba(255, 244, 236, 0.8);
+}
+
+.planOriginLabel {
+  margin-top: 18px;
+  color: rgba(255, 244, 236, 0.52);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planOriginValue {
+  margin-top: 6px;
+  color: rgba(255, 244, 236, 0.92);
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 700;
 }
 
 .amount {

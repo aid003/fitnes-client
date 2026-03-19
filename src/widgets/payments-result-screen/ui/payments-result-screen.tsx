@@ -136,6 +136,8 @@ export function PaymentsResultScreen() {
                 {payment.statusLabel}
               </span>
 
+              <p className={styles.planOriginLabel}>Источник тарифа</p>
+              <p className={styles.planOriginValue}>{formatPlanOrigin(payment)}</p>
               <h2 className={styles.planTitle}>{payment.planTitle}</h2>
               {payment.planSubtitle ? <p className={styles.planSubtitle}>{payment.planSubtitle}</p> : null}
 
@@ -195,4 +197,14 @@ export function PaymentsResultScreen() {
       </section>
     </main>
   );
+}
+
+function formatPlanOrigin(payment: PaymentResultViewModel) {
+  const parts = [
+    payment.planCategoryTitle,
+    payment.planVariantTitle,
+    payment.planGroupTitle,
+  ].filter((value): value is string => Boolean(value));
+
+  return parts.length > 0 ? parts.join(" / ") : "Не указано";
 }

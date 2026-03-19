@@ -302,6 +302,9 @@ export type PaymentStatusResponse = {
   currency: string;
   planTitle: string;
   planSubtitle: string | null;
+  planCategoryTitle: string | null;
+  planVariantTitle: string | null;
+  planGroupTitle: string | null;
   createdAt: string;
   updatedAt: string;
   paidAt: string | null;
@@ -354,6 +357,9 @@ export type AdminScannedMembershipQrViewModel = {
     title: string;
     subtitle: string | null;
     description: string | null;
+    categoryTitle: string | null;
+    variantTitle: string | null;
+    groupTitle: string | null;
     billingType: string | null;
     durationValue: number | null;
     durationUnit: string | null;

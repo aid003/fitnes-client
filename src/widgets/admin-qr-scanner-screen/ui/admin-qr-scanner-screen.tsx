@@ -34,6 +34,7 @@ export function AdminQrScannerScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isManualEntryVisible, setIsManualEntryVisible] = useState(false);
   const [manualContent, setManualContent] = useState("");
+  const [scannerRequestToken, setScannerRequestToken] = useState(0);
 
   function clearNoQrHintTimer() {
     if (noQrHintTimeoutRef.current !== null) {
@@ -140,13 +141,17 @@ export function AdminQrScannerScreen() {
   }
 
   function handleRescan() {
+    stopScanner();
     setResult(null);
     setScanError(null);
-    void startScanner();
+    setManualContent("");
+    setIsManualEntryVisible(false);
+    setCameraState("idle");
+    setScannerRequestToken((value) => value + 1);
   }
 
   useEffect(() => {
-    if (!canRender) {
+    if (!canRender || result) {
       return;
     }
 
@@ -157,7 +162,7 @@ export function AdminQrScannerScreen() {
     };
     // `startScanner` and `stopScanner` are stable enough for this mount/unmount flow.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canRender]);
+  }, [canRender, result, scannerRequestToken]);
 
   if (isLoading) {
     return <SessionStatus title="Загрузка" text="Проверяем права доступа." />;
@@ -256,6 +261,7 @@ export function AdminQrScannerScreen() {
               <DenseSection
                 title="Тариф"
                 rows={[
+                  ["Источник тарифа", formatPlanOrigin(result.plan)],
                   ["ID", result.plan.id],
                   ["Название", result.plan.title],
                   ["Подзаголовок", result.plan.subtitle ?? "Без подзаголовка"],
@@ -474,4 +480,16 @@ function formatPlanDuration(value: number | null, unit: string | null) {
   }
 
   return `${value} ${unit.toLowerCase()}`;
+}
+
+function formatPlanOrigin(plan: {
+  categoryTitle: string | null;
+  variantTitle: string | null;
+  groupTitle: string | null;
+}) {
+  const parts = [plan.categoryTitle, plan.variantTitle, plan.groupTitle].filter(
+    (value): value is string => Boolean(value),
+  );
+
+  return parts.length > 0 ? parts.join(" / ") : "Не указано";
 }
