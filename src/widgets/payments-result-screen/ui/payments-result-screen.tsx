@@ -136,7 +136,6 @@ export function PaymentsResultScreen() {
                 {payment.statusLabel}
               </span>
 
-              <p className={styles.planOriginLabel}>Источник тарифа</p>
               <p className={styles.planOriginValue}>{formatPlanOrigin(payment)}</p>
               <h2 className={styles.planTitle}>{payment.planTitle}</h2>
               {payment.planSubtitle ? <p className={styles.planSubtitle}>{payment.planSubtitle}</p> : null}
@@ -198,7 +197,6 @@ export function PaymentsResultScreen() {
     </main>
   );
 }
-
 function formatPlanOrigin(payment: PaymentResultViewModel) {
   const parts = [
     payment.planCategoryTitle,
@@ -208,3 +206,4 @@ function formatPlanOrigin(payment: PaymentResultViewModel) {
 
   return parts.length > 0 ? parts.join(" / ") : "Не указано";
 }
+

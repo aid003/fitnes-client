@@ -1,0 +1,460 @@
+.screen {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(67, 180, 171, 0.22), transparent 26%),
+    radial-gradient(circle at 85% 18%, rgba(243, 188, 84, 0.16), transparent 24%),
+    linear-gradient(180deg, #11171c 0%, #171f27 45%, #1c222d 100%);
+}
+
+.panel {
+  width: min(100%, 1320px);
+  margin: 0 auto;
+  padding: 32px 24px 44px;
+  display: grid;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.copy {
+  display: grid;
+  gap: 10px;
+  max-width: 700px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: rgba(111, 225, 214, 0.9);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: 42px;
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+}
+
+.subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.secondaryButton,
+.loadMoreButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.secondaryButton:hover,
+.loadMoreButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.secondaryButton:disabled,
+.loadMoreButton:disabled {
+  opacity: 0.64;
+  cursor: default;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.userBadge {
+  width: fit-content;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rangeControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.rangeLabel {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rangeSelect {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+}
+
+.errorText {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(208, 72, 93, 0.15);
+  color: #ffbec6;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kpiCard,
+.chartCard,
+.ledgerSection {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  background: rgba(10, 14, 18, 0.34);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(14px);
+}
+
+.kpiCard {
+  min-height: 180px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+}
+
+.kpiIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(111, 225, 214, 0.14);
+  color: #84ece2;
+}
+
+.kpiCopy {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.kpiTitle,
+.kpiCompare,
+.kpiHint,
+.cardText,
+.secondaryCell,
+.rankItemMeta,
+.rankEmpty,
+.emptyText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.kpiTitle {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.kpiValue {
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.kpiCompare {
+  color: #f2d289;
+  font-weight: 700;
+}
+
+.kpiHint,
+.cardText,
+.secondaryCell,
+.rankItemMeta,
+.emptyText {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.chartCard,
+.ledgerSection {
+  padding: 20px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.cardTitle,
+.rankTitle,
+.emptyTitle {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.chartWrap,
+.barChart,
+.weekComparison,
+.rankedGrid,
+.rankList {
+  display: grid;
+  gap: 14px;
+}
+
+.chartMeta,
+.axisLabels,
+.comparisonHead,
+.rankHead,
+.comparisonLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chartMeta,
+.axisLabels,
+.comparisonLabel span,
+.ledgerCount {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chartSvg {
+  width: 100%;
+  height: auto;
+}
+
+.barTrack {
+  display: grid;
+  grid-template-columns: repeat(30, minmax(0, 1fr));
+  align-items: end;
+  gap: 6px;
+  min-height: 220px;
+}
+
+.barColumn {
+  height: 220px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.barValue {
+  width: 100%;
+  min-height: 0;
+  border-radius: 10px 10px 4px 4px;
+}
+
+.weekComparison {
+  gap: 18px;
+}
+
+.comparisonRow {
+  display: grid;
+  gap: 10px;
+}
+
+.comparisonGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.progressTrack,
+.rankTrack {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.progressCurrent,
+.rankFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #62d7ca 0%, #8cf0e3 100%);
+}
+
+.progressPrevious {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f2b355 0%, #f5d48f 100%);
+}
+
+.comparisonLabel strong,
+.rankValue {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.rankedGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rankBlock {
+  display: grid;
+  gap: 12px;
+}
+
+.rankTitle {
+  font-size: 18px;
+}
+
+.rankItem {
+  display: grid;
+  gap: 8px;
+}
+
+.rankItemTitle,
+.primaryCell {
+  margin: 0;
+  font-weight: 800;
+}
+
+.ledgerSection {
+  display: grid;
+  gap: 16px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.table th,
+.table td {
+  padding: 14px 12px;
+  text-align: left;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  vertical-align: top;
+}
+
+.table th {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(111, 225, 214, 0.14);
+  color: #8ceddf;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+}
+
+.emptyState {
+  padding: 28px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 1180px) {
+  .kpiGrid,
+  .chartsGrid,
+  .rankedGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .panel {
+    padding-inline: 16px;
+  }
+
+  .header {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar,
+  .headerActions {
+    align-items: stretch;
+  }
+
+  .secondaryButton,
+  .loadMoreButton,
+  .rangeControl {
+    width: 100%;
+  }
+}

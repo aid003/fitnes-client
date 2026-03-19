@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarRange, ChevronRight, FolderTree, IdCard, LogOut, ScanLine } from "lucide-react";
+import {
+  CalendarRange,
+  ChartNoAxesCombined,
+  ChevronRight,
+  FolderTree,
+  IdCard,
+  LogOut,
+  ScanLine,
+} from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
@@ -35,6 +43,13 @@ const ADMIN_SECTIONS = [
     href: "/admin/qr-scanner",
     Icon: ScanLine,
     toneClassName: "scannerCard",
+  },
+  {
+    title: "Платежи и аналитика",
+    description: "Выручка, динамика продаж, популярные тарифы и ledger успешных оплат.",
+    href: "/admin/payments",
+    Icon: ChartNoAxesCombined,
+    toneClassName: "paymentsCard",
   },
 ] as const;
 

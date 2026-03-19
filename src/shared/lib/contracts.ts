@@ -322,6 +322,96 @@ export type PaymentStatusResponse = {
 
 export type PaymentResultViewModel = PaymentStatusResponse;
 
+export type AdminPaymentsMetricComparison = {
+  current: number;
+  previous: number;
+  delta: number;
+  deltaPercent: number | null;
+};
+
+export type AdminPaymentsOverview = {
+  range: "30d";
+  rangeLabel: string;
+  generatedAt: string;
+  totals: {
+    grossRevenue: number;
+    successfulPaymentsCount: number;
+    averageCheck: number;
+    createdOrdersCount: number;
+    paidConversionRate: number;
+  };
+  comparisons: {
+    grossRevenue: AdminPaymentsMetricComparison;
+    successfulPaymentsCount: AdminPaymentsMetricComparison;
+    averageCheck: AdminPaymentsMetricComparison;
+    paidConversionRate: AdminPaymentsMetricComparison;
+  };
+  revenueSeries: Array<{
+    date: string;
+    value: number;
+  }>;
+  paymentsSeries: Array<{
+    date: string;
+    value: number;
+  }>;
+  weeklyComparison: {
+    currentWeek: {
+      grossRevenue: number;
+      successfulPaymentsCount: number;
+    };
+    previousWeek: {
+      grossRevenue: number;
+      successfulPaymentsCount: number;
+    };
+  };
+  topPlans: {
+    byRevenue: Array<{
+      planId: string;
+      title: string;
+      subtitle: string | null;
+      categoryTitle: string | null;
+      value: number;
+    }>;
+    byCount: Array<{
+      planId: string;
+      title: string;
+      subtitle: string | null;
+      categoryTitle: string | null;
+      value: number;
+    }>;
+  };
+};
+
+export type AdminPaymentLedgerItem = {
+  paymentId: string;
+  merchantOrderNumber: string;
+  paidAt: string;
+  amount: number;
+  currency: string;
+  status: PaymentOrderStatus;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  plan: {
+    id: string;
+    title: string;
+    subtitle: string | null;
+    categoryTitle: string | null;
+    variantTitle: string | null;
+    groupTitle: string | null;
+  };
+  membershipId: string | null;
+  membershipIssuedAt: string | null;
+};
+
+export type AdminPaymentsLedgerPage = {
+  range: "30d";
+  items: AdminPaymentLedgerItem[];
+  nextCursor: string | null;
+};
+
 export type MembershipQrViewModel = {
   membershipId: string;
   qrCodeSvg: string;
