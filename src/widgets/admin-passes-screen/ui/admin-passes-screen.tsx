@@ -1,8 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
-import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  Dumbbell,
+  Eye,
+  Flame,
+  Gift,
+  Layers3,
+  Plus,
+  Snowflake,
+  Ticket,
+  Trash2,
+  Waves,
+} from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { apiFetch, ApiError } from "@/shared/lib/api";
@@ -10,11 +24,29 @@ import type {
   PassBadge,
   PassCategoryDetails,
   PassFeature,
+  PassFeatureIcon,
   PassPlan,
   PassPlanGroup,
   PassVariant,
 } from "@/shared/lib/contracts";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
+import {
+  BADGE_STYLE_OPTIONS,
+  BILLING_TYPE_OPTIONS,
+  createPlanDraft,
+  DURATION_UNIT_OPTIONS,
+  FEATURE_ICON_OPTIONS,
+  findFeatureIconOption,
+  formatBadgeStyle,
+  formatBillingType,
+  formatDurationUnit,
+  formatFeatureIcon,
+  formatHighlightStyle,
+  formatPlanPrice,
+  getPreviewBadges,
+  HIGHLIGHT_STYLE_OPTIONS,
+  type PlanDraft,
+} from "./admin-passes-options";
 import styles from "./admin-passes-screen.module.css";
 
 type CategoryPayload = {
@@ -80,6 +112,8 @@ type CreateMode =
   | { kind: "feature"; parentId: string }
   | null;
 
+type ChildCreateMode = Exclude<CreateMode, { kind: "category" } | null>;
+
 type FoundNode =
   | {
       kind: "category";
@@ -136,7 +170,10 @@ export function AdminPassesScreen() {
   const loadCategories = async () => {
     const data = await apiFetch<PassCategoryDetails[]>("/admin/passes/categories");
     setCategories(data);
-    setExpanded(buildExpandedState(data));
+    setExpanded((current) => ({
+      ...buildExpandedState(data),
+      ...current,
+    }));
   };
 
   useEffect(() => {
@@ -233,10 +270,10 @@ export function AdminPassesScreen() {
     <main className={styles.screen}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <div>
+          <div className={styles.headerCopy}>
             <h1 className={styles.title}>Админка абонементов</h1>
             <p className={styles.subtitle}>
-              Слева структура каталога, справа редактор выбранной сущности.
+              Слева структура каталога, справа компактный редактор выбранного элемента.
             </p>
           </div>
 
@@ -250,7 +287,7 @@ export function AdminPassesScreen() {
               }}
             >
               <Plus size={16} />
-              Создать категорию
+              Категория
             </button>
             <Link href="/admin" className={styles.secondaryButton}>
               Все админки
@@ -279,14 +316,15 @@ export function AdminPassesScreen() {
         <div className={styles.workspace}>
           <aside className={styles.treePanel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>Структура каталога</h2>
-              <p className={styles.panelText}>
-                Выберите элемент, чтобы редактировать его справа.
-              </p>
+              <div>
+                <h2 className={styles.panelTitle}>Структура каталога</h2>
+                <p className={styles.panelText}>Категория → формат → группа → тариф.</p>
+              </div>
+              <span className={styles.summaryBadge}>{categories.length} категорий</span>
             </div>
 
             {isDataLoading ? (
-              <p className={styles.panelText}>Загружаем дерево абонементов...</p>
+              <p className={styles.panelText}>Загружаем каталог...</p>
             ) : (
               <div className={styles.tree}>
                 {categories.map((category) => (
@@ -309,10 +347,12 @@ export function AdminPassesScreen() {
 
           <section className={styles.editorPanel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>Редактор</h2>
-              <p className={styles.panelText}>
-                Изменения применяются только для выбранного элемента.
-              </p>
+              <div>
+                <h2 className={styles.panelTitle}>Редактор</h2>
+                <p className={styles.panelText}>
+                  Только допустимые значения и минимум лишнего текста.
+                </p>
+              </div>
             </div>
 
             {createMode ? (
@@ -333,14 +373,9 @@ export function AdminPassesScreen() {
                 selected={selected}
                 onRunAction={runAction}
                 onReplaceCategory={replaceCategory}
-                onCreate={(mode) => {
-                  setCreateMode(mode);
-                }}
+                onCreate={(mode) => setCreateMode(mode)}
                 onDelete={async () => {
-                  await handleDelete(
-                    getDeletePath(selected),
-                    getDeleteConfirmation(selected),
-                  );
+                  await handleDelete(getDeletePath(selected), getDeleteConfirmation(selected));
                   setSelectedNode(null);
                   setCreateMode(null);
                 }}
@@ -349,8 +384,7 @@ export function AdminPassesScreen() {
               <div className={styles.placeholder}>
                 <h3 className={styles.placeholderTitle}>Выберите элемент слева</h3>
                 <p className={styles.panelText}>
-                  Выберите категорию, подпункт, группу, тариф или бейдж. Либо создайте новую
-                  категорию.
+                  Или создайте новую категорию. Для тарифа справа появится мини-превью карточки.
                 </p>
               </div>
             )}
@@ -384,8 +418,10 @@ function TreeCategory({
     <div className={styles.treeBlock}>
       <TreeRow
         title={category.title}
-        meta={`${category.isActive ? "активна" : "скрыта"} • sort ${category.sortOrder}`}
+        meta={category.slug}
+        details={`${category.variants.length} форматов`}
         level={0}
+        tone={category.isActive ? "active" : "muted"}
         selected={isSelected}
         canExpand={category.variants.length > 0}
         expanded={isExpanded}
@@ -398,7 +434,6 @@ function TreeCategory({
         ? category.variants.map((variant) => (
             <TreeVariant
               key={variant.id}
-              categoryId={category.id}
               variant={variant}
               expanded={expanded}
               selectedNode={selectedNode}
@@ -413,7 +448,6 @@ function TreeCategory({
 }
 
 function TreeVariant({
-  categoryId,
   variant,
   expanded,
   selectedNode,
@@ -421,7 +455,6 @@ function TreeVariant({
   onToggle,
   onCreate,
 }: {
-  categoryId: string;
   variant: PassVariant;
   expanded: Record<string, boolean>;
   selectedNode: SelectedAdminNode;
@@ -437,8 +470,10 @@ function TreeVariant({
     <div className={styles.treeBlock}>
       <TreeRow
         title={variant.title}
-        meta={`${variant.isActive ? "активен" : "скрыт"} • sort ${variant.sortOrder}`}
+        meta={variant.slug}
+        details={`${variant.groups.length} групп`}
         level={1}
+        tone={variant.isActive ? "active" : "muted"}
         selected={isSelected}
         canExpand={variant.groups.length > 0}
         expanded={isExpanded}
@@ -451,8 +486,6 @@ function TreeVariant({
         ? variant.groups.map((group) => (
             <TreeGroup
               key={group.id}
-              categoryId={categoryId}
-              variantId={variant.id}
               group={group}
               expanded={expanded}
               selectedNode={selectedNode}
@@ -474,8 +507,6 @@ function TreeGroup({
   onToggle,
   onCreate,
 }: {
-  categoryId: string;
-  variantId: string;
   group: PassPlanGroup;
   expanded: Record<string, boolean>;
   selectedNode: SelectedAdminNode;
@@ -491,8 +522,10 @@ function TreeGroup({
     <div className={styles.treeBlock}>
       <TreeRow
         title={group.title}
-        meta={`${group.isActive ? "активна" : "скрыта"} • sort ${group.sortOrder}`}
+        meta={group.slug}
+        details={`${group.plans.length} тарифов`}
         level={2}
+        tone={group.isActive ? "active" : "muted"}
         selected={isSelected}
         canExpand={group.plans.length > 0}
         expanded={isExpanded}
@@ -541,8 +574,10 @@ function TreePlan({
     <div className={styles.treeBlock}>
       <TreeRow
         title={plan.title}
-        meta={`${plan.isActive ? "активен" : "скрыт"} • ${plan.price} ${formatCurrency(plan.currency)}`}
+        meta={plan.highlightStyle === "popular" ? "Популярный" : "Обычный"}
+        details={formatPlanPrice(plan.price, plan.currency)}
         level={3}
+        tone={plan.isActive ? "active" : "muted"}
         selected={isSelected}
         canExpand={plan.badges.length + plan.features.length > 0}
         expanded={isExpanded}
@@ -562,8 +597,10 @@ function TreePlan({
                 <TreeRow
                   key={entry.item.id}
                   title={entry.item.label}
-                  meta={`иконка ${formatFeatureIcon(entry.item.icon)} • sort ${entry.item.sortOrder}`}
+                  meta={formatFeatureIcon(entry.item.icon)}
+                  details={`sort ${entry.item.sortOrder}`}
                   level={4}
+                  tone="muted"
                   selected={selectedNode?.kind === "feature" && selectedNode.id === entry.item.id}
                   canExpand={false}
                   expanded={false}
@@ -573,8 +610,10 @@ function TreePlan({
                 <TreeRow
                   key={entry.item.id}
                   title={entry.item.label}
-                  meta={`style ${entry.item.style ?? "—"} • sort ${entry.item.sortOrder}`}
+                  meta={formatBadgeStyle(entry.item.style)}
+                  details={`sort ${entry.item.sortOrder}`}
                   level={4}
+                  tone="muted"
                   selected={selectedNode?.kind === "badge" && selectedNode.id === entry.item.id}
                   canExpand={false}
                   expanded={false}
@@ -590,7 +629,9 @@ function TreePlan({
 function TreeRow({
   title,
   meta,
+  details,
   level,
+  tone,
   selected,
   canExpand,
   expanded,
@@ -600,7 +641,9 @@ function TreeRow({
 }: {
   title: string;
   meta: string;
+  details: string;
   level: number;
+  tone: "active" | "muted";
   selected: boolean;
   canExpand: boolean;
   expanded: boolean;
@@ -611,7 +654,7 @@ function TreeRow({
   return (
     <div
       className={[styles.treeRow, selected ? styles.treeRowSelected : ""].filter(Boolean).join(" ")}
-      style={{ paddingLeft: `${12 + level * 18}px` }}
+      style={{ paddingLeft: `${12 + level * 16}px` }}
     >
       <span className={styles.treeExpand}>
         {canExpand ? (
@@ -627,14 +670,24 @@ function TreeRow({
           <span className={styles.dotMarker} />
         )}
       </span>
-      <button
-        type="button"
-        className={styles.treeMain}
-        onClick={onClick}
-      >
+
+      <button type="button" className={styles.treeMain} onClick={onClick}>
         <span className={styles.treeText}>
           <span className={styles.treeTitle}>{title}</span>
           <span className={styles.treeMeta}>{meta}</span>
+        </span>
+        <span className={styles.treeInfo}>
+          <span
+            className={[
+              styles.treeState,
+              tone === "active" ? styles.treeStateActive : styles.treeStateMuted,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {tone === "active" ? "Активно" : "Скрыто"}
+          </span>
+          <span className={styles.treeDetails}>{details}</span>
         </span>
       </button>
 
@@ -674,7 +727,8 @@ function CreateEditor({
     return (
       <EditorCard
         title="Новая категория"
-        subtitle="Создайте новую карточку верхнего уровня."
+        subtitle="Верхний уровень каталога"
+        path="Создание"
       >
         <CategoryCreateForm
           submitLabel="Создать категорию"
@@ -696,7 +750,8 @@ function CreateEditor({
   return (
     <EditorCard
       title={getCreateTitle(createMode.kind)}
-      subtitle={selected ? `Родитель: ${getSelectedTitle(selected)}` : "Создание дочернего элемента"}
+      subtitle="Новый дочерний элемент"
+      path={selected ? getSelectedPath(selected) : "Создание"}
     >
       <CreateChildForm
         createMode={createMode}
@@ -728,31 +783,38 @@ function EntityEditor({
   selected: FoundNode;
   onRunAction: (message: string, action: () => Promise<void>) => Promise<void>;
   onReplaceCategory: (category: PassCategoryDetails) => void;
-  onCreate: (mode: CreateMode) => void;
+  onCreate: (mode: ChildCreateMode) => void;
   onDelete: () => Promise<void>;
 }) {
-  const commonMeta = getSelectedMeta(selected);
-
   return (
-    <EditorCard title={getSelectedTitle(selected)} subtitle={commonMeta}>
-      <div className={styles.editorActions}>
-        {getCreateActions(selected).map((action) => (
-          <button
-            key={action.kind}
-            type="button"
-            className={styles.secondaryButton}
-            onClick={() => onCreate(action)}
-          >
-            <Plus size={16} />
-            {getCreateActionLabel(action.kind)}
-          </button>
-        ))}
-        <button type="button" className={styles.dangerButton} onClick={() => void onDelete()}>
-          <Trash2 size={16} />
-          Удалить
-        </button>
-      </div>
-
+    <EditorCard
+      title={getSelectedTitle(selected)}
+      subtitle={getSelectedMeta(selected)}
+      path={getSelectedPath(selected)}
+      actions={
+        <>
+          <div className={styles.editorActions}>
+            {getCreateActions(selected).map((action) => (
+              <button
+                key={`${action.kind}:${action.parentId}`}
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => onCreate(action)}
+              >
+                <Plus size={16} />
+                {getCreateActionLabel(action.kind)}
+              </button>
+            ))}
+          </div>
+          <div className={styles.editorDangerZone}>
+            <button type="button" className={styles.dangerButton} onClick={() => void onDelete()}>
+              <Trash2 size={16} />
+              Удалить
+            </button>
+          </div>
+        </>
+      }
+    >
       {selected.kind === "category" ? (
         <CategoryEditForm
           category={selected.category}
@@ -810,8 +872,9 @@ function EntityEditor({
       ) : null}
 
       {selected.kind === "plan" ? (
-        <PlanEditForm
+        <PlanForm
           plan={selected.plan}
+          submitLabel="Сохранить тариф"
           onSubmit={(payload) =>
             onRunAction("Сохраняем тариф...", async () => {
               const category = await apiFetch<PassCategoryDetails>(
@@ -828,8 +891,9 @@ function EntityEditor({
       ) : null}
 
       {selected.kind === "badge" ? (
-        <BadgeEditForm
+        <BadgeForm
           badge={selected.badge}
+          submitLabel="Сохранить бейдж"
           onSubmit={(payload) =>
             onRunAction("Сохраняем бейдж...", async () => {
               const category = await apiFetch<PassCategoryDetails>(
@@ -846,8 +910,9 @@ function EntityEditor({
       ) : null}
 
       {selected.kind === "feature" ? (
-        <FeatureEditForm
+        <FeatureForm
           feature={selected.feature}
+          submitLabel="Сохранить преимущество"
           onSubmit={(payload) =>
             onRunAction("Сохраняем преимущество...", async () => {
               const category = await apiFetch<PassCategoryDetails>(
@@ -869,17 +934,27 @@ function EntityEditor({
 function EditorCard({
   title,
   subtitle,
+  path,
+  actions,
   children,
 }: {
   title: string;
   subtitle: string;
-  children: React.ReactNode;
+  path: string;
+  actions?: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className={styles.editorCard}>
       <div className={styles.editorHeader}>
-        <h3 className={styles.editorTitle}>{title}</h3>
-        <p className={styles.panelText}>{subtitle}</p>
+        <div className={styles.editorHeaderTop}>
+          <div>
+            <h3 className={styles.editorTitle}>{title}</h3>
+            <p className={styles.panelText}>{subtitle}</p>
+          </div>
+          <div className={styles.pathChip}>{path}</div>
+        </div>
+        {actions ? <div className={styles.editorHeaderActions}>{actions}</div> : null}
       </div>
       {children}
     </div>
@@ -935,140 +1010,355 @@ function VariantEditForm({
   );
 }
 
-function PlanEditForm({
+function PlanForm({
   plan,
+  submitLabel,
   onSubmit,
+  onCancel,
 }: {
-  plan: PassPlan;
+  plan?: PassPlan;
+  submitLabel: string;
   onSubmit: (payload: PlanPayload) => Promise<void>;
+  onCancel?: () => void;
 }) {
+  const [draft, setDraft] = useState<PlanDraft>(() => createPlanDraft(plan));
+
+  useEffect(() => {
+    setDraft(createPlanDraft(plan));
+  }, [plan]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    return onSubmit(parsePlanDraft(draft));
+  };
+
   return (
-    <form className={styles.editorForm} onSubmit={(event) => handlePlanSubmit(event, onSubmit)}>
-      <FormSection title="Основное">
-        <div className={styles.formGrid}>
-          <InputField name="title" label="Название" defaultValue={plan.title} required />
-          <InputField name="slug" label="Slug" defaultValue={plan.slug} required />
-        </div>
-        <TextAreaField
-          name="description"
-          label="Описание"
-          defaultValue={plan.description ?? ""}
-        />
-        <InputField
-          name="subtitle"
-          label="Подзаголовок"
-          defaultValue={plan.subtitle ?? ""}
-        />
-      </FormSection>
+    <form className={styles.editorForm} onSubmit={handleSubmit}>
+      <div className={styles.editorLayout}>
+        <div className={styles.editorMain}>
+          <FormSection title="Основное">
+            <div className={styles.formGrid}>
+              <InputField
+                name="title"
+                label="Название"
+                value={draft.title}
+                onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
+                required
+              />
+              <InputField
+                name="slug"
+                label="Slug"
+                value={draft.slug}
+                onChange={(event) => setDraft((current) => ({ ...current, slug: event.target.value }))}
+                required
+              />
+            </div>
+            <InputField
+              name="subtitle"
+              label="Подзаголовок"
+              value={draft.subtitle}
+              onChange={(event) => setDraft((current) => ({ ...current, subtitle: event.target.value }))}
+            />
+            <TextAreaField
+              name="description"
+              label="Описание"
+              value={draft.description}
+              onChange={(event) =>
+                setDraft((current) => ({ ...current, description: event.target.value }))
+              }
+            />
+          </FormSection>
 
-      <FormSection title="Цена и валюта">
-        <div className={styles.formGrid}>
-          <InputField
-            name="price"
-            label="Цена"
-            type="number"
-            min="0"
-            defaultValue={String(plan.price)}
-            required
-          />
-          <InputField name="currency" label="Валюта" defaultValue={plan.currency} />
-        </div>
-      </FormSection>
+          <FormSection title="Цена и срок">
+            <div className={styles.formGrid}>
+              <InputField
+                name="price"
+                label="Цена"
+                type="number"
+                min="0"
+                value={draft.price}
+                onChange={(event) => setDraft((current) => ({ ...current, price: event.target.value }))}
+                required
+              />
+              <InputField
+                name="currency"
+                label="Валюта"
+                value={draft.currency}
+                onChange={(event) => setDraft((current) => ({ ...current, currency: event.target.value }))}
+              />
+            </div>
+            <div className={styles.formGrid}>
+              <InputField
+                name="durationValue"
+                label="Срок"
+                type="number"
+                min="0"
+                value={draft.durationValue}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, durationValue: event.target.value }))
+                }
+              />
+              <SelectField
+                name="durationUnit"
+                label="Единица срока"
+                value={draft.durationUnit}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, durationUnit: event.target.value }))
+                }
+                options={DURATION_UNIT_OPTIONS}
+              />
+            </div>
+          </FormSection>
 
-      <FormSection title="Срок и посещения">
-        <div className={styles.formGrid}>
-          <InputField
-            name="durationValue"
-            label="Срок"
-            type="number"
-            min="0"
-            defaultValue={plan.durationValue ? String(plan.durationValue) : ""}
-          />
-          <InputField
-            name="durationUnit"
-            label="Единица срока"
-            defaultValue={plan.durationUnit ?? ""}
-          />
+          <FormSection title="Логика тарифа">
+            <div className={styles.formGrid}>
+              <InputField
+                name="visitCount"
+                label="Посещений"
+                type="number"
+                min="0"
+                value={draft.visitCount}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, visitCount: event.target.value }))
+                }
+              />
+              <SelectField
+                name="billingType"
+                label="Тип тарифа"
+                value={draft.billingType}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, billingType: event.target.value }))
+                }
+                options={BILLING_TYPE_OPTIONS}
+              />
+            </div>
+            <div className={styles.formGrid}>
+              <SelectField
+                name="highlightStyle"
+                label="Подсветка"
+                value={draft.highlightStyle}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, highlightStyle: event.target.value }))
+                }
+                options={HIGHLIGHT_STYLE_OPTIONS}
+              />
+              <InputField
+                name="sortOrder"
+                label="Порядок"
+                type="number"
+                min="0"
+                value={draft.sortOrder}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, sortOrder: event.target.value }))
+                }
+              />
+            </div>
+            <CheckboxField
+              name="isActive"
+              label="Показывать тариф"
+              checked={draft.isActive}
+              onChange={(event) =>
+                setDraft((current) => ({ ...current, isActive: event.target.checked }))
+              }
+            />
+          </FormSection>
         </div>
-        <div className={styles.formGrid}>
-          <InputField
-            name="visitCount"
-            label="Кол-во посещений"
-            type="number"
-            min="0"
-            defaultValue={plan.visitCount ? String(plan.visitCount) : ""}
-          />
-          <InputField
-            name="billingType"
-            label="Тип тарифа"
-            defaultValue={plan.billingType ?? ""}
-          />
-        </div>
-      </FormSection>
 
-      <FormSection title="Оформление">
-        <div className={styles.formGrid}>
-          <InputField
-            name="highlightStyle"
-            label="Стиль подсветки"
-            defaultValue={plan.highlightStyle ?? ""}
-          />
-          <InputField
-            name="sortOrder"
-            label="Порядок"
-            type="number"
-            min="0"
-            defaultValue={String(plan.sortOrder)}
-          />
-        </div>
-        <CheckboxField name="isActive" label="Активен" defaultChecked={plan.isActive} />
-      </FormSection>
+        <PlanPreview draft={draft} />
+      </div>
 
-      <EditorButtons submitLabel="Сохранить тариф" />
+      <EditorButtons submitLabel={submitLabel} onCancel={onCancel} />
     </form>
   );
 }
 
-function BadgeEditForm({
+function BadgeForm({
   badge,
+  submitLabel,
   onSubmit,
+  onCancel,
 }: {
-  badge: PassBadge;
+  badge?: PassBadge;
+  submitLabel: string;
   onSubmit: (payload: BadgePayload) => Promise<void>;
+  onCancel?: () => void;
 }) {
   return (
     <form className={styles.editorForm} onSubmit={(event) => handleBadgeSubmit(event, onSubmit)}>
       <FormSection title="Бейдж">
         <div className={styles.formGrid}>
-          <InputField name="label" label="Текст" defaultValue={badge.label} required />
-          <InputField name="style" label="Стиль" defaultValue={badge.style ?? ""} />
+          <InputField name="label" label="Текст" defaultValue={badge?.label ?? ""} required />
+          <SelectField
+            name="style"
+            label="Стиль"
+            defaultValue={badge?.style ?? ""}
+            options={BADGE_STYLE_OPTIONS}
+          />
         </div>
         <InputField
           name="sortOrder"
           label="Порядок"
           type="number"
           min="0"
-          defaultValue={String(badge.sortOrder)}
+          defaultValue={badge ? String(badge.sortOrder) : ""}
         />
       </FormSection>
-      <EditorButtons submitLabel="Сохранить бейдж" />
+      <EditorButtons submitLabel={submitLabel} onCancel={onCancel} />
     </form>
   );
 }
 
-function FeatureEditForm({
+function FeatureForm({
   feature,
+  submitLabel,
   onSubmit,
+  onCancel,
 }: {
-  feature: PassFeature;
+  feature?: PassFeature;
+  submitLabel: string;
   onSubmit: (payload: FeaturePayload) => Promise<void>;
+  onCancel?: () => void;
 }) {
   return (
     <form className={styles.editorForm} onSubmit={(event) => handleFeatureSubmit(event, onSubmit)}>
-      <FeatureFields feature={feature} />
-      <EditorButtons submitLabel="Сохранить преимущество" />
+      <FormSection title="Преимущество">
+        <div className={styles.formGrid}>
+          <InputField name="label" label="Текст" defaultValue={feature?.label ?? ""} required />
+          <SelectField
+            name="icon"
+            label="Иконка"
+            defaultValue={feature?.icon ?? "GIFT"}
+            options={FEATURE_ICON_OPTIONS}
+          />
+        </div>
+        <InputField
+          name="sortOrder"
+          label="Порядок"
+          type="number"
+          min="0"
+          defaultValue={feature ? String(feature.sortOrder) : ""}
+        />
+      </FormSection>
+      <EditorButtons submitLabel={submitLabel} onCancel={onCancel} />
     </form>
   );
+}
+
+function PlanPreview({ draft }: { draft: PlanDraft }) {
+  const badges = getPreviewBadges(draft.badges);
+  const features = draft.features;
+  const previewPrice = Number(draft.price) > 0 ? Number(draft.price) : 0;
+  const previewCurrency = draft.currency.trim() || "RUB";
+
+  return (
+    <aside className={styles.previewCard}>
+      <div className={styles.previewHeader}>
+        <div className={styles.previewLabel}>
+          <Eye size={16} />
+          Превью
+        </div>
+        <p className={styles.previewMeta}>Как карточка выглядит на витрине</p>
+      </div>
+
+      <article
+        className={[
+          styles.previewPlanCard,
+          draft.highlightStyle === "popular" ? styles.previewPlanCardHighlighted : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {badges.topBadges.length > 0 ? (
+          <div className={styles.previewBadgesTop}>
+            {badges.topBadges.map((badge) => (
+              <span
+                key={badge.id}
+                className={[
+                  styles.previewBadge,
+                  badge.style === "featured"
+                    ? styles.previewBadgeFeatured
+                    : styles.previewBadgeDefault,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {badge.label}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        <div className={styles.previewPlanMain}>
+          <div className={styles.previewPlanCopy}>
+            <h4 className={styles.previewPlanTitle}>{draft.title.trim() || "Новый тариф"}</h4>
+            {draft.description.trim() ? (
+              <p className={styles.previewPlanDescription}>{draft.description.trim()}</p>
+            ) : draft.subtitle.trim() ? (
+              <p className={styles.previewPlanDescription}>{draft.subtitle.trim()}</p>
+            ) : (
+              <p className={styles.previewPlanDescription}>Короткое описание появится здесь.</p>
+            )}
+
+            {features.length > 0 ? (
+              <ul className={styles.previewFeatureList}>
+                {features.map((feature) => (
+                  <li key={feature.id} className={styles.previewFeatureItem}>
+                    <FeatureIcon
+                      icon={findFeatureIconOption(feature.icon)}
+                      className={styles.previewFeatureIcon}
+                    />
+                    <span>{feature.label}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          <div className={styles.previewPlanAside}>
+            <div className={styles.previewPlanPrice}>
+              {formatPlanPrice(previewPrice, previewCurrency)}
+            </div>
+            <button type="button" className={styles.previewPlanAction} disabled>
+              Выбрать
+            </button>
+          </div>
+        </div>
+
+        {badges.footerBadge ? (
+          <div className={styles.previewFooter}>
+            <span className={[styles.previewBadge, styles.previewBadgeSuccess].join(" ")}>
+              {badges.footerBadge.label}
+            </span>
+          </div>
+        ) : null}
+      </article>
+
+      <div className={styles.previewFacts}>
+        <span className={styles.previewFact}>
+          {formatBillingType(draft.billingType || null)}
+        </span>
+        <span className={styles.previewFact}>
+          {draft.durationValue
+            ? `${draft.durationValue} ${formatDurationUnit(draft.durationUnit || null)}`
+            : "Срок не задан"}
+        </span>
+        <span className={styles.previewFact}>
+          {formatHighlightStyle(draft.highlightStyle || null)}
+        </span>
+      </div>
+    </aside>
+  );
+}
+
+function FeatureIcon({
+  icon,
+  className,
+}: {
+  icon: PassFeatureIcon;
+  className?: string;
+}) {
+  const Icon = FEATURE_ICON_MAP[icon] ?? Gift;
+  return <Icon className={className} aria-hidden="true" />;
 }
 
 function CreateChildForm({
@@ -1076,7 +1366,7 @@ function CreateChildForm({
   onSubmit,
   onCancel,
 }: {
-  createMode: Exclude<CreateMode, { kind: "category" } | null>;
+  createMode: ChildCreateMode;
   onSubmit: (
     payload: CategoryPayload | VariantPayload | PlanPayload | BadgePayload | FeaturePayload,
   ) => Promise<void>;
@@ -1093,33 +1383,18 @@ function CreateChildForm({
 
   if (createMode.kind === "plan") {
     return (
-      <form className={styles.editorForm} onSubmit={(event) => handlePlanSubmit(event, onSubmit)}>
-        <PlanEditFormDefaults />
-        <EditorButtons submitLabel="Создать тариф" onCancel={onCancel} />
-      </form>
+      <PlanForm submitLabel="Создать тариф" onCancel={onCancel} onSubmit={(payload) => onSubmit(payload)} />
     );
   }
 
   if (createMode.kind === "feature") {
     return (
-      <form className={styles.editorForm} onSubmit={(event) => handleFeatureSubmit(event, onSubmit)}>
-        <FeatureFields />
-        <EditorButtons submitLabel="Создать преимущество" onCancel={onCancel} />
-      </form>
+      <FeatureForm submitLabel="Создать преимущество" onCancel={onCancel} onSubmit={onSubmit} />
     );
   }
 
   return (
-    <form className={styles.editorForm} onSubmit={(event) => handleBadgeSubmit(event, onSubmit)}>
-      <FormSection title="Бейдж">
-        <div className={styles.formGrid}>
-          <InputField name="label" label="Текст" required />
-          <InputField name="style" label="Стиль" />
-        </div>
-        <InputField name="sortOrder" label="Порядок" type="number" min="0" />
-      </FormSection>
-      <EditorButtons submitLabel="Создать бейдж" onCancel={onCancel} />
-    </form>
+    <BadgeForm submitLabel="Создать бейдж" onCancel={onCancel} onSubmit={onSubmit} />
   );
 }
 
@@ -1142,7 +1417,7 @@ function BasicCategoryFields({ category }: { category?: PassCategoryDetails }) {
         <div className={styles.formGrid}>
           <InputField
             name="coverImageUrl"
-            label="Картинка"
+            label="Обложка"
             defaultValue={category?.coverImageUrl ?? ""}
           />
           <InputField
@@ -1153,7 +1428,7 @@ function BasicCategoryFields({ category }: { category?: PassCategoryDetails }) {
             defaultValue={category ? String(category.sortOrder) : ""}
           />
         </div>
-        <CheckboxField name="isActive" label="Активна" defaultChecked={category?.isActive ?? true} />
+        <CheckboxField name="isActive" label="Показывать категорию" defaultChecked={category?.isActive ?? true} />
       </FormSection>
     </>
   );
@@ -1184,7 +1459,7 @@ function BasicVariantFields({ entity }: { entity?: PassVariant | PassPlanGroup }
           />
           <CheckboxField
             name="isActive"
-            label="Активен"
+            label="Показывать элемент"
             defaultChecked={entity?.isActive ?? true}
           />
         </div>
@@ -1193,76 +1468,12 @@ function BasicVariantFields({ entity }: { entity?: PassVariant | PassPlanGroup }
   );
 }
 
-function PlanEditFormDefaults() {
-  return (
-    <>
-      <FormSection title="Основное">
-        <div className={styles.formGrid}>
-          <InputField name="title" label="Название" required />
-          <InputField name="slug" label="Slug" required />
-        </div>
-        <TextAreaField name="description" label="Описание" />
-        <InputField name="subtitle" label="Подзаголовок" />
-      </FormSection>
-
-      <FormSection title="Цена и валюта">
-        <div className={styles.formGrid}>
-          <InputField name="price" label="Цена" type="number" min="0" required />
-          <InputField name="currency" label="Валюта" defaultValue="RUB" />
-        </div>
-      </FormSection>
-
-      <FormSection title="Срок и посещения">
-        <div className={styles.formGrid}>
-          <InputField name="durationValue" label="Срок" type="number" min="0" />
-          <InputField name="durationUnit" label="Единица срока" />
-        </div>
-        <div className={styles.formGrid}>
-          <InputField name="visitCount" label="Кол-во посещений" type="number" min="0" />
-          <InputField name="billingType" label="Тип тарифа" />
-        </div>
-      </FormSection>
-
-      <FormSection title="Оформление">
-        <div className={styles.formGrid}>
-          <InputField name="highlightStyle" label="Стиль подсветки" />
-          <InputField name="sortOrder" label="Порядок" type="number" min="0" />
-        </div>
-        <CheckboxField name="isActive" label="Активен" defaultChecked />
-      </FormSection>
-    </>
-  );
-}
-
-function FeatureFields({ feature }: { feature?: PassFeature }) {
-  return (
-    <FormSection title="Преимущество">
-      <div className={styles.formGrid}>
-        <InputField name="label" label="Текст" defaultValue={feature?.label ?? ""} required />
-        <SelectField
-          name="icon"
-          label="Иконка"
-          defaultValue={feature?.icon ?? "GIFT"}
-          options={FEATURE_ICON_OPTIONS}
-        />
-      </div>
-      <InputField
-        name="sortOrder"
-        label="Порядок"
-        type="number"
-        min="0"
-        defaultValue={feature ? String(feature.sortOrder) : ""}
-      />
-    </FormSection>
-  );
-}
-
 function FormSection({
   title,
   children,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section className={styles.formSection}>
@@ -1276,6 +1487,8 @@ function InputField({
   name,
   label,
   defaultValue,
+  value,
+  onChange,
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & {
   name: string;
@@ -1284,7 +1497,14 @@ function InputField({
   return (
     <label className={styles.field}>
       <span className={styles.fieldLabel}>{label}</span>
-      <input className={styles.input} name={name} defaultValue={defaultValue} {...props} />
+      <input
+        className={styles.input}
+        name={name}
+        defaultValue={defaultValue}
+        value={value}
+        onChange={onChange}
+        {...props}
+      />
     </label>
   );
 }
@@ -1293,15 +1513,22 @@ function TextAreaField({
   name,
   label,
   defaultValue,
-}: {
+  value,
+  onChange,
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
   name: string;
   label: string;
-  defaultValue?: string;
 }) {
   return (
     <label className={styles.field}>
       <span className={styles.fieldLabel}>{label}</span>
-      <textarea className={styles.textarea} name={name} defaultValue={defaultValue} />
+      <textarea
+        className={styles.textarea}
+        name={name}
+        defaultValue={defaultValue}
+        value={value}
+        onChange={onChange}
+      />
     </label>
   );
 }
@@ -1310,17 +1537,24 @@ function SelectField({
   name,
   label,
   defaultValue,
+  value,
+  onChange,
   options,
-}: {
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
   name: string;
   label: string;
-  defaultValue?: string;
   options: ReadonlyArray<{ value: string; label: string }>;
 }) {
   return (
     <label className={styles.field}>
       <span className={styles.fieldLabel}>{label}</span>
-      <select className={styles.input} name={name} defaultValue={defaultValue}>
+      <select
+        className={styles.input}
+        name={name}
+        defaultValue={defaultValue}
+        value={value}
+        onChange={onChange}
+      >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -1335,14 +1569,24 @@ function CheckboxField({
   name,
   label,
   defaultChecked,
+  checked,
+  onChange,
 }: {
   name: string;
   label: string;
   defaultChecked?: boolean;
+  checked?: boolean;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }) {
   return (
     <label className={styles.checkboxRow}>
-      <input name={name} type="checkbox" defaultChecked={defaultChecked} />
+      <input
+        name={name}
+        type="checkbox"
+        defaultChecked={defaultChecked}
+        checked={checked}
+        onChange={onChange}
+      />
       {label}
     </label>
   );
@@ -1418,10 +1662,13 @@ function buildExpandedState(categories: PassCategoryDetails[]) {
 
   for (const category of categories) {
     next[`category:${category.id}`] = true;
+
     for (const variant of category.variants) {
       next[`variant:${variant.id}`] = true;
+
       for (const group of variant.groups) {
         next[`group:${group.id}`] = true;
+
         for (const plan of group.plans) {
           next[`plan:${plan.id}`] = plan.features.length + plan.badges.length > 0;
         }
@@ -1449,24 +1696,41 @@ function getSelectedTitle(selected: FoundNode) {
   }
 }
 
-function getSelectedMeta(selected: FoundNode) {
+function getSelectedPath(selected: FoundNode) {
   switch (selected.kind) {
     case "category":
-      return `Категория • ${selected.category.slug}`;
+      return selected.category.title;
     case "variant":
-      return `${selected.category.title} → подпункт • ${selected.variant.slug}`;
+      return `${selected.category.title} / ${selected.variant.title}`;
     case "group":
-      return `${selected.variant.title} → группа • ${selected.group.slug}`;
+      return `${selected.category.title} / ${selected.variant.title} / ${selected.group.title}`;
     case "plan":
-      return `${selected.group.title} → тариф • ${selected.plan.price} ${formatCurrency(selected.plan.currency)}`;
+      return `${selected.category.title} / ${selected.variant.title} / ${selected.group.title} / ${selected.plan.title}`;
     case "badge":
-      return `${selected.plan.title} → бейдж • ${selected.badge.style ?? "без стиля"}`;
+      return `${selected.plan.title} / Бейдж`;
     case "feature":
-      return `${selected.plan.title} → преимущество • ${formatFeatureIcon(selected.feature.icon)}`;
+      return `${selected.plan.title} / Преимущество`;
   }
 }
 
-function getCreateActions(selected: FoundNode): Exclude<CreateMode, null>[] {
+function getSelectedMeta(selected: FoundNode) {
+  switch (selected.kind) {
+    case "category":
+      return `Slug: ${selected.category.slug}`;
+    case "variant":
+      return `Slug: ${selected.variant.slug}`;
+    case "group":
+      return `Slug: ${selected.group.slug}`;
+    case "plan":
+      return `${formatPlanPrice(selected.plan.price, selected.plan.currency)} • ${formatBillingType(selected.plan.billingType)}`;
+    case "badge":
+      return `Стиль: ${formatBadgeStyle(selected.badge.style)}`;
+    case "feature":
+      return `Иконка: ${formatFeatureIcon(selected.feature.icon)}`;
+  }
+}
+
+function getCreateActions(selected: FoundNode): ChildCreateMode[] {
   switch (selected.kind) {
     case "category":
       return [{ kind: "variant", parentId: selected.category.id }];
@@ -1480,7 +1744,6 @@ function getCreateActions(selected: FoundNode): Exclude<CreateMode, null>[] {
         { kind: "badge", parentId: selected.plan.id },
       ];
     case "badge":
-      return [];
     case "feature":
       return [];
   }
@@ -1489,17 +1752,17 @@ function getCreateActions(selected: FoundNode): Exclude<CreateMode, null>[] {
 function getCreateActionLabel(kind: Exclude<CreateMode, null>["kind"]) {
   switch (kind) {
     case "variant":
-      return "Добавить подпункт";
+      return "Подпункт";
     case "group":
-      return "Добавить группу";
+      return "Группа";
     case "plan":
-      return "Добавить тариф";
+      return "Тариф";
     case "badge":
-      return "Добавить бейдж";
+      return "Бейдж";
     case "feature":
-      return "Добавить преимущество";
+      return "Преимущество";
     case "category":
-      return "Создать категорию";
+      return "Категория";
   }
 }
 
@@ -1555,7 +1818,7 @@ function getCreateTitle(kind: Exclude<CreateMode, null>["kind"]) {
 }
 
 async function createChild(
-  createMode: Exclude<CreateMode, { kind: "category" } | null>,
+  createMode: ChildCreateMode,
   payload: CategoryPayload | VariantPayload | PlanPayload | BadgePayload | FeaturePayload,
 ) {
   switch (createMode.kind) {
@@ -1604,15 +1867,11 @@ async function createChild(
 
 function findCreatedNode(
   category: PassCategoryDetails,
-  createMode: Exclude<CreateMode, { kind: "category" } | null>,
+  createMode: ChildCreateMode,
   payload: CategoryPayload | VariantPayload | PlanPayload | BadgePayload | FeaturePayload,
 ): NonNullable<SelectedAdminNode> | null {
   const targetTitle =
-    "title" in payload
-      ? payload.title
-      : "label" in payload
-        ? payload.label
-        : "";
+    "title" in payload ? payload.title : "label" in payload ? payload.label : "";
 
   if (createMode.kind === "variant") {
     const match = category.variants.find((item) => item.title === targetTitle);
@@ -1689,28 +1948,22 @@ function handleVariantSubmit(
   });
 }
 
-function handlePlanSubmit(
-  event: FormEvent<HTMLFormElement>,
-  onSubmit: (payload: PlanPayload) => Promise<void>,
-) {
-  event.preventDefault();
-  const formData = new FormData(event.currentTarget);
-
-  return onSubmit({
-    title: String(formData.get("title") ?? "").trim(),
-    slug: String(formData.get("slug") ?? "").trim(),
-    price: Number(formData.get("price") ?? 0),
-    description: optionalString(formData.get("description")),
-    subtitle: optionalString(formData.get("subtitle")),
-    currency: optionalString(formData.get("currency")) ?? "RUB",
-    durationValue: optionalNumber(formData.get("durationValue")),
-    durationUnit: optionalString(formData.get("durationUnit")),
-    visitCount: optionalNumber(formData.get("visitCount")),
-    billingType: optionalString(formData.get("billingType")),
-    highlightStyle: optionalString(formData.get("highlightStyle")),
-    sortOrder: optionalNumber(formData.get("sortOrder")),
-    isActive: formData.get("isActive") === "on",
-  });
+function parsePlanDraft(draft: PlanDraft): PlanPayload {
+  return {
+    title: draft.title.trim(),
+    slug: draft.slug.trim(),
+    description: optionalString(draft.description),
+    subtitle: optionalString(draft.subtitle),
+    price: Number(draft.price || 0),
+    currency: optionalString(draft.currency) ?? "RUB",
+    durationValue: optionalNumber(draft.durationValue),
+    durationUnit: optionalString(draft.durationUnit),
+    visitCount: optionalNumber(draft.visitCount),
+    billingType: optionalString(draft.billingType),
+    highlightStyle: optionalString(draft.highlightStyle),
+    sortOrder: optionalNumber(draft.sortOrder),
+    isActive: draft.isActive,
+  };
 }
 
 function handleBadgeSubmit(
@@ -1741,34 +1994,15 @@ function handleFeatureSubmit(
   });
 }
 
-function optionalString(value: FormDataEntryValue | null) {
+function optionalString(value: FormDataEntryValue | string | null) {
   const nextValue = String(value ?? "").trim();
   return nextValue.length > 0 ? nextValue : undefined;
 }
 
-function optionalNumber(value: FormDataEntryValue | null) {
+function optionalNumber(value: FormDataEntryValue | string | null) {
   const nextValue = String(value ?? "").trim();
   return nextValue ? Number(nextValue) : undefined;
 }
-
-function formatCurrency(currency: string) {
-  return currency === "RUB" ? "₽" : currency;
-}
-
-function formatFeatureIcon(icon: string) {
-  return FEATURE_ICON_OPTIONS.find((option) => option.value === icon)?.label ?? icon;
-}
-
-const FEATURE_ICON_OPTIONS = [
-  { value: "TICKET", label: "Билет" },
-  { value: "FLAME", label: "Огонь" },
-  { value: "SNOWFLAKE", label: "Снежинка" },
-  { value: "CALENDAR", label: "Календарь" },
-  { value: "GIFT", label: "Подарок" },
-  { value: "DUMBBELL", label: "Гантель" },
-  { value: "POOL", label: "Бассейн" },
-  { value: "COMBO", label: "Комбо" },
-] as const;
 
 function getErrorMessage(error: unknown, fallback: string) {
   if (error instanceof ApiError) {
@@ -1784,3 +2018,14 @@ function getErrorMessage(error: unknown, fallback: string) {
 
   return fallback;
 }
+
+const FEATURE_ICON_MAP = {
+  TICKET: Ticket,
+  FLAME: Flame,
+  SNOWFLAKE: Snowflake,
+  CALENDAR: CalendarDays,
+  GIFT: Gift,
+  DUMBBELL: Dumbbell,
+  POOL: Waves,
+  COMBO: Layers3,
+} as const;
