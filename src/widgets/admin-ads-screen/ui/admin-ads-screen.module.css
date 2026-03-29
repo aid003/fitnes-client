@@ -250,14 +250,6 @@
   object-fit: cover;
 }
 
-.mediaShade {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(18, 12, 16, 0.1) 0%, rgba(18, 12, 16, 0.1) 36%, rgba(18, 12, 16, 0.56) 100%),
-    linear-gradient(90deg, rgba(18, 12, 16, 0.44) 0%, rgba(18, 12, 16, 0.08) 58%, rgba(18, 12, 16, 0.08) 100%);
-}
-
 .mediaPlaceholder {
   width: 100%;
   height: 100%;
@@ -283,39 +275,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.previewFooter {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  left: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.previewBadge,
-.previewAction {
-  min-height: 40px;
-  padding: 0 14px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 800;
-}
-
-.previewBadge {
-  background: rgba(20, 14, 16, 0.54);
-  border: 1px solid rgba(255, 235, 191, 0.22);
-  color: #ffe4a3;
-}
-
-.previewAction {
-  background: linear-gradient(180deg, #ffd15c 0%, #ffb321 100%);
-  color: #4c2401;
 }
 
 .mediaActions {

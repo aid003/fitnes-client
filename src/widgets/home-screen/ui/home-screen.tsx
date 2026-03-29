@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CalendarCheck2,
-  ExternalLink,
   X,
   CreditCard,
   MapPinned,
@@ -158,7 +157,6 @@ export function HomeScreen() {
               sizes="(max-width: 768px) 90vw, 420px"
               unoptimized
             />
-            <div className={styles.adShade} />
 
             <button
               type="button"
@@ -168,17 +166,9 @@ export function HomeScreen() {
                 event.stopPropagation();
                 void handleAdDismiss();
               }}
-            >
+              >
               <X size={26} strokeWidth={3} />
             </button>
-
-            <div className={styles.adFooter}>
-              <span className={styles.adHint}>Акция</span>
-              <span className={styles.adAction}>
-                Перейти
-                <ExternalLink size={18} strokeWidth={2.4} />
-              </span>
-            </div>
           </div>
         </div>
       ) : null}

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { ExternalLink, Plus, Trash2, Upload, X } from "lucide-react";
+import { Plus, Trash2, Upload, X } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
@@ -361,16 +361,8 @@ export function AdminAdsScreen() {
                             className={styles.mediaImage}
                             unoptimized
                           />
-                          <div className={styles.mediaShade} />
                           <div className={styles.previewClose}>
                             <X size={26} strokeWidth={3} />
-                          </div>
-                          <div className={styles.previewFooter}>
-                            <span className={styles.previewBadge}>Акция</span>
-                            <span className={styles.previewAction}>
-                              Перейти
-                              <ExternalLink size={16} strokeWidth={2.6} />
-                            </span>
                           </div>
                         </>
                       ) : (
