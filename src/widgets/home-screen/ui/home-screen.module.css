@@ -167,7 +167,6 @@
   }
 
   .tiles {
-    grid-template-columns: 1fr;
     gap: 12px;
     margin-top: 0;
   }
@@ -179,13 +178,20 @@
   }
 
   .tile:first-child,
-  .tile:nth-child(2),
   .tileBuy,
   .tileMemberships,
   .tileSchedule,
   .tileContacts {
-    grid-column: auto;
+    grid-column: 1 / -1;
     min-height: 102px;
+  }
+
+  .tile:first-child,
+  .tile:nth-child(2) {
+    grid-column: auto;
+    min-height: 118px;
+    gap: 10px;
+    padding: 12px 10px 12px 12px;
   }
 
   .tileTitle {
@@ -198,5 +204,41 @@
 
   .tileIcon {
     width: 44px;
+  }
+
+  .tile:first-child .tileTitle,
+  .tile:nth-child(2) .tileTitle {
+    font-size: 18px;
+  }
+
+  .tile:first-child .tileIcon,
+  .tile:nth-child(2) .tileIcon {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (max-width: 350px) {
+  .tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .tile:first-child,
+  .tile:nth-child(2) {
+    grid-column: 1 / -1;
+    min-height: 102px;
+    gap: 18px;
+    padding: 14px 12px 14px 14px;
+  }
+
+  .tile:first-child .tileTitle,
+  .tile:nth-child(2) .tileTitle {
+    font-size: 20px;
+  }
+
+  .tile:first-child .tileIcon,
+  .tile:nth-child(2) .tileIcon {
+    width: 44px;
+    height: 44px;
   }
 }

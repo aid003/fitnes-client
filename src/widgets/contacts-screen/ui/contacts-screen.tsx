@@ -17,6 +17,60 @@ type ContactItem = {
   iconAlt: string;
 };
 
+type ServiceItem = {
+  iconSrc: string;
+  iconAlt: string;
+  title: string;
+};
+
+const SERVICE_ITEMS: ServiceItem[] = [
+  {
+    iconSrc: "/service/1.png",
+    iconAlt: "Тренажерный зал",
+    title: "Тренажерный зал с современным оборудованием.",
+  },
+  {
+    iconSrc: "/service/1.png",
+    iconAlt: "Групповые занятия",
+    title: "Групповые занятия: фитнес, йога, бокс, кроссфит и другое",
+  },
+  {
+    iconSrc: "/service/1.png",
+    iconAlt: "Индивидуальные тренировки",
+    title: "Индивидуальные тренировки с опытными тренерами",
+  },
+  {
+    iconSrc: "/service/2.png",
+    iconAlt: "Сауна",
+    title: "Сауна для вашего отдыха и восстановления",
+  },
+  {
+    iconSrc: "/service/3.png",
+    iconAlt: "Фитнес-бар",
+    title: "Фитнес-бар: спортивное питание и напитки",
+  },
+  {
+    iconSrc: "/service/1.png",
+    iconAlt: "Бассейн",
+    title: "Бассейн для плавания и восстановления организма",
+  },
+  {
+    iconSrc: "/service/1.png",
+    iconAlt: "Детские секции",
+    title: "Детские секции: занятия для детей по расписанию",
+  },
+  {
+    iconSrc: "/service/2.png",
+    iconAlt: "Косметология",
+    title: "Косметология: уходовые процедуры для лица и тела",
+  },
+  {
+    iconSrc: "/service/2.png",
+    iconAlt: "Парикмахерские услуги",
+    title: "Парикмахерские услуги: стрижки, укладки и уход за волосами",
+  },
+];
+
 const CONTACT_ITEMS: ContactItem[] = [
   {
     title: "Телефон",
@@ -86,10 +140,47 @@ export function ContactsScreen() {
             />
           </div>
 
-          <h1 className={styles.title}>Наши контакты</h1>
+          <section className={styles.servicesSection} aria-labelledby="services-title">
+            <h1 id="services-title" className={styles.title}>
+              Наши услуги:
+            </h1>
+            <p className={styles.lead}>
+              Добро пожаловать в наш клуб! Здесь вы найдете всё необходимое для поддержания
+              отличной физической формы и внутреннего баланса. Современные тренировки,
+              комфортная атмосфера и внимание к каждому гостю помогут двигаться к цели с
+              удовольствием.
+            </p>
+            <div className={styles.servicesGlow} aria-hidden="true" />
+
+            <div className={styles.servicesList}>
+              {SERVICE_ITEMS.map((item) => (
+                <article key={item.title} className={styles.serviceRow}>
+                  <div className={styles.serviceIconWrap}>
+                    <Image
+                      src={item.iconSrc}
+                      alt={item.iconAlt}
+                      width={64}
+                      height={64}
+                      className={styles.serviceIcon}
+                    />
+                  </div>
+
+                  <div className={styles.serviceCopy}>
+                    <p className={styles.serviceTitle}>{item.title}</p>
+                    <span className={styles.serviceDivider} aria-hidden="true" />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
         </header>
 
         <section className={styles.content}>
+          <section className={styles.contactsSection} aria-labelledby="contacts-title">
+            <h2 id="contacts-title" className={styles.contactsTitle}>
+              Наши контакты
+            </h2>
+
           <div className={styles.contactList}>
             {CONTACT_ITEMS.map((item) => (
               <article key={item.title} className={styles.contactCard}>
@@ -172,6 +263,7 @@ export function ContactsScreen() {
                 По всем вопросам вы можете связаться с нами любым удобным способом.
               </p>
             </div>
+          </section>
           </section>
         </section>
 

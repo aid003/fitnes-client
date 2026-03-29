@@ -1,9 +1,9 @@
 .screen {
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 14% 10%, rgba(120, 72, 42, 0.28), transparent 28%),
-    radial-gradient(circle at 88% 88%, rgba(83, 54, 76, 0.22), transparent 30%),
-    linear-gradient(180deg, #22181c 0%, #261d23 48%, #2a2234 100%);
+    radial-gradient(circle at 18% 12%, rgba(104, 66, 46, 0.2), transparent 28%),
+    radial-gradient(circle at 86% 90%, rgba(87, 59, 74, 0.24), transparent 32%),
+    linear-gradient(180deg, #241b1f 0%, #272025 58%, #2b2434 100%);
 }
 
 .panel {
@@ -19,7 +19,7 @@
 
 .header {
   display: grid;
-  gap: 18px;
+  gap: 26px;
 }
 
 .headerTop {
@@ -46,7 +46,13 @@
   height: auto;
 }
 
-.title {
+.servicesSection {
+  display: grid;
+  gap: 18px;
+}
+
+.title,
+.contactsTitle {
   margin: 0;
   color: #ffffff;
   font-size: 31px;
@@ -55,38 +61,114 @@
   letter-spacing: -0.05em;
 }
 
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-top: 18px;
+.lead {
+  margin: 0;
+  max-width: 320px;
+  color: rgba(255, 241, 240, 0.74);
+  font-size: 16px;
+  line-height: 1.03;
+  font-weight: 500;
+  letter-spacing: -0.035em;
 }
 
-.contactList {
+.servicesGlow {
+  height: 10px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 167, 74, 0.72) 0%, rgba(255, 167, 74, 0.18) 36%, transparent 74%),
+    linear-gradient(90deg, transparent 0%, rgba(255, 144, 43, 0.6) 28%, rgba(255, 171, 99, 0.95) 50%, rgba(255, 144, 43, 0.6) 72%, transparent 100%);
+  box-shadow: 0 0 22px rgba(255, 143, 37, 0.3);
+}
+
+.servicesList {
   display: grid;
   gap: 12px;
 }
 
+.serviceRow {
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.serviceIconWrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
+}
+
+.serviceIcon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.serviceCopy {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.serviceTitle {
+  margin: 0;
+  color: #f2e0de;
+  font-size: 18px;
+  line-height: 0.98;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+.serviceDivider {
+  display: block;
+  width: min(100%, 264px);
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.contactsSection {
+  display: grid;
+  gap: 14px;
+}
+
+.contactList {
+  display: grid;
+  gap: 14px;
+}
+
 .contactCard,
 .addressCard {
-  border-radius: 24px;
-  border: 1px solid rgba(182, 127, 110, 0.72);
-  background: rgba(37, 29, 39, 0.92);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  border-radius: 17px;
+  border: 1px solid rgba(142, 95, 84, 0.86);
+  background: rgba(42, 34, 47, 0.94);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 10px 24px rgba(16, 8, 14, 0.16);
 }
 
 .contactCard {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 10px 13px;
+  gap: 12px;
+  padding: 12px 14px;
 }
 
 .contactInfo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -94,18 +176,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   flex: 0 0 auto;
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(108, 72, 60, 0.54) 0%, rgba(74, 45, 41, 0.42) 100%);
-  border: 1px solid rgba(180, 122, 93, 0.38);
+  background: linear-gradient(180deg, rgba(117, 79, 67, 0.55) 0%, rgba(78, 51, 47, 0.48) 100%);
+  border: 1px solid rgba(173, 121, 97, 0.34);
   box-shadow: inset 0 0 0 1px rgba(255, 226, 205, 0.04);
 }
 
 .contactIcon {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
 }
 
@@ -123,10 +205,10 @@
 }
 
 .contactValue {
-  margin: 6px 0 0;
+  margin: 7px 0 0;
   color: #ffffff;
-  font-size: 16px;
-  line-height: 1.18;
+  font-size: 15px;
+  line-height: 1.12;
   font-weight: 600;
   letter-spacing: -0.03em;
   overflow-wrap: anywhere;
@@ -137,13 +219,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 10px 16px;
-  border-radius: 18px;
-  background: linear-gradient(90deg, #df7a16 0%, #995708 100%);
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #df821b 0%, #ba6b10 100%);
   color: #ffffff;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -163,14 +245,14 @@
 
 .addressTop {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 1.08fr;
+  grid-template-columns: minmax(0, 1fr) 1.04fr;
   gap: 18px;
   padding: 16px;
 }
 
 .addressCopy {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -178,8 +260,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 46px;
+  height: 46px;
   flex: 0 0 auto;
   color: #ffae3a;
 }
@@ -187,14 +269,14 @@
 .addressText {
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 8px;
 }
 
 .addressTitle,
 .sectionTitle {
   margin: 0;
   color: #ffffff;
-  font-size: 24px;
+  font-size: 21px;
   line-height: 1;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -203,18 +285,18 @@
 .addressValue {
   margin: 0;
   color: #d6b7aa;
-  font-size: 17px;
-  line-height: 1.16;
+  font-size: 16px;
+  line-height: 1.08;
   font-weight: 700;
 }
 
 .mapCard {
   position: relative;
-  min-height: 176px;
-  border-radius: 22px;
+  min-height: 142px;
+  border-radius: 16px;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(78, 45, 28, 0.28) 0%, rgba(46, 31, 28, 0.44) 100%),
+    linear-gradient(180deg, rgba(78, 45, 28, 0.18) 0%, rgba(46, 31, 28, 0.34) 100%),
     #2f2427;
   border: 1px solid rgba(182, 127, 110, 0.52);
 }
@@ -223,20 +305,22 @@
   width: 100%;
   height: 100%;
   border: 0;
+  filter: sepia(0.38) saturate(0.9) brightness(0.82) contrast(1.02);
 }
 
 .mapAction {
   position: absolute;
-  right: 14px;
-  bottom: 14px;
-  min-height: 38px;
-  padding: 10px 14px;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  min-height: 30px;
+  padding: 8px 14px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .addressSection {
-  padding: 18px 16px 20px;
+  padding: 16px;
   border-top: 1px solid rgba(165, 112, 94, 0.52);
 }
 
@@ -245,7 +329,7 @@
   gap: 8px;
   margin: 14px 0 0;
   color: #d6b7aa;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.18;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -253,9 +337,9 @@
 
 .footerText {
   margin: 0;
-  color: #d6b7aa;
-  font-size: 16px;
-  line-height: 1.2;
+  color: #e0c1b5;
+  font-size: 15px;
+  line-height: 1.14;
   font-weight: 700;
   letter-spacing: -0.03em;
 }
@@ -268,40 +352,67 @@
 }
 
 @media (max-width: 420px) {
-  .title {
+  .title,
+  .contactsTitle {
     font-size: 28px;
   }
 
+  .lead {
+    max-width: none;
+    font-size: 15px;
+  }
+
+  .serviceRow {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .serviceIconWrap {
+    width: 46px;
+    height: 46px;
+  }
+
+  .serviceTitle {
+    font-size: 17px;
+  }
+
+  .serviceDivider {
+    width: min(100%, 252px);
+  }
+
   .contactCard {
-    padding: 9px 11px;
+    padding: 11px 12px;
+    gap: 10px;
+  }
+
+  .contactInfo {
+    gap: 10px;
   }
 
   .iconWrap {
-    width: 50px;
-    height: 50px;
-  }
-
-  .contactIcon {
     width: 48px;
     height: 48px;
   }
 
-  .contactTitle,
-  .addressTitle,
-  .sectionTitle {
-    font-size: 21px;
+  .contactIcon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .contactTitle {
+    font-size: 20px;
   }
 
   .contactValue,
   .scheduleText,
   .addressValue {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .contactAction {
-    min-height: 46px;
-    padding: 10px 14px;
-    font-size: 15px;
+    min-height: 38px;
+    padding: 10px 13px;
+    font-size: 14px;
   }
 }
 
