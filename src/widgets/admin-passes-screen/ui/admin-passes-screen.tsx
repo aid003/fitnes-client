@@ -105,6 +105,8 @@ type FeaturePayload = {
   sortOrder?: number;
 };
 
+const MAX_IMAGE_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
+
 type SelectedAdminNode =
   | { kind: "category"; id: string }
   | { kind: "variant"; id: string }
@@ -1038,9 +1040,18 @@ function CategoryEditForm({
             className={styles.hiddenFileInput}
             type="file"
             accept="image/png,image/jpeg,image/webp"
-            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-              setPendingUpload(event.target.files?.[0] ?? null)
-            }
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              const nextFile = event.target.files?.[0] ?? null;
+
+              if (nextFile && nextFile.size > MAX_IMAGE_UPLOAD_SIZE_BYTES) {
+                setPendingUpload(null);
+                event.target.value = "";
+                window.alert("Размер изображения должен быть не больше 5 МБ");
+                return;
+              }
+
+              setPendingUpload(nextFile);
+            }}
           />
 
           <div className={styles.mediaText}>
@@ -1074,6 +1085,10 @@ function CategoryEditForm({
                 }
 
                 void onRunAction("Загружаем обложку категории...", async () => {
+                  if (pendingUpload.size > MAX_IMAGE_UPLOAD_SIZE_BYTES) {
+                    throw new Error("Размер изображения должен быть не больше 5 МБ");
+                  }
+
                   const formData = new FormData();
                   formData.append("file", pendingUpload);
                   const response = await apiFetch<UploadImageResponse<PassCategoryDetails>>(
@@ -1093,29 +1108,6 @@ function CategoryEditForm({
             >
               <Upload size={16} />
               Загрузить обложку
-            </button>
-
-            <button
-              type="button"
-              className={styles.secondaryButton}
-              disabled={!category.coverImageUrl}
-              onClick={() => {
-                void onRunAction("Удаляем обложку категории...", async () => {
-                  const response = await apiFetch<UploadImageResponse<PassCategoryDetails>>(
-                    `/admin/passes/categories/${category.id}/cover`,
-                    {
-                      method: "DELETE",
-                    },
-                  );
-                  onReplaceCategory(response.item);
-                  setPendingUpload(null);
-                  if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
-                  }
-                });
-              }}
-            >
-              Удалить обложку
             </button>
           </div>
         </div>
@@ -1547,11 +1539,6 @@ function BasicCategoryFields({ category }: { category?: PassCategoryDetails }) {
 
       <FormSection title="Отображение">
         <div className={styles.formGrid}>
-          <InputField
-            name="coverImageUrl"
-            label="Обложка"
-            defaultValue={category?.coverImageUrl ?? ""}
-          />
           <InputField
             name="sortOrder"
             label="Порядок"
@@ -2072,7 +2059,6 @@ function handleCategorySubmit(
     title: String(formData.get("title") ?? "").trim(),
     slug: String(formData.get("slug") ?? "").trim(),
     description: optionalString(formData.get("description")),
-    coverImageUrl: optionalString(formData.get("coverImageUrl")),
     sortOrder: optionalNumber(formData.get("sortOrder")),
     isActive: formData.get("isActive") === "on",
   });

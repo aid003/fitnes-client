@@ -59,6 +59,10 @@ export function resolveApiAssetUrl(path: string | null | undefined): string | nu
     return path;
   }
 
+  if (!path.startsWith('/uploads/')) {
+    return path;
+  }
+
   return new URL(path, `${API_BASE_URL}/`).toString();
 }
 
