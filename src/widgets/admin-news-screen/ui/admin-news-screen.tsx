@@ -13,7 +13,7 @@ import {
 import { Bold, Italic, List, Plus, Trash2, Upload } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
-import { apiFetch, ApiError } from "@/shared/lib/api";
+import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type {
   AdminNewsArticle,
   UploadImageResponse,
@@ -61,10 +61,15 @@ export function AdminNewsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [pendingUpload, setPendingUpload] = useState<File | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const selectedItem = useMemo(
     () => items.find((item) => item.id === selectedId) ?? null,
     [items, selectedId],
+  );
+  const selectedCoverImageUrl = useMemo(
+    () => resolveApiAssetUrl(selectedItem?.coverImageUrl),
+    [selectedItem?.coverImageUrl],
   );
 
   const loadData = async () => {
@@ -447,9 +452,9 @@ export function AdminNewsScreen() {
                 {!isCreateMode && selectedItem ? (
                   <section className={styles.mediaPanel}>
                     <div className={styles.mediaPreview}>
-                      {selectedItem.coverImageUrl ? (
+                      {selectedCoverImageUrl ? (
                         <Image
-                          src={selectedItem.coverImageUrl}
+                          src={selectedCoverImageUrl}
                           alt={selectedItem.title}
                           fill
                           sizes="220px"
@@ -463,12 +468,26 @@ export function AdminNewsScreen() {
 
                     <div className={styles.mediaActions}>
                       <input
+                        ref={fileInputRef}
+                        className={styles.hiddenFileInput}
                         type="file"
                         accept="image/png,image/jpeg,image/webp"
                         onChange={(event: ChangeEvent<HTMLInputElement>) =>
                           setPendingUpload(event.target.files?.[0] ?? null)
                         }
                       />
+                      <div className={styles.filePickerRow}>
+                        <button
+                          type="button"
+                          className={styles.secondaryButton}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Выбрать обложку
+                        </button>
+                        <span className={pendingUpload ? styles.fileName : styles.fileHint}>
+                          {pendingUpload ? pendingUpload.name : "PNG, JPG или WEBP до 5 МБ"}
+                        </span>
+                      </div>
                       <div className={styles.mediaButtons}>
                         <button
                           type="button"
@@ -489,11 +508,18 @@ export function AdminNewsScreen() {
                                   body: formData,
                                 },
                               );
+                              const nextItem = {
+                                ...response.item,
+                                coverImageUrl: resolveApiAssetUrl(response.item.coverImageUrl),
+                              };
 
                               setItems((current) =>
-                                current.map((item) => (item.id === response.item.id ? response.item : item)),
+                                current.map((item) => (item.id === nextItem.id ? nextItem : item)),
                               );
                               setPendingUpload(null);
+                              if (fileInputRef.current) {
+                                fileInputRef.current.value = "";
+                              }
                             });
                           }}
                         >
@@ -513,9 +539,13 @@ export function AdminNewsScreen() {
                                   method: "DELETE",
                                 },
                               );
+                              const nextItem = {
+                                ...response.item,
+                                coverImageUrl: resolveApiAssetUrl(response.item.coverImageUrl),
+                              };
 
                               setItems((current) =>
-                                current.map((item) => (item.id === response.item.id ? response.item : item)),
+                                current.map((item) => (item.id === nextItem.id ? nextItem : item)),
                               );
                             });
                           }}

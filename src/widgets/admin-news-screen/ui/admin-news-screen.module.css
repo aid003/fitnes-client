@@ -287,6 +287,33 @@
   gap: 14px;
 }
 
+.hiddenFileInput {
+  display: none;
+}
+
+.filePickerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.fileName,
+.fileHint {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.fileName {
+  color: #2d2430;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.fileHint {
+  color: #6c6574;
+}
+
 .primaryButton,
 .secondaryButton,
 .deleteButton,

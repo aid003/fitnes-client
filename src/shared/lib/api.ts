@@ -50,6 +50,18 @@ export async function apiFetch<T>(
   return (await response.json()) as T;
 }
 
+export function resolveApiAssetUrl(path: string | null | undefined): string | null {
+  if (!path) {
+    return null;
+  }
+
+  if (/^https?:\/\//.test(path)) {
+    return path;
+  }
+
+  return new URL(path, `${API_BASE_URL}/`).toString();
+}
+
 async function extractErrorMessage(response: Response): Promise<string> {
   try {
     const payload = (await response.json()) as {

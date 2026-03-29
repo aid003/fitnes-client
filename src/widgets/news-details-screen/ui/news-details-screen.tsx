@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRequireAuth } from "@/shared/auth/auth-guards";
-import { apiFetch, ApiError } from "@/shared/lib/api";
+import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type { NewsDetails } from "@/shared/lib/contracts";
 import { BottomNav } from "@/shared/ui/bottom-nav/bottom-nav";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
@@ -105,7 +105,7 @@ export function NewsDetailsScreen({ slug }: NewsDetailsScreenProps) {
           <div className={styles.media}>
             {article.coverImageUrl ? (
               <Image
-                src={article.coverImageUrl}
+                src={resolveApiAssetUrl(article.coverImageUrl) ?? article.coverImageUrl}
                 alt={article.title}
                 fill
                 sizes="(max-width: 767px) 100vw, 430px"

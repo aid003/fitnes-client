@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRequireAuth } from "@/shared/auth/auth-guards";
-import { apiFetch, ApiError } from "@/shared/lib/api";
+import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type { Trainer } from "@/shared/lib/contracts";
 import { BottomNav } from "@/shared/ui/bottom-nav/bottom-nav";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
@@ -103,7 +103,7 @@ export function TrainersScreen() {
                 <div className={styles.photoWrap}>
                   {trainer.photoUrl ? (
                     <Image
-                      src={trainer.photoUrl}
+                      src={resolveApiAssetUrl(trainer.photoUrl) ?? trainer.photoUrl}
                       alt={trainer.name}
                       fill
                       sizes="96px"

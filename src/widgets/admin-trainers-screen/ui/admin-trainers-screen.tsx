@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, Upload } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
-import { apiFetch, ApiError } from "@/shared/lib/api";
+import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type { AdminTrainer, UploadImageResponse } from "@/shared/lib/contracts";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
 import styles from "./admin-trainers-screen.module.css";
@@ -40,10 +40,15 @@ export function AdminTrainersScreen() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pendingUpload, setPendingUpload] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const selectedItem = useMemo(
     () => items.find((item) => item.id === selectedId) ?? null,
     [items, selectedId],
+  );
+  const selectedPhotoUrl = useMemo(
+    () => resolveApiAssetUrl(selectedItem?.photoUrl),
+    [selectedItem?.photoUrl],
   );
 
   const loadData = async () => {
@@ -317,9 +322,9 @@ export function AdminTrainersScreen() {
                 {!isCreateMode && selectedItem ? (
                   <section className={styles.mediaPanel}>
                     <div className={styles.mediaPreview}>
-                      {selectedItem.photoUrl ? (
+                      {selectedPhotoUrl ? (
                         <Image
-                          src={selectedItem.photoUrl}
+                          src={selectedPhotoUrl}
                           alt={selectedItem.name}
                           fill
                           sizes="180px"
@@ -333,12 +338,26 @@ export function AdminTrainersScreen() {
 
                     <div className={styles.mediaActions}>
                       <input
+                        ref={fileInputRef}
+                        className={styles.hiddenFileInput}
                         type="file"
                         accept="image/png,image/jpeg,image/webp"
                         onChange={(event: ChangeEvent<HTMLInputElement>) =>
                           setPendingUpload(event.target.files?.[0] ?? null)
                         }
                       />
+                      <div className={styles.filePickerRow}>
+                        <button
+                          type="button"
+                          className={styles.secondaryButton}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Выбрать фото
+                        </button>
+                        <span className={pendingUpload ? styles.fileName : styles.fileHint}>
+                          {pendingUpload ? pendingUpload.name : "PNG, JPG или WEBP до 5 МБ"}
+                        </span>
+                      </div>
                       <div className={styles.mediaButtons}>
                         <button
                           type="button"
@@ -359,11 +378,18 @@ export function AdminTrainersScreen() {
                                   body: formData,
                                 },
                               );
+                              const nextItem = {
+                                ...response.item,
+                                photoUrl: resolveApiAssetUrl(response.item.photoUrl),
+                              };
 
                               setItems((current) =>
-                                current.map((item) => (item.id === response.item.id ? response.item : item)),
+                                current.map((item) => (item.id === nextItem.id ? nextItem : item)),
                               );
                               setPendingUpload(null);
+                              if (fileInputRef.current) {
+                                fileInputRef.current.value = "";
+                              }
                             });
                           }}
                         >
@@ -383,9 +409,13 @@ export function AdminTrainersScreen() {
                                   method: "DELETE",
                                 },
                               );
+                              const nextItem = {
+                                ...response.item,
+                                photoUrl: resolveApiAssetUrl(response.item.photoUrl),
+                              };
 
                               setItems((current) =>
-                                current.map((item) => (item.id === response.item.id ? response.item : item)),
+                                current.map((item) => (item.id === nextItem.id ? nextItem : item)),
                               );
                             });
                           }}
