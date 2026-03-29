@@ -8,6 +8,7 @@ import {
   FolderTree,
   IdCard,
   LogOut,
+  Megaphone,
   Newspaper,
   ScanLine,
   UsersRound,
@@ -66,6 +67,13 @@ const ADMIN_SECTIONS = [
     href: "/admin/news",
     Icon: Newspaper,
     toneClassName: "catalogCard",
+  },
+  {
+    title: "Реклама и баннеры",
+    description: "Попап на главной, ссылки, периоды активности и интервал повторного показа.",
+    href: "/admin/ads",
+    Icon: Megaphone,
+    toneClassName: "paymentsCard",
   },
 ] as const;
 

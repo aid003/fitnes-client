@@ -1,4 +1,5 @@
 .screen {
+  position: relative;
   min-height: 100dvh;
   background:
     radial-gradient(circle at 20% 18%, rgba(120, 92, 108, 0.28), transparent 34%),
@@ -7,6 +8,8 @@
 }
 
 .panel {
+  position: relative;
+  z-index: 1;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -150,6 +153,99 @@
   color: #ffffff;
 }
 
+.adOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: rgba(18, 12, 16, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.adCard {
+  position: relative;
+  width: min(100%, 430px);
+  aspect-ratio: 0.92;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 28px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow:
+    0 28px 60px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.adCard:focus-visible {
+  outline: 2px solid rgba(255, 190, 76, 0.92);
+  outline-offset: 4px;
+}
+
+.adImage {
+  object-fit: cover;
+}
+
+.adShade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(17, 10, 8, 0.12) 0%, rgba(17, 10, 8, 0.08) 22%, rgba(17, 10, 8, 0.58) 100%),
+    linear-gradient(90deg, rgba(17, 10, 8, 0.56) 0%, rgba(17, 10, 8, 0.16) 56%, rgba(17, 10, 8, 0.08) 100%);
+}
+
+.adCloseButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 54px;
+  height: 54px;
+  border: 2px solid rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  background: rgba(18, 12, 16, 0.76);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.adFooter {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adHint,
+.adAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.adHint {
+  background: rgba(21, 15, 18, 0.54);
+  color: rgba(255, 232, 178, 0.94);
+  border: 1px solid rgba(255, 235, 191, 0.26);
+}
+
+.adAction {
+  background: linear-gradient(180deg, #ffd15c 0%, #ffb321 100%);
+  color: #4c2401;
+  box-shadow: 0 10px 24px rgba(255, 159, 28, 0.26);
+}
+
 @media (min-width: 768px) {
   .screen,
   .panel {
@@ -158,6 +254,34 @@
 }
 
 @media (max-width: 420px) {
+  .adOverlay {
+    padding: 16px 10px;
+  }
+
+  .adCard {
+    border-radius: 24px;
+  }
+
+  .adCloseButton {
+    top: 10px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .adFooter {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+  }
+
+  .adHint,
+  .adAction {
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
   .logo {
     width: 136px;
   }

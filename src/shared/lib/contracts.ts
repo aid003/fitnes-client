@@ -68,6 +68,35 @@ export type UploadImageResponse<TItem> = UploadedMedia & {
   item: TItem;
 };
 
+export type AdminAdBanner = {
+  id: string;
+  title: string;
+  imageUrl: string | null;
+  targetUrl: string;
+  startsAt: string;
+  endsAt: string;
+  repeatIntervalDays: number;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ActiveAdBanner = {
+  id: string;
+  title: string;
+  imageUrl: string | null;
+  targetUrl: string;
+  startsAt: string;
+  endsAt: string;
+  repeatIntervalDays: number;
+};
+
+export type DismissAdResponse = {
+  success: true;
+  dismissedAt: string;
+};
+
 export type PassCategoryListItem = {
   id: string;
   title: string;
