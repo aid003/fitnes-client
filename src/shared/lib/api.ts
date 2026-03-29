@@ -20,6 +20,8 @@ export async function apiFetch<T>(
   path: string,
   init: ApiRequestInit = {},
 ): Promise<T> {
+  const isFormDataBody =
+    typeof FormData !== "undefined" && init.body instanceof FormData;
   const shouldDisableCache =
     init.cache === "no-store" ||
     path.startsWith("/schedule") ||
@@ -30,8 +32,8 @@ export async function apiFetch<T>(
     cache: shouldDisableCache ? "no-store" : init.cache,
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
       ...(shouldDisableCache ? { 'Cache-Control': 'no-store' } : {}),
+      ...(isFormDataBody ? {} : { 'Content-Type': 'application/json' }),
       ...(init.headers ?? {}),
     },
   });

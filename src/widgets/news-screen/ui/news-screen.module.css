@@ -1,0 +1,170 @@
+.screen {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 78% 10%, rgba(120, 196, 185, 0.18), transparent 24%),
+    linear-gradient(180deg, #2a2022 0%, #241b1e 70%, #2f2839 100%);
+}
+
+.panel {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    18px
+    calc(132px + env(safe-area-inset-bottom))
+    18px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.backLink {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  color: #fff;
+  text-decoration: none;
+}
+
+.logo {
+  width: 148px;
+  height: auto;
+}
+
+.heroTitle {
+  width: 100%;
+  border-radius: 24px;
+  padding: 22px 20px;
+  background: #79b8ab;
+  border: 4px solid #bfe7df;
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.05em;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.stateText,
+.errorText {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 15px;
+}
+
+.errorText {
+  color: #ffb3bf;
+}
+
+.emptyState {
+  padding: 22px 18px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.emptyTitle {
+  color: #fff;
+  font-size: 22px;
+  line-height: 1.04;
+  font-weight: 800;
+}
+
+.emptyText {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 126px minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px 12px;
+  border-radius: 24px;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(44, 31, 35, 0.88);
+  border: 2px solid rgba(255, 255, 255, 0.28);
+}
+
+.cardMedia {
+  position: relative;
+  min-height: 136px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cardImage {
+  object-fit: cover;
+}
+
+.cardFallback {
+  width: 100%;
+  height: 100%;
+  min-height: 136px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.cardBody {
+  min-width: 0;
+}
+
+.cardTitle {
+  color: #fff;
+  font-size: 18px;
+  line-height: 1.06;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.cardText {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 14px;
+  line-height: 1.24;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardMeta {
+  margin-top: 12px;
+  color: #b5e4db;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+}

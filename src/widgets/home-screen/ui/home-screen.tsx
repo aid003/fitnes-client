@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import {
+  CalendarCheck2,
+  CreditCard,
+  MapPinned,
+  Newspaper,
+  UserRound,
+  UsersRound,
+} from "lucide-react";
 import { useRequireAuth } from "@/shared/auth/auth-guards";
 import { BottomNav } from "@/shared/ui/bottom-nav/bottom-nav";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
@@ -11,63 +18,48 @@ import styles from "./home-screen.module.css";
 type HomeTile = {
   title: string;
   subtitle?: string;
-  iconSrc: string;
-  iconAlt: string;
+  Icon: typeof CreditCard;
   className: string;
   href?: string;
 };
 
 export function HomeScreen() {
   const { canRender, isLoading, user } = useRequireAuth();
-  const [todayLabel, setTodayLabel] = useState(() => formatCurrentDate());
-
-  useEffect(() => {
-    const updateCurrentDate = () => {
-      setTodayLabel(formatCurrentDate());
-    };
-
-    updateCurrentDate();
-
-    const timerId = window.setInterval(updateCurrentDate, 60_000);
-
-    return () => {
-      window.clearInterval(timerId);
-    };
-  }, []);
 
   const homeTiles: HomeTile[] = [
     {
-      title: "Сегодня",
-      subtitle: todayLabel,
-      iconSrc: "/main/calendar.svg",
-      iconAlt: "Календарь",
+      title: "Тренера",
+      Icon: UsersRound,
       className: [styles.tile, styles.tileToday].join(" "),
+      href: "/trainers",
+    },
+    {
+      title: "Новости",
+      Icon: Newspaper,
+      className: [styles.tile, styles.tileNews].join(" "),
+      href: "/news",
     },
     {
       title: "Купить абонемент",
-      iconSrc: "/main/card.svg",
-      iconAlt: "Карта",
+      Icon: CreditCard,
       className: [styles.tile, styles.tileBuy].join(" "),
       href: "/passes",
     },
     {
       title: "Мои абонементы",
-      iconSrc: "/main/user.svg",
-      iconAlt: "Пользователь",
+      Icon: UserRound,
       className: [styles.tile, styles.tileMemberships].join(" "),
       href: "/memberships",
     },
     {
       title: "Расписание\nзанятий",
-      iconSrc: "/main/calendar.svg",
-      iconAlt: "Календарь",
+      Icon: CalendarCheck2,
       className: [styles.tile, styles.tileSchedule].join(" "),
       href: "/schedule",
     },
     {
       title: "Наши контакты",
-      iconSrc: "/main/map-phone.svg",
-      iconAlt: "Контакты",
+      Icon: MapPinned,
       className: [styles.tile, styles.tileContacts].join(" "),
       href: "/contacts",
     },
@@ -101,7 +93,7 @@ export function HomeScreen() {
         </header>
 
         <section className={styles.tiles} aria-label="Главные разделы">
-          {homeTiles.map(({ title, subtitle, iconSrc, iconAlt, className, href }) => {
+          {homeTiles.map(({ title, subtitle, Icon, className, href }) => {
             const content = (
               <>
                 <div className={styles.tileCopy}>
@@ -115,13 +107,7 @@ export function HomeScreen() {
                   {subtitle ? <p className={styles.tileSubtitle}>{subtitle}</p> : null}
                 </div>
 
-                <Image
-                  src={iconSrc}
-                  alt={iconAlt}
-                  width={74}
-                  height={74}
-                  className={styles.tileIcon}
-                />
+                <Icon className={styles.tileIcon} strokeWidth={2.1} aria-hidden="true" />
               </>
             );
 
@@ -145,26 +131,4 @@ export function HomeScreen() {
       </section>
     </main>
   );
-}
-
-function formatCurrentDate() {
-  const now = new Date();
-  const weekday = new Intl.DateTimeFormat("ru-RU", {
-    weekday: "long",
-  }).format(now);
-  const date = new Intl.DateTimeFormat("ru-RU", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(now);
-
-  return `${capitalizeFirstLetter(weekday)} ${date}`;
-}
-
-function capitalizeFirstLetter(value: string) {
-  if (!value) {
-    return value;
-  }
-
-  return value.charAt(0).toUpperCase() + value.slice(1);
 }

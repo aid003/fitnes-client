@@ -8,7 +8,9 @@ import {
   FolderTree,
   IdCard,
   LogOut,
+  Newspaper,
   ScanLine,
+  UsersRound,
 } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
@@ -50,6 +52,20 @@ const ADMIN_SECTIONS = [
     href: "/admin/payments",
     Icon: ChartNoAxesCombined,
     toneClassName: "paymentsCard",
+  },
+  {
+    title: "Тренеры",
+    description: "Состав тренеров, карточки, порядок вывода и фотографии.",
+    href: "/admin/trainers",
+    Icon: UsersRound,
+    toneClassName: "membershipsCard",
+  },
+  {
+    title: "Новости",
+    description: "Публикации, rich text-контент, теги, фотообложки и публикация.",
+    href: "/admin/news",
+    Icon: Newspaper,
+    toneClassName: "catalogCard",
   },
 ] as const;
 

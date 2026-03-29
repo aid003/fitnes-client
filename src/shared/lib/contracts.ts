@@ -10,6 +10,64 @@ export type AuthUser = {
   updatedAt: string;
 };
 
+export type UploadedMedia = {
+  url: string | null;
+};
+
+export type Trainer = {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+  shortBio: string | null;
+  photoUrl: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminTrainer = Trainer;
+
+export type NewsListItem = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  coverImageUrl: string | null;
+  lead: string | null;
+  tags: string[];
+  publishedAt: string | null;
+  sortOrder: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NewsDetails = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  coverImageUrl: string | null;
+  lead: string | null;
+  highlightsTitle: string | null;
+  highlights: string[];
+  contentRichText: string;
+  tags: string[];
+  publishedAt: string | null;
+  sortOrder: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminNewsArticle = NewsDetails;
+
+export type UploadImageResponse<TItem> = UploadedMedia & {
+  item: TItem;
+};
+
 export type PassCategoryListItem = {
   id: string;
   title: string;

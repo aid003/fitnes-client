@@ -49,6 +49,7 @@
 
 .tiles {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 13px;
   margin-top: 2px;
   padding: 0 2px;
@@ -66,6 +67,11 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
+.tile:first-child,
+.tile:nth-child(2) {
+  min-height: 140px;
+}
+
 .tileLink {
   color: inherit;
   text-decoration: none;
@@ -81,24 +87,33 @@
   border-color: #944154;
 }
 
+.tileNews {
+  background: #79b8ab;
+  border-color: #b5e4db;
+}
+
 .tileBuy {
   background: #175863;
   border-color: #26858f;
+  grid-column: 1 / -1;
 }
 
 .tileMemberships {
   background: #32588e;
   border-color: #4f6fa1;
+  grid-column: 1 / -1;
 }
 
 .tileSchedule {
   background: #44434f;
   border-color: #616374;
+  grid-column: 1 / -1;
 }
 
 .tileContacts {
   background: #11594a;
   border-color: #23735d;
+  grid-column: 1 / -1;
 }
 
 .tileCopy {
@@ -129,9 +144,10 @@
 }
 
 .tileIcon {
-  width: 50px;
-  height: auto;
+  width: 52px;
+  height: 52px;
   flex: 0 0 auto;
+  color: #ffffff;
 }
 
 @media (min-width: 768px) {
@@ -151,6 +167,7 @@
   }
 
   .tiles {
+    grid-template-columns: 1fr;
     gap: 12px;
     margin-top: 0;
   }
@@ -159,6 +176,16 @@
     min-height: 102px;
     padding: 14px 12px 14px 14px;
     border-width: 3px;
+  }
+
+  .tile:first-child,
+  .tile:nth-child(2),
+  .tileBuy,
+  .tileMemberships,
+  .tileSchedule,
+  .tileContacts {
+    grid-column: auto;
+    min-height: 102px;
   }
 
   .tileTitle {
