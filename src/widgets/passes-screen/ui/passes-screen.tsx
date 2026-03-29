@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRequireAuth } from "@/shared/auth/auth-guards";
-import { apiFetch, ApiError } from "@/shared/lib/api";
+import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type { PassCategoryListItem } from "@/shared/lib/contracts";
 import { BottomNav } from "@/shared/ui/bottom-nav/bottom-nav";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
@@ -91,7 +91,7 @@ export function PassesScreen() {
               <article key={pass.id} className={styles.card}>
                 <div className={styles.cardMedia} aria-hidden="true">
                   <Image
-                    src={pass.coverImageUrl ?? "/buy/image1.jpg"}
+                    src={resolveApiAssetUrl(pass.coverImageUrl) ?? "/buy/image1.jpg"}
                     alt=""
                     fill
                     sizes="(max-width: 767px) 100vw, 430px"

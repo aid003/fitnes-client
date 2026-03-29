@@ -318,6 +318,12 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.mediaTitle {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
 .pathChip {
   max-width: 360px;
   white-space: nowrap;
@@ -340,6 +346,52 @@
 .editorMain {
   display: grid;
   gap: 12px;
+}
+
+.mediaPanel {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mediaPreview {
+  position: relative;
+  min-height: 180px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mediaImage {
+  object-fit: cover;
+}
+
+.mediaPlaceholder {
+  width: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.mediaActions,
+.mediaText {
+  display: grid;
+}
+
+.mediaActions {
+  gap: 14px;
+}
+
+.mediaText {
+  gap: 6px;
 }
 
 .formSection {
@@ -373,6 +425,34 @@
   font-size: 12px;
   font-weight: 700;
   line-height: 1.25;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.filePickerRow,
+.mediaButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.fileName,
+.fileHint {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.fileName {
+  color: #ffffff;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.fileHint {
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .input,
@@ -593,6 +673,7 @@
     padding-inline: 16px;
   }
 
+  .mediaPanel,
   .formGrid,
   .previewPlanMain {
     grid-template-columns: 1fr;

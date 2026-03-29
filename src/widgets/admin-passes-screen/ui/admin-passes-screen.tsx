@@ -1,7 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import {
   CalendarDays,
   ChevronDown,
@@ -15,11 +24,12 @@ import {
   Snowflake,
   Ticket,
   Trash2,
+  Upload,
   Waves,
 } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
-import { apiFetch, ApiError } from "@/shared/lib/api";
+import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type {
   PassBadge,
   PassCategoryDetails,
@@ -28,6 +38,7 @@ import type {
   PassPlan,
   PassPlanGroup,
   PassVariant,
+  UploadImageResponse,
 } from "@/shared/lib/contracts";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
 import {
@@ -815,6 +826,8 @@ function EntityEditor({
       {selected.kind === "category" ? (
         <CategoryEditForm
           category={selected.category}
+          onRunAction={onRunAction}
+          onReplaceCategory={onReplaceCategory}
           onSubmit={(payload) =>
             onRunAction("Сохраняем категорию...", async () => {
               const category = await apiFetch<PassCategoryDetails>(
@@ -978,13 +991,135 @@ function CategoryCreateForm({
 function CategoryEditForm({
   category,
   onSubmit,
+  onRunAction,
+  onReplaceCategory,
 }: {
   category: PassCategoryDetails;
   onSubmit: (payload: CategoryPayload) => Promise<void>;
+  onRunAction: (message: string, action: () => Promise<void>) => Promise<void>;
+  onReplaceCategory: (category: PassCategoryDetails) => void;
 }) {
+  const [pendingUpload, setPendingUpload] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const selectedCoverImageUrl = useMemo(
+    () => resolveApiAssetUrl(category.coverImageUrl),
+    [category.coverImageUrl],
+  );
+
+  useEffect(() => {
+    setPendingUpload(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, [category.id, category.coverImageUrl]);
+
   return (
     <form className={styles.editorForm} onSubmit={(event) => handleCategorySubmit(event, onSubmit)}>
       <BasicCategoryFields category={category} />
+      <section className={styles.mediaPanel}>
+        <div className={styles.mediaPreview}>
+          {selectedCoverImageUrl ? (
+            <Image
+              src={selectedCoverImageUrl}
+              alt={category.title}
+              fill
+              sizes="220px"
+              className={styles.mediaImage}
+              unoptimized
+            />
+          ) : (
+            <div className={styles.mediaPlaceholder}>Фото</div>
+          )}
+        </div>
+
+        <div className={styles.mediaActions}>
+          <input
+            ref={fileInputRef}
+            className={styles.hiddenFileInput}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              setPendingUpload(event.target.files?.[0] ?? null)
+            }
+          />
+
+          <div className={styles.mediaText}>
+            <h4 className={styles.mediaTitle}>Обложка категории</h4>
+            <p className={styles.panelText}>
+              Используется на карточке категории в каталоге абонементов.
+            </p>
+          </div>
+
+          <div className={styles.filePickerRow}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Выбрать изображение
+            </button>
+            <span className={pendingUpload ? styles.fileName : styles.fileHint}>
+              {pendingUpload ? pendingUpload.name : "PNG, JPG или WEBP до 5 МБ"}
+            </span>
+          </div>
+
+          <div className={styles.mediaButtons}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              disabled={!pendingUpload}
+              onClick={() => {
+                if (!pendingUpload) {
+                  return;
+                }
+
+                void onRunAction("Загружаем обложку категории...", async () => {
+                  const formData = new FormData();
+                  formData.append("file", pendingUpload);
+                  const response = await apiFetch<UploadImageResponse<PassCategoryDetails>>(
+                    `/admin/passes/categories/${category.id}/cover`,
+                    {
+                      method: "POST",
+                      body: formData,
+                    },
+                  );
+                  onReplaceCategory(response.item);
+                  setPendingUpload(null);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                  }
+                });
+              }}
+            >
+              <Upload size={16} />
+              Загрузить обложку
+            </button>
+
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              disabled={!category.coverImageUrl}
+              onClick={() => {
+                void onRunAction("Удаляем обложку категории...", async () => {
+                  const response = await apiFetch<UploadImageResponse<PassCategoryDetails>>(
+                    `/admin/passes/categories/${category.id}/cover`,
+                    {
+                      method: "DELETE",
+                    },
+                  );
+                  onReplaceCategory(response.item);
+                  setPendingUpload(null);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                  }
+                });
+              }}
+            >
+              Удалить обложку
+            </button>
+          </div>
+        </div>
+      </section>
       <EditorButtons submitLabel="Сохранить категорию" />
     </form>
   );
