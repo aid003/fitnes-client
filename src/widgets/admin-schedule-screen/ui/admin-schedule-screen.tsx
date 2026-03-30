@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, X } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
+import { useAdminActionFeedback } from "@/shared/lib/admin-action-feedback";
 import { apiFetch, ApiError } from "@/shared/lib/api";
 import type {
   AdminScheduleTemplateDay,
@@ -101,17 +102,7 @@ export function AdminScheduleScreen() {
 
   const timeRows = useMemo(() => buildTimeRows(workspace?.templateDays ?? []), [workspace]);
 
-  const runAction = async (message: string, action: () => Promise<void>) => {
-    try {
-      setStatus(message);
-      setError(null);
-      await action();
-    } catch (actionError) {
-      setError(getErrorMessage(actionError, "Не удалось выполнить действие"));
-    } finally {
-      setStatus(null);
-    }
-  };
+  const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
   if (isLoading) {
     return <SessionStatus title="Загрузка" text="Проверяем права доступа." />;
@@ -176,6 +167,7 @@ export function AdminScheduleScreen() {
 
     await runAction(
       slotModal.mode === "edit" ? "Сохраняем слот" : "Создаём слот",
+      slotModal.mode === "edit" ? "Слот сохранён" : "Слот создан",
       async () => {
         const nextWorkspace = await apiFetch<AdminScheduleWorkspace>(
           slotModal.mode === "edit"
@@ -189,6 +181,7 @@ export function AdminScheduleScreen() {
         setWorkspace(nextWorkspace);
         setSlotModal(null);
       },
+      slotModal.mode === "edit" ? "Не удалось сохранить слот" : "Не удалось создать слот",
     );
   };
 
@@ -197,14 +190,19 @@ export function AdminScheduleScreen() {
       return;
     }
 
-    await runAction("Удаляем слот", async () => {
-      const nextWorkspace = await apiFetch<AdminScheduleWorkspace>(
-        `/admin/schedule/template-slots/${slotModal.slotId}`,
-        { method: "DELETE" },
-      );
-      setWorkspace(nextWorkspace);
-      setSlotModal(null);
-    });
+    await runAction(
+      "Удаляем слот",
+      "Слот удалён",
+      async () => {
+        const nextWorkspace = await apiFetch<AdminScheduleWorkspace>(
+          `/admin/schedule/template-slots/${slotModal.slotId}`,
+          { method: "DELETE" },
+        );
+        setWorkspace(nextWorkspace);
+        setSlotModal(null);
+      },
+      "Не удалось удалить слот",
+    );
   };
 
   return (

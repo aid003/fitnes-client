@@ -58,6 +58,11 @@ import {
   HIGHLIGHT_STYLE_OPTIONS,
   type PlanDraft,
 } from "./admin-passes-options";
+import {
+  useAdminActionFeedback,
+  type AdminActionRunner,
+} from "@/shared/lib/admin-action-feedback";
+import { useToast } from "@/shared/ui/toast-provider/toast-provider";
 import styles from "./admin-passes-screen.module.css";
 
 type CategoryPayload = {
@@ -104,6 +109,8 @@ type FeaturePayload = {
   icon: string;
   sortOrder?: number;
 };
+
+type SubmitResult = Promise<void | boolean>;
 
 const MAX_IMAGE_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -216,17 +223,7 @@ export function AdminPassesScreen() {
     }
   }, [categories, selectedNode]);
 
-  const runAction = async (message: string, action: () => Promise<void>) => {
-    try {
-      setStatus(message);
-      setError(null);
-      await action();
-    } catch (actionError) {
-      setError(getErrorMessage(actionError, "Не удалось выполнить операцию"));
-    } finally {
-      setStatus(null);
-    }
-  };
+  const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
   const replaceCategory = (category: PassCategoryDetails) => {
     setCategories((current) =>
@@ -259,13 +256,23 @@ export function AdminPassesScreen() {
     }));
   };
 
-  const handleDelete = async (path: string, confirmText: string) => {
+  const handleDelete = async (selectedNodeToDelete: FoundNode) => {
+    const path = getDeletePath(selectedNodeToDelete);
+    const confirmText = getDeleteConfirmation(selectedNodeToDelete);
+
     if (!window.confirm(confirmText)) {
-      return;
+      return false;
     }
 
-    await apiFetch(path, { method: "DELETE" });
-    await loadCategories();
+    return runAction(
+      getDeletePendingMessage(selectedNodeToDelete),
+      getDeleteSuccessMessage(selectedNodeToDelete),
+      async () => {
+        await apiFetch(path, { method: "DELETE" });
+        await loadCategories();
+      },
+      getDeleteErrorMessage(selectedNodeToDelete),
+    );
   };
 
   if (isLoading) {
@@ -385,9 +392,11 @@ export function AdminPassesScreen() {
                 onReplaceCategory={replaceCategory}
                 onCreate={(mode) => setCreateMode(mode)}
                 onDelete={async () => {
-                  await handleDelete(getDeletePath(selected), getDeleteConfirmation(selected));
-                  setSelectedNode(null);
-                  setCreateMode(null);
+                  const wasDeleted = await handleDelete(selected);
+                  if (wasDeleted) {
+                    setSelectedNode(null);
+                    setCreateMode(null);
+                  }
                 }}
               />
             ) : (
@@ -726,7 +735,7 @@ function CreateEditor({
   createMode: NonNullable<CreateMode>;
   selected: FoundNode | null;
   onCancel: () => void;
-  onRunAction: (message: string, action: () => Promise<void>) => Promise<void>;
+  onRunAction: AdminActionRunner;
   onCreatedCategory: (category: PassCategoryDetails) => void;
   onUpdatedCategory: (
     category: PassCategoryDetails,
@@ -743,13 +752,18 @@ function CreateEditor({
         <CategoryCreateForm
           submitLabel="Создать категорию"
           onSubmit={(payload) =>
-            onRunAction("Создаем категорию...", async () => {
-              const category = await apiFetch<PassCategoryDetails>("/admin/passes/categories", {
-                method: "POST",
-                body: JSON.stringify(payload),
-              });
-              onCreatedCategory(category);
-            })
+            onRunAction(
+              "Создаем категорию...",
+              "Категория создана",
+              async () => {
+                const category = await apiFetch<PassCategoryDetails>("/admin/passes/categories", {
+                  method: "POST",
+                  body: JSON.stringify(payload),
+                });
+                onCreatedCategory(category);
+              },
+              "Не удалось создать категорию",
+            )
           }
           onCancel={onCancel}
         />
@@ -767,16 +781,21 @@ function CreateEditor({
         createMode={createMode}
         onCancel={onCancel}
         onSubmit={(payload) =>
-          onRunAction("Создаем элемент...", async () => {
-            const response = await createChild(createMode, payload);
-            const nextNode = findCreatedNode(response, createMode, payload);
+          onRunAction(
+            "Создаем элемент...",
+            getCreateSuccessMessage(createMode.kind),
+            async () => {
+              const response = await createChild(createMode, payload);
+              const nextNode = findCreatedNode(response, createMode, payload);
 
-            if (nextNode) {
-              onUpdatedCategory(response, nextNode);
-            } else {
-              onUpdatedCategory(response, { kind: "category", id: response.id });
-            }
-          })
+              if (nextNode) {
+                onUpdatedCategory(response, nextNode);
+              } else {
+                onUpdatedCategory(response, { kind: "category", id: response.id });
+              }
+            },
+            getCreateErrorMessage(createMode.kind),
+          )
         }
       />
     </EditorCard>
@@ -791,7 +810,7 @@ function EntityEditor({
   onDelete,
 }: {
   selected: FoundNode;
-  onRunAction: (message: string, action: () => Promise<void>) => Promise<void>;
+  onRunAction: AdminActionRunner;
   onReplaceCategory: (category: PassCategoryDetails) => void;
   onCreate: (mode: ChildCreateMode) => void;
   onDelete: () => Promise<void>;
@@ -831,16 +850,21 @@ function EntityEditor({
           onRunAction={onRunAction}
           onReplaceCategory={onReplaceCategory}
           onSubmit={(payload) =>
-            onRunAction("Сохраняем категорию...", async () => {
-              const category = await apiFetch<PassCategoryDetails>(
-                `/admin/passes/categories/${selected.category.id}`,
-                {
-                  method: "PATCH",
-                  body: JSON.stringify(payload),
-                },
-              );
-              onReplaceCategory(category);
-            })
+            onRunAction(
+              "Сохраняем категорию...",
+              "Категория сохранена",
+              async () => {
+                const category = await apiFetch<PassCategoryDetails>(
+                  `/admin/passes/categories/${selected.category.id}`,
+                  {
+                    method: "PATCH",
+                    body: JSON.stringify(payload),
+                  },
+                );
+                onReplaceCategory(category);
+              },
+              "Не удалось сохранить категорию",
+            )
           }
         />
       ) : null}
@@ -850,16 +874,21 @@ function EntityEditor({
           entity={selected.variant}
           submitLabel="Сохранить подпункт"
           onSubmit={(payload) =>
-            onRunAction("Сохраняем подпункт...", async () => {
-              const category = await apiFetch<PassCategoryDetails>(
-                `/admin/passes/variants/${selected.variant.id}`,
-                {
-                  method: "PATCH",
-                  body: JSON.stringify(payload),
-                },
-              );
-              onReplaceCategory(category);
-            })
+            onRunAction(
+              "Сохраняем подпункт...",
+              "Подпункт сохранён",
+              async () => {
+                const category = await apiFetch<PassCategoryDetails>(
+                  `/admin/passes/variants/${selected.variant.id}`,
+                  {
+                    method: "PATCH",
+                    body: JSON.stringify(payload),
+                  },
+                );
+                onReplaceCategory(category);
+              },
+              "Не удалось сохранить подпункт",
+            )
           }
         />
       ) : null}
@@ -869,16 +898,21 @@ function EntityEditor({
           entity={selected.group}
           submitLabel="Сохранить группу"
           onSubmit={(payload) =>
-            onRunAction("Сохраняем группу...", async () => {
-              const category = await apiFetch<PassCategoryDetails>(
-                `/admin/passes/groups/${selected.group.id}`,
-                {
-                  method: "PATCH",
-                  body: JSON.stringify(payload),
-                },
-              );
-              onReplaceCategory(category);
-            })
+            onRunAction(
+              "Сохраняем группу...",
+              "Группа сохранена",
+              async () => {
+                const category = await apiFetch<PassCategoryDetails>(
+                  `/admin/passes/groups/${selected.group.id}`,
+                  {
+                    method: "PATCH",
+                    body: JSON.stringify(payload),
+                  },
+                );
+                onReplaceCategory(category);
+              },
+              "Не удалось сохранить группу",
+            )
           }
         />
       ) : null}
@@ -888,16 +922,21 @@ function EntityEditor({
           plan={selected.plan}
           submitLabel="Сохранить тариф"
           onSubmit={(payload) =>
-            onRunAction("Сохраняем тариф...", async () => {
-              const category = await apiFetch<PassCategoryDetails>(
-                `/admin/passes/plans/${selected.plan.id}`,
-                {
-                  method: "PATCH",
-                  body: JSON.stringify(payload),
-                },
-              );
-              onReplaceCategory(category);
-            })
+            onRunAction(
+              "Сохраняем тариф...",
+              "Тариф сохранён",
+              async () => {
+                const category = await apiFetch<PassCategoryDetails>(
+                  `/admin/passes/plans/${selected.plan.id}`,
+                  {
+                    method: "PATCH",
+                    body: JSON.stringify(payload),
+                  },
+                );
+                onReplaceCategory(category);
+              },
+              "Не удалось сохранить тариф",
+            )
           }
         />
       ) : null}
@@ -907,16 +946,21 @@ function EntityEditor({
           badge={selected.badge}
           submitLabel="Сохранить бейдж"
           onSubmit={(payload) =>
-            onRunAction("Сохраняем бейдж...", async () => {
-              const category = await apiFetch<PassCategoryDetails>(
-                `/admin/passes/badges/${selected.badge.id}`,
-                {
-                  method: "PATCH",
-                  body: JSON.stringify(payload),
-                },
-              );
-              onReplaceCategory(category);
-            })
+            onRunAction(
+              "Сохраняем бейдж...",
+              "Бейдж сохранён",
+              async () => {
+                const category = await apiFetch<PassCategoryDetails>(
+                  `/admin/passes/badges/${selected.badge.id}`,
+                  {
+                    method: "PATCH",
+                    body: JSON.stringify(payload),
+                  },
+                );
+                onReplaceCategory(category);
+              },
+              "Не удалось сохранить бейдж",
+            )
           }
         />
       ) : null}
@@ -926,16 +970,21 @@ function EntityEditor({
           feature={selected.feature}
           submitLabel="Сохранить преимущество"
           onSubmit={(payload) =>
-            onRunAction("Сохраняем преимущество...", async () => {
-              const category = await apiFetch<PassCategoryDetails>(
-                `/admin/passes/features/${selected.feature.id}`,
-                {
-                  method: "PATCH",
-                  body: JSON.stringify(payload),
-                },
-              );
-              onReplaceCategory(category);
-            })
+            onRunAction(
+              "Сохраняем преимущество...",
+              "Преимущество сохранено",
+              async () => {
+                const category = await apiFetch<PassCategoryDetails>(
+                  `/admin/passes/features/${selected.feature.id}`,
+                  {
+                    method: "PATCH",
+                    body: JSON.stringify(payload),
+                  },
+                );
+                onReplaceCategory(category);
+              },
+              "Не удалось сохранить преимущество",
+            )
           }
         />
       ) : null}
@@ -979,7 +1028,7 @@ function CategoryCreateForm({
   onCancel,
 }: {
   submitLabel: string;
-  onSubmit: (payload: CategoryPayload) => Promise<void>;
+  onSubmit: (payload: CategoryPayload) => SubmitResult;
   onCancel: () => void;
 }) {
   return (
@@ -997,12 +1046,13 @@ function CategoryEditForm({
   onReplaceCategory,
 }: {
   category: PassCategoryDetails;
-  onSubmit: (payload: CategoryPayload) => Promise<void>;
-  onRunAction: (message: string, action: () => Promise<void>) => Promise<void>;
+  onSubmit: (payload: CategoryPayload) => SubmitResult;
+  onRunAction: AdminActionRunner;
   onReplaceCategory: (category: PassCategoryDetails) => void;
 }) {
   const [pendingUpload, setPendingUpload] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const toast = useToast();
   const selectedCoverImageUrl = useMemo(
     () => resolveApiAssetUrl(category.coverImageUrl),
     [category.coverImageUrl],
@@ -1046,7 +1096,7 @@ function CategoryEditForm({
               if (nextFile && nextFile.size > MAX_IMAGE_UPLOAD_SIZE_BYTES) {
                 setPendingUpload(null);
                 event.target.value = "";
-                window.alert("Размер изображения должен быть не больше 5 МБ");
+                toast.error("Размер изображения должен быть не больше 5 МБ");
                 return;
               }
 
@@ -1084,26 +1134,31 @@ function CategoryEditForm({
                   return;
                 }
 
-                void onRunAction("Загружаем обложку категории...", async () => {
-                  if (pendingUpload.size > MAX_IMAGE_UPLOAD_SIZE_BYTES) {
-                    throw new Error("Размер изображения должен быть не больше 5 МБ");
-                  }
+                void onRunAction(
+                  "Загружаем обложку категории...",
+                  "Обложка загружена",
+                  async () => {
+                    if (pendingUpload.size > MAX_IMAGE_UPLOAD_SIZE_BYTES) {
+                      throw new Error("Размер изображения должен быть не больше 5 МБ");
+                    }
 
-                  const formData = new FormData();
-                  formData.append("file", pendingUpload);
-                  const response = await apiFetch<UploadImageResponse<PassCategoryDetails>>(
-                    `/admin/passes/categories/${category.id}/cover`,
-                    {
-                      method: "POST",
-                      body: formData,
-                    },
-                  );
-                  onReplaceCategory(response.item);
-                  setPendingUpload(null);
-                  if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
-                  }
-                });
+                    const formData = new FormData();
+                    formData.append("file", pendingUpload);
+                    const response = await apiFetch<UploadImageResponse<PassCategoryDetails>>(
+                      `/admin/passes/categories/${category.id}/cover`,
+                      {
+                        method: "POST",
+                        body: formData,
+                      },
+                    );
+                    onReplaceCategory(response.item);
+                    setPendingUpload(null);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = "";
+                    }
+                  },
+                  "Не удалось загрузить обложку категории",
+                );
               }}
             >
               <Upload size={16} />
@@ -1124,7 +1179,7 @@ function VariantEditForm({
 }: {
   entity: PassVariant | PassPlanGroup;
   submitLabel: string;
-  onSubmit: (payload: VariantPayload) => Promise<void>;
+  onSubmit: (payload: VariantPayload) => SubmitResult;
 }) {
   return (
     <form className={styles.editorForm} onSubmit={(event) => handleVariantSubmit(event, onSubmit)}>
@@ -1142,7 +1197,7 @@ function PlanForm({
 }: {
   plan?: PassPlan;
   submitLabel: string;
-  onSubmit: (payload: PlanPayload) => Promise<void>;
+  onSubmit: (payload: PlanPayload) => SubmitResult;
   onCancel?: () => void;
 }) {
   const [draft, setDraft] = useState<PlanDraft>(() => createPlanDraft(plan));
@@ -1304,7 +1359,7 @@ function BadgeForm({
 }: {
   badge?: PassBadge;
   submitLabel: string;
-  onSubmit: (payload: BadgePayload) => Promise<void>;
+  onSubmit: (payload: BadgePayload) => SubmitResult;
   onCancel?: () => void;
 }) {
   return (
@@ -1340,7 +1395,7 @@ function FeatureForm({
 }: {
   feature?: PassFeature;
   submitLabel: string;
-  onSubmit: (payload: FeaturePayload) => Promise<void>;
+  onSubmit: (payload: FeaturePayload) => SubmitResult;
   onCancel?: () => void;
 }) {
   return (
@@ -1493,7 +1548,7 @@ function CreateChildForm({
   createMode: ChildCreateMode;
   onSubmit: (
     payload: CategoryPayload | VariantPayload | PlanPayload | BadgePayload | FeaturePayload,
-  ) => Promise<void>;
+  ) => SubmitResult;
   onCancel: () => void;
 }) {
   if (createMode.kind === "variant" || createMode.kind === "group") {
@@ -1933,6 +1988,57 @@ function getDeleteConfirmation(selected: FoundNode) {
   }
 }
 
+function getDeletePendingMessage(selected: FoundNode) {
+  switch (selected.kind) {
+    case "category":
+      return "Удаляем категорию...";
+    case "variant":
+      return "Удаляем подпункт...";
+    case "group":
+      return "Удаляем группу...";
+    case "plan":
+      return "Удаляем тариф...";
+    case "badge":
+      return "Удаляем бейдж...";
+    case "feature":
+      return "Удаляем преимущество...";
+  }
+}
+
+function getDeleteSuccessMessage(selected: FoundNode) {
+  switch (selected.kind) {
+    case "category":
+      return "Категория удалена";
+    case "variant":
+      return "Подпункт удалён";
+    case "group":
+      return "Группа удалена";
+    case "plan":
+      return "Тариф удалён";
+    case "badge":
+      return "Бейдж удалён";
+    case "feature":
+      return "Преимущество удалено";
+  }
+}
+
+function getDeleteErrorMessage(selected: FoundNode) {
+  switch (selected.kind) {
+    case "category":
+      return "Не удалось удалить категорию";
+    case "variant":
+      return "Не удалось удалить подпункт";
+    case "group":
+      return "Не удалось удалить группу";
+    case "plan":
+      return "Не удалось удалить тариф";
+    case "badge":
+      return "Не удалось удалить бейдж";
+    case "feature":
+      return "Не удалось удалить преимущество";
+  }
+}
+
 function getCreateTitle(kind: Exclude<CreateMode, null>["kind"]) {
   switch (kind) {
     case "category":
@@ -1947,6 +2053,36 @@ function getCreateTitle(kind: Exclude<CreateMode, null>["kind"]) {
       return "Новый бейдж";
     case "feature":
       return "Новое преимущество";
+  }
+}
+
+function getCreateSuccessMessage(kind: ChildCreateMode["kind"]) {
+  switch (kind) {
+    case "variant":
+      return "Подпункт создан";
+    case "group":
+      return "Группа создана";
+    case "plan":
+      return "Тариф создан";
+    case "badge":
+      return "Бейдж создан";
+    case "feature":
+      return "Преимущество создано";
+  }
+}
+
+function getCreateErrorMessage(kind: ChildCreateMode["kind"]) {
+  switch (kind) {
+    case "variant":
+      return "Не удалось создать подпункт";
+    case "group":
+      return "Не удалось создать группу";
+    case "plan":
+      return "Не удалось создать тариф";
+    case "badge":
+      return "Не удалось создать бейдж";
+    case "feature":
+      return "Не удалось создать преимущество";
   }
 }
 
@@ -2050,7 +2186,7 @@ function findCreatedNode(
 
 function handleCategorySubmit(
   event: FormEvent<HTMLFormElement>,
-  onSubmit: (payload: CategoryPayload) => Promise<void>,
+  onSubmit: (payload: CategoryPayload) => SubmitResult,
 ) {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
@@ -2066,7 +2202,7 @@ function handleCategorySubmit(
 
 function handleVariantSubmit(
   event: FormEvent<HTMLFormElement>,
-  onSubmit: (payload: VariantPayload) => Promise<void>,
+  onSubmit: (payload: VariantPayload) => SubmitResult,
 ) {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
@@ -2100,7 +2236,7 @@ function parsePlanDraft(draft: PlanDraft): PlanPayload {
 
 function handleBadgeSubmit(
   event: FormEvent<HTMLFormElement>,
-  onSubmit: (payload: BadgePayload) => Promise<void>,
+  onSubmit: (payload: BadgePayload) => SubmitResult,
 ) {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
@@ -2114,7 +2250,7 @@ function handleBadgeSubmit(
 
 function handleFeatureSubmit(
   event: FormEvent<HTMLFormElement>,
-  onSubmit: (payload: FeaturePayload) => Promise<void>,
+  onSubmit: (payload: FeaturePayload) => SubmitResult,
 ) {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);

@@ -6,6 +6,7 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "re
 import { Plus, Trash2, Upload, X } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
+import { useAdminActionFeedback } from "@/shared/lib/admin-action-feedback";
 import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type { AdminAdBanner, UploadImageResponse } from "@/shared/lib/contracts";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
@@ -97,23 +98,14 @@ export function AdminAdsScreen() {
     setPendingUpload(null);
   }, [isCreateMode, selectedItem]);
 
-  const runAction = async (message: string, action: () => Promise<void>) => {
-    try {
-      setStatus(message);
-      setError(null);
-      await action();
-    } catch (actionError) {
-      setError(getErrorMessage(actionError, "Не удалось выполнить действие"));
-    } finally {
-      setStatus(null);
-    }
-  };
+  const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     void runAction(
       isCreateMode ? "Создаём рекламный баннер" : "Сохраняем изменения баннера",
+      isCreateMode ? "Баннер создан" : "Изменения сохранены",
       async () => {
         const payload = {
           title: form.title,
@@ -149,6 +141,7 @@ export function AdminAdsScreen() {
           );
         }
       },
+      isCreateMode ? "Не удалось создать баннер" : "Не удалось сохранить изменения баннера",
     );
   };
 
@@ -403,27 +396,32 @@ export function AdminAdsScreen() {
                               return;
                             }
 
-                            void runAction("Загружаем изображение баннера", async () => {
-                              const formData = new FormData();
-                              formData.append("file", pendingUpload);
-                              const response = await apiFetch<UploadImageResponse<AdminAdBanner>>(
-                                `/admin/ads/${selectedItem.id}/image`,
-                                {
-                                  method: "POST",
-                                  body: formData,
-                                },
-                              );
+                            void runAction(
+                              "Загружаем изображение баннера",
+                              "Изображение загружено",
+                              async () => {
+                                const formData = new FormData();
+                                formData.append("file", pendingUpload);
+                                const response = await apiFetch<UploadImageResponse<AdminAdBanner>>(
+                                  `/admin/ads/${selectedItem.id}/image`,
+                                  {
+                                    method: "POST",
+                                    body: formData,
+                                  },
+                                );
 
-                              setItems((current) =>
-                                current.map((item) =>
-                                  item.id === response.item.id ? response.item : item,
-                                ),
-                              );
-                              setPendingUpload(null);
-                              if (fileInputRef.current) {
-                                fileInputRef.current.value = "";
-                              }
-                            });
+                                setItems((current) =>
+                                  current.map((item) =>
+                                    item.id === response.item.id ? response.item : item,
+                                  ),
+                                );
+                                setPendingUpload(null);
+                                if (fileInputRef.current) {
+                                  fileInputRef.current.value = "";
+                                }
+                              },
+                              "Не удалось загрузить изображение баннера",
+                            );
                           }}
                         >
                           <Upload size={16} />
@@ -435,20 +433,25 @@ export function AdminAdsScreen() {
                           className={styles.secondaryButton}
                           disabled={!selectedItem.imageUrl}
                           onClick={() => {
-                            void runAction("Удаляем изображение баннера", async () => {
-                              const response = await apiFetch<UploadImageResponse<AdminAdBanner>>(
-                                `/admin/ads/${selectedItem.id}/image`,
-                                {
-                                  method: "DELETE",
-                                },
-                              );
+                            void runAction(
+                              "Удаляем изображение баннера",
+                              "Изображение удалено",
+                              async () => {
+                                const response = await apiFetch<UploadImageResponse<AdminAdBanner>>(
+                                  `/admin/ads/${selectedItem.id}/image`,
+                                  {
+                                    method: "DELETE",
+                                  },
+                                );
 
-                              setItems((current) =>
-                                current.map((item) =>
-                                  item.id === response.item.id ? response.item : item,
-                                ),
-                              );
-                            });
+                                setItems((current) =>
+                                  current.map((item) =>
+                                    item.id === response.item.id ? response.item : item,
+                                  ),
+                                );
+                              },
+                              "Не удалось удалить изображение баннера",
+                            );
                           }}
                         >
                           Удалить картинку
@@ -483,12 +486,17 @@ export function AdminAdsScreen() {
                           return;
                         }
 
-                        void runAction("Удаляем рекламный баннер", async () => {
-                          await apiFetch(`/admin/ads/${selectedItem.id}`, { method: "DELETE" });
-                          const nextItems = items.filter((item) => item.id !== selectedItem.id);
-                          setItems(nextItems);
-                          setSelectedId(nextItems[0]?.id ?? null);
-                        });
+                        void runAction(
+                          "Удаляем рекламный баннер",
+                          "Баннер удалён",
+                          async () => {
+                            await apiFetch(`/admin/ads/${selectedItem.id}`, { method: "DELETE" });
+                            const nextItems = items.filter((item) => item.id !== selectedItem.id);
+                            setItems(nextItems);
+                            setSelectedId(nextItems[0]?.id ?? null);
+                          },
+                          "Не удалось удалить баннер",
+                        );
                       }}
                     >
                       <Trash2 size={16} />

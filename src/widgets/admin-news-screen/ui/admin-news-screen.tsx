@@ -13,6 +13,7 @@ import {
 import { Bold, Italic, List, Plus, Trash2, Upload } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
+import { useAdminActionFeedback } from "@/shared/lib/admin-action-feedback";
 import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type {
   AdminNewsArticle,
@@ -130,23 +131,14 @@ export function AdminNewsScreen() {
     }
   }, [form.contentRichText]);
 
-  const runAction = async (message: string, action: () => Promise<void>) => {
-    try {
-      setStatus(message);
-      setError(null);
-      await action();
-    } catch (actionError) {
-      setError(getErrorMessage(actionError, "Не удалось выполнить действие"));
-    } finally {
-      setStatus(null);
-    }
-  };
+  const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     void runAction(
       isCreateMode ? "Создаём новость" : "Сохраняем изменения новости",
+      isCreateMode ? "Новость создана" : "Изменения сохранены",
       async () => {
         const payload = {
           title: form.title,
@@ -189,6 +181,7 @@ export function AdminNewsScreen() {
           );
         }
       },
+      isCreateMode ? "Не удалось создать новость" : "Не удалось сохранить изменения новости",
     );
   };
 
@@ -498,29 +491,34 @@ export function AdminNewsScreen() {
                               return;
                             }
 
-                            void runAction("Загружаем обложку новости", async () => {
-                              const formData = new FormData();
-                              formData.append("file", pendingUpload);
-                              const response = await apiFetch<UploadImageResponse<AdminNewsArticle>>(
-                                `/admin/news/${selectedItem.id}/cover`,
-                                {
-                                  method: "POST",
-                                  body: formData,
-                                },
-                              );
-                              const nextItem = {
-                                ...response.item,
-                                coverImageUrl: resolveApiAssetUrl(response.item.coverImageUrl),
-                              };
+                            void runAction(
+                              "Загружаем обложку новости",
+                              "Обложка загружена",
+                              async () => {
+                                const formData = new FormData();
+                                formData.append("file", pendingUpload);
+                                const response = await apiFetch<UploadImageResponse<AdminNewsArticle>>(
+                                  `/admin/news/${selectedItem.id}/cover`,
+                                  {
+                                    method: "POST",
+                                    body: formData,
+                                  },
+                                );
+                                const nextItem = {
+                                  ...response.item,
+                                  coverImageUrl: resolveApiAssetUrl(response.item.coverImageUrl),
+                                };
 
-                              setItems((current) =>
-                                current.map((item) => (item.id === nextItem.id ? nextItem : item)),
-                              );
-                              setPendingUpload(null);
-                              if (fileInputRef.current) {
-                                fileInputRef.current.value = "";
-                              }
-                            });
+                                setItems((current) =>
+                                  current.map((item) => (item.id === nextItem.id ? nextItem : item)),
+                                );
+                                setPendingUpload(null);
+                                if (fileInputRef.current) {
+                                  fileInputRef.current.value = "";
+                                }
+                              },
+                              "Не удалось загрузить обложку новости",
+                            );
                           }}
                         >
                           <Upload size={16} />
@@ -532,22 +530,27 @@ export function AdminNewsScreen() {
                           className={styles.secondaryButton}
                           disabled={!selectedItem.coverImageUrl}
                           onClick={() => {
-                            void runAction("Удаляем обложку новости", async () => {
-                              const response = await apiFetch<UploadImageResponse<AdminNewsArticle>>(
-                                `/admin/news/${selectedItem.id}/cover`,
-                                {
-                                  method: "DELETE",
-                                },
-                              );
-                              const nextItem = {
-                                ...response.item,
-                                coverImageUrl: resolveApiAssetUrl(response.item.coverImageUrl),
-                              };
+                            void runAction(
+                              "Удаляем обложку новости",
+                              "Обложка удалена",
+                              async () => {
+                                const response = await apiFetch<UploadImageResponse<AdminNewsArticle>>(
+                                  `/admin/news/${selectedItem.id}/cover`,
+                                  {
+                                    method: "DELETE",
+                                  },
+                                );
+                                const nextItem = {
+                                  ...response.item,
+                                  coverImageUrl: resolveApiAssetUrl(response.item.coverImageUrl),
+                                };
 
-                              setItems((current) =>
-                                current.map((item) => (item.id === nextItem.id ? nextItem : item)),
-                              );
-                            });
+                                setItems((current) =>
+                                  current.map((item) => (item.id === nextItem.id ? nextItem : item)),
+                                );
+                              },
+                              "Не удалось удалить обложку новости",
+                            );
                           }}
                         >
                           Удалить обложку
@@ -582,12 +585,17 @@ export function AdminNewsScreen() {
                           return;
                         }
 
-                        void runAction("Удаляем новость", async () => {
-                          await apiFetch(`/admin/news/${selectedItem.id}`, { method: "DELETE" });
-                          const nextItems = items.filter((item) => item.id !== selectedItem.id);
-                          setItems(nextItems);
-                          setSelectedId(nextItems[0]?.id ?? null);
-                        });
+                        void runAction(
+                          "Удаляем новость",
+                          "Новость удалена",
+                          async () => {
+                            await apiFetch(`/admin/news/${selectedItem.id}`, { method: "DELETE" });
+                            const nextItems = items.filter((item) => item.id !== selectedItem.id);
+                            setItems(nextItems);
+                            setSelectedId(nextItems[0]?.id ?? null);
+                          },
+                          "Не удалось удалить новость",
+                        );
                       }}
                     >
                       <Trash2 size={16} />

@@ -6,6 +6,7 @@ import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2, Upload } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
+import { useAdminActionFeedback } from "@/shared/lib/admin-action-feedback";
 import { apiFetch, ApiError, resolveApiAssetUrl } from "@/shared/lib/api";
 import type { AdminTrainer, UploadImageResponse } from "@/shared/lib/contracts";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
@@ -94,17 +95,7 @@ export function AdminTrainersScreen() {
     setPendingUpload(null);
   }, [isCreateMode, selectedItem]);
 
-  const runAction = async (message: string, action: () => Promise<void>) => {
-    try {
-      setStatus(message);
-      setError(null);
-      await action();
-    } catch (actionError) {
-      setError(getErrorMessage(actionError, "Не удалось выполнить действие"));
-    } finally {
-      setStatus(null);
-    }
-  };
+  const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
   if (isLoading) {
     return <SessionStatus title="Загрузка" text="Проверяем права доступа." />;
@@ -214,6 +205,7 @@ export function AdminTrainersScreen() {
 
                   void runAction(
                     isCreateMode ? "Создаём карточку тренера" : "Сохраняем изменения тренера",
+                    isCreateMode ? "Тренер создан" : "Изменения сохранены",
                     async () => {
                       const payload = {
                         name: form.name,
@@ -248,6 +240,9 @@ export function AdminTrainersScreen() {
                         );
                       }
                     },
+                    isCreateMode
+                      ? "Не удалось создать карточку тренера"
+                      : "Не удалось сохранить изменения тренера",
                   );
                 }}
               >
@@ -368,29 +363,34 @@ export function AdminTrainersScreen() {
                               return;
                             }
 
-                            void runAction("Загружаем фотографию тренера", async () => {
-                              const formData = new FormData();
-                              formData.append("file", pendingUpload);
-                              const response = await apiFetch<UploadImageResponse<AdminTrainer>>(
-                                `/admin/trainers/${selectedItem.id}/photo`,
-                                {
-                                  method: "POST",
-                                  body: formData,
-                                },
-                              );
-                              const nextItem = {
-                                ...response.item,
-                                photoUrl: resolveApiAssetUrl(response.item.photoUrl),
-                              };
+                            void runAction(
+                              "Загружаем фотографию тренера",
+                              "Фотография загружена",
+                              async () => {
+                                const formData = new FormData();
+                                formData.append("file", pendingUpload);
+                                const response = await apiFetch<UploadImageResponse<AdminTrainer>>(
+                                  `/admin/trainers/${selectedItem.id}/photo`,
+                                  {
+                                    method: "POST",
+                                    body: formData,
+                                  },
+                                );
+                                const nextItem = {
+                                  ...response.item,
+                                  photoUrl: resolveApiAssetUrl(response.item.photoUrl),
+                                };
 
-                              setItems((current) =>
-                                current.map((item) => (item.id === nextItem.id ? nextItem : item)),
-                              );
-                              setPendingUpload(null);
-                              if (fileInputRef.current) {
-                                fileInputRef.current.value = "";
-                              }
-                            });
+                                setItems((current) =>
+                                  current.map((item) => (item.id === nextItem.id ? nextItem : item)),
+                                );
+                                setPendingUpload(null);
+                                if (fileInputRef.current) {
+                                  fileInputRef.current.value = "";
+                                }
+                              },
+                              "Не удалось загрузить фотографию тренера",
+                            );
                           }}
                         >
                           <Upload size={16} />
@@ -402,22 +402,27 @@ export function AdminTrainersScreen() {
                           className={styles.secondaryButton}
                           disabled={!selectedItem.photoUrl}
                           onClick={() => {
-                            void runAction("Удаляем фотографию тренера", async () => {
-                              const response = await apiFetch<UploadImageResponse<AdminTrainer>>(
-                                `/admin/trainers/${selectedItem.id}/photo`,
-                                {
-                                  method: "DELETE",
-                                },
-                              );
-                              const nextItem = {
-                                ...response.item,
-                                photoUrl: resolveApiAssetUrl(response.item.photoUrl),
-                              };
+                            void runAction(
+                              "Удаляем фотографию тренера",
+                              "Фотография удалена",
+                              async () => {
+                                const response = await apiFetch<UploadImageResponse<AdminTrainer>>(
+                                  `/admin/trainers/${selectedItem.id}/photo`,
+                                  {
+                                    method: "DELETE",
+                                  },
+                                );
+                                const nextItem = {
+                                  ...response.item,
+                                  photoUrl: resolveApiAssetUrl(response.item.photoUrl),
+                                };
 
-                              setItems((current) =>
-                                current.map((item) => (item.id === nextItem.id ? nextItem : item)),
-                              );
-                            });
+                                setItems((current) =>
+                                  current.map((item) => (item.id === nextItem.id ? nextItem : item)),
+                                );
+                              },
+                              "Не удалось удалить фотографию тренера",
+                            );
                           }}
                         >
                           Удалить фото
@@ -452,12 +457,17 @@ export function AdminTrainersScreen() {
                           return;
                         }
 
-                        void runAction("Удаляем карточку тренера", async () => {
-                          await apiFetch(`/admin/trainers/${selectedItem.id}`, { method: "DELETE" });
-                          const nextItems = items.filter((item) => item.id !== selectedItem.id);
-                          setItems(nextItems);
-                          setSelectedId(nextItems[0]?.id ?? null);
-                        });
+                        void runAction(
+                          "Удаляем карточку тренера",
+                          "Карточка тренера удалена",
+                          async () => {
+                            await apiFetch(`/admin/trainers/${selectedItem.id}`, { method: "DELETE" });
+                            const nextItems = items.filter((item) => item.id !== selectedItem.id);
+                            setItems(nextItems);
+                            setSelectedId(nextItems[0]?.id ?? null);
+                          },
+                          "Не удалось удалить карточку тренера",
+                        );
                       }}
                     >
                       <Trash2 size={16} />

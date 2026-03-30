@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Snowflake } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
+import { useAdminActionFeedback } from "@/shared/lib/admin-action-feedback";
 import { apiFetch, ApiError } from "@/shared/lib/api";
 import type {
   AdminMembership,
@@ -127,17 +128,7 @@ export function AdminMembershipsScreen() {
     });
   }, [selectedMembership]);
 
-  const runAction = async (message: string, action: () => Promise<void>) => {
-    try {
-      setStatus(message);
-      setError(null);
-      await action();
-    } catch (actionError) {
-      setError(getErrorMessage(actionError, "Не удалось выполнить действие"));
-    } finally {
-      setStatus(null);
-    }
-  };
+  const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
   if (isLoading) {
     return <SessionStatus title="Загрузка" text="Проверяем права доступа." />;
@@ -200,22 +191,27 @@ export function AdminMembershipsScreen() {
               onSubmit={(event) => {
                 event.preventDefault();
 
-                void runAction("Назначаем абонемент", async () => {
-                  const nextMemberships = await apiFetch<AdminMembership[]>("/admin/memberships", {
-                    method: "POST",
-                    body: JSON.stringify({
-                      userId: createForm.userId,
-                      passPlanId: createForm.passPlanId,
-                      startsAt: new Date(createForm.startsAt).toISOString(),
-                      endsAt: new Date(createForm.endsAt).toISOString(),
-                      freezeDaysLimit: Number(createForm.freezeDaysLimit) || 0,
-                      canRenew: createForm.canRenew,
-                    }),
-                  });
+                void runAction(
+                  "Назначаем абонемент",
+                  "Абонемент назначен",
+                  async () => {
+                    const nextMemberships = await apiFetch<AdminMembership[]>("/admin/memberships", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        userId: createForm.userId,
+                        passPlanId: createForm.passPlanId,
+                        startsAt: new Date(createForm.startsAt).toISOString(),
+                        endsAt: new Date(createForm.endsAt).toISOString(),
+                        freezeDaysLimit: Number(createForm.freezeDaysLimit) || 0,
+                        canRenew: createForm.canRenew,
+                      }),
+                    });
 
-                  setMemberships(nextMemberships);
-                  setCreateForm(EMPTY_CREATE_FORM);
-                });
+                    setMemberships(nextMemberships);
+                    setCreateForm(EMPTY_CREATE_FORM);
+                  },
+                  "Не удалось назначить абонемент",
+                );
               }}
             >
               <label className={styles.field}>
@@ -423,27 +419,32 @@ export function AdminMembershipsScreen() {
                 onSubmit={(event) => {
                   event.preventDefault();
 
-                  void runAction("Сохраняем изменения", async () => {
-                    const nextMemberships = await apiFetch<AdminMembership[]>(
-                      `/admin/memberships/${selectedMembership.id}`,
-                      {
-                        method: "PATCH",
-                        body: JSON.stringify({
-                          title: editForm.title,
-                          subtitle: editForm.subtitle,
-                          description: editForm.description,
-                          startsAt: new Date(editForm.startsAt).toISOString(),
-                          endsAt: new Date(editForm.endsAt).toISOString(),
-                          freezeDaysLimit: Number(editForm.freezeDaysLimit) || 0,
-                          canRenew: editForm.canRenew,
-                          sortOrder: Number(editForm.sortOrder) || 0,
-                          status: editForm.status,
-                        }),
-                      },
-                    );
+                  void runAction(
+                    "Сохраняем изменения",
+                    "Изменения сохранены",
+                    async () => {
+                      const nextMemberships = await apiFetch<AdminMembership[]>(
+                        `/admin/memberships/${selectedMembership.id}`,
+                        {
+                          method: "PATCH",
+                          body: JSON.stringify({
+                            title: editForm.title,
+                            subtitle: editForm.subtitle,
+                            description: editForm.description,
+                            startsAt: new Date(editForm.startsAt).toISOString(),
+                            endsAt: new Date(editForm.endsAt).toISOString(),
+                            freezeDaysLimit: Number(editForm.freezeDaysLimit) || 0,
+                            canRenew: editForm.canRenew,
+                            sortOrder: Number(editForm.sortOrder) || 0,
+                            status: editForm.status,
+                          }),
+                        },
+                      );
 
-                    setMemberships(nextMemberships);
-                  });
+                      setMemberships(nextMemberships);
+                    },
+                    "Не удалось сохранить изменения",
+                  );
                 }}
               >
                 <label className={styles.field}>
@@ -593,17 +594,22 @@ export function AdminMembershipsScreen() {
                     type="button"
                     className={styles.warnButton}
                     onClick={() =>
-                      void runAction("Завершаем абонемент", async () => {
-                        const nextMemberships = await apiFetch<AdminMembership[]>(
-                          `/admin/memberships/${selectedMembership.id}/expire`,
-                          {
-                            method: "POST",
-                            body: JSON.stringify({}),
-                          },
-                        );
+                      void runAction(
+                        "Завершаем абонемент",
+                        "Абонемент завершён",
+                        async () => {
+                          const nextMemberships = await apiFetch<AdminMembership[]>(
+                            `/admin/memberships/${selectedMembership.id}/expire`,
+                            {
+                              method: "POST",
+                              body: JSON.stringify({}),
+                            },
+                          );
 
-                        setMemberships(nextMemberships);
-                      })
+                          setMemberships(nextMemberships);
+                        },
+                        "Не удалось завершить абонемент",
+                      )
                     }
                   >
                     Завершить
@@ -612,17 +618,22 @@ export function AdminMembershipsScreen() {
                     type="button"
                     className={styles.secondaryButton}
                     onClick={() =>
-                      void runAction("Снимаем заморозку", async () => {
-                        const nextMemberships = await apiFetch<AdminMembership[]>(
-                          `/admin/memberships/${selectedMembership.id}/unfreeze`,
-                          {
-                            method: "POST",
-                            body: JSON.stringify({}),
-                          },
-                        );
+                      void runAction(
+                        "Снимаем заморозку",
+                        "Заморозка снята",
+                        async () => {
+                          const nextMemberships = await apiFetch<AdminMembership[]>(
+                            `/admin/memberships/${selectedMembership.id}/unfreeze`,
+                            {
+                              method: "POST",
+                              body: JSON.stringify({}),
+                            },
+                          );
 
-                        setMemberships(nextMemberships);
-                      })
+                          setMemberships(nextMemberships);
+                        },
+                        "Не удалось снять заморозку",
+                      )
                     }
                   >
                     Снять заморозку
