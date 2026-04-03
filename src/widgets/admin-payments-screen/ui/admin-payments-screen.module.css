@@ -390,6 +390,15 @@
   letter-spacing: 0.05em;
 }
 
+.table tbody tr {
+  cursor: pointer;
+}
+
+.table tbody tr:hover,
+.rowActive {
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .statusBadge {
   display: inline-flex;
   align-items: center;
@@ -405,6 +414,31 @@
 .loadMoreWrap {
   display: flex;
   justify-content: center;
+}
+
+.detailsStack,
+.eventsList {
+  display: grid;
+  gap: 14px;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detailActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eventCard {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .emptyState {
@@ -444,6 +478,10 @@
 
 @media (max-width: 560px) {
   .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailsGrid {
     grid-template-columns: 1fr;
   }
 

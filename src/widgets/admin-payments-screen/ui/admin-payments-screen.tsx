@@ -7,6 +7,7 @@ import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { apiFetch, ApiError } from "@/shared/lib/api";
 import type {
+  AdminPaymentDetails,
   AdminPaymentLedgerItem,
   AdminPaymentsLedgerPage,
   AdminPaymentsOverview,
@@ -26,6 +27,10 @@ export function AdminPaymentsScreen() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<AdminPaymentDetails | null>(null);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+  const [isRefundLoading, setIsRefundLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadWorkspace = async (selectedRange: "30d") => {
@@ -44,6 +49,12 @@ export function AdminPaymentsScreen() {
     setOverview(overviewData);
     setLedger(ledgerData.items);
     setNextCursor(ledgerData.nextCursor);
+    if (selectedPaymentId) {
+      const details = await apiFetch<AdminPaymentDetails>(`/admin/payments/${selectedPaymentId}`, {
+        cache: "no-store",
+      });
+      setSelectedPayment(details);
+    }
   };
 
   useEffect(() => {
@@ -97,6 +108,46 @@ export function AdminPaymentsScreen() {
       setError(getErrorMessage(loadMoreError, "Не удалось догрузить транзакции"));
     } finally {
       setIsLoadingMore(false);
+    }
+  };
+
+  const handleSelectPayment = async (paymentId: string) => {
+    try {
+      setSelectedPaymentId(paymentId);
+      setIsDetailsLoading(true);
+      setError(null);
+      const details = await apiFetch<AdminPaymentDetails>(`/admin/payments/${paymentId}`, {
+        cache: "no-store",
+      });
+      setSelectedPayment(details);
+    } catch (loadError) {
+      setError(getErrorMessage(loadError, "Не удалось загрузить детали платежа"));
+    } finally {
+      setIsDetailsLoading(false);
+    }
+  };
+
+  const handleRefund = async () => {
+    if (!selectedPaymentId) {
+      return;
+    }
+
+    try {
+      setIsRefundLoading(true);
+      setError(null);
+      const details = await apiFetch<AdminPaymentDetails>(
+        `/admin/payments/${selectedPaymentId}/refund`,
+        {
+          method: "POST",
+          body: JSON.stringify({}),
+        },
+      );
+      setSelectedPayment(details);
+      await loadWorkspace(range);
+    } catch (refundError) {
+      setError(getErrorMessage(refundError, "Не удалось выполнить возврат"));
+    } finally {
+      setIsRefundLoading(false);
     }
   };
 
@@ -333,14 +384,24 @@ export function AdminPaymentsScreen() {
                   </thead>
                   <tbody>
                     {ledger.map((item) => (
-                      <tr key={item.paymentId}>
+                      <tr
+                        key={item.paymentId}
+                        onClick={() => void handleSelectPayment(item.paymentId)}
+                        className={selectedPaymentId === item.paymentId ? styles.rowActive : undefined}
+                      >
                         <td>
                           <div className={styles.primaryCell}>{formatDateTime(item.paidAt)}</div>
-                          <div className={styles.secondaryCell}>{item.status}</div>
+                          <div className={styles.secondaryCell}>
+                            {item.status}
+                            {item.gatewayStatus ? ` · ${item.gatewayStatus}` : ""}
+                          </div>
                         </td>
                         <td>
                           <div className={styles.primaryCell}>{formatCurrency(item.amount)}</div>
-                          <div className={styles.secondaryCell}>{item.currency}</div>
+                          <div className={styles.secondaryCell}>
+                            {item.currency}
+                            {item.refundedAmount > 0 ? ` · возврат ${formatCurrency(item.refundedAmount)}` : ""}
+                          </div>
                         </td>
                         <td>
                           <div className={styles.primaryCell}>{item.plan.title}</div>
@@ -356,7 +417,9 @@ export function AdminPaymentsScreen() {
                         </td>
                         <td>
                           <div className={styles.primaryCell}>{item.merchantOrderNumber}</div>
-                          <div className={styles.secondaryCell}>{item.paymentId}</div>
+                          <div className={styles.secondaryCell}>
+                            {item.gatewayPaymentId ?? item.paymentId}
+                          </div>
                         </td>
                         <td>
                           <div className={styles.statusBadge}>
@@ -387,6 +450,123 @@ export function AdminPaymentsScreen() {
                 </div>
               ) : null}
             </>
+          )}
+        </section>
+
+        <section className={styles.chartCard}>
+          <div className={styles.cardHeader}>
+            <div>
+              <h2 className={styles.cardTitle}>Детали платежа</h2>
+              <p className={styles.cardText}>
+                Gateway-статусы, возврат и последние события по выбранной операции
+              </p>
+            </div>
+          </div>
+
+          {isDetailsLoading ? (
+            <p className={styles.cardText}>Загружаем детали платежа…</p>
+          ) : selectedPayment ? (
+            <div className={styles.detailsStack}>
+              <div className={styles.detailsGrid}>
+                <div>
+                  <div className={styles.primaryCell}>{selectedPayment.plan.title}</div>
+                  <div className={styles.secondaryCell}>
+                    {[selectedPayment.plan.categoryTitle, selectedPayment.plan.variantTitle, selectedPayment.plan.groupTitle]
+                      .filter(Boolean)
+                      .join(" / ")}
+                  </div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>{selectedPayment.user.name}</div>
+                  <div className={styles.secondaryCell}>{selectedPayment.user.email}</div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>{selectedPayment.gatewayProvider}</div>
+                  <div className={styles.secondaryCell}>
+                    {selectedPayment.gatewayStatus ?? "Статус не получен"}
+                  </div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>
+                    {selectedPayment.gatewayPaymentId ?? "Нет PaymentId"}
+                  </div>
+                  <div className={styles.secondaryCell}>
+                    {selectedPayment.gatewayOrderId ?? "Legacy order id отсутствует"}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.detailActions}>
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  onClick={() => void handleSelectPayment(selectedPayment.paymentId)}
+                >
+                  Обновить детали
+                </button>
+                {selectedPayment.canRefund ? (
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    onClick={() => void handleRefund()}
+                    disabled={isRefundLoading}
+                  >
+                    {isRefundLoading ? "Возвращаем…" : "Полный возврат"}
+                  </button>
+                ) : null}
+              </div>
+
+              <div className={styles.detailsGrid}>
+                <div>
+                  <div className={styles.primaryCell}>{selectedPayment.statusLabel}</div>
+                  <div className={styles.secondaryCell}>{selectedPayment.status}</div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>{formatCurrency(selectedPayment.amount)}</div>
+                  <div className={styles.secondaryCell}>
+                    Возвращено: {formatCurrency(selectedPayment.refundedAmount)}
+                  </div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>
+                    {selectedPayment.lastNotificationAt
+                      ? formatDateTime(selectedPayment.lastNotificationAt)
+                      : "Webhook ещё не приходил"}
+                  </div>
+                  <div className={styles.secondaryCell}>
+                    Токен webhook:{" "}
+                    {selectedPayment.notificationTokenValid === null
+                      ? "не проверялся"
+                      : selectedPayment.notificationTokenValid
+                        ? "валидный"
+                        : "невалидный"}
+                  </div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>
+                    {selectedPayment.actionCodeDescription ?? selectedPayment.gatewayMessage ?? "Без сообщения"}
+                  </div>
+                  <div className={styles.secondaryCell}>
+                    {selectedPayment.gatewayErrorCode ?? selectedPayment.gatewayDetails ?? "Без кода ошибки"}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.eventsList}>
+                {selectedPayment.events.map((event) => (
+                  <article key={event.id} className={styles.eventCard}>
+                    <div className={styles.primaryCell}>
+                      {event.type} · {formatDateTime(event.createdAt)}
+                    </div>
+                    <div className={styles.secondaryCell}>
+                      {[event.gatewayStatus, event.errorCode, event.message].filter(Boolean).join(" · ") || "Без деталей"}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className={styles.cardText}>Выберите строку в ledger, чтобы открыть детали.</p>
           )}
         </section>
       </section>

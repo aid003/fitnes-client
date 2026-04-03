@@ -369,8 +369,11 @@ export type AdminMembership = {
 export type PaymentOrderStatus =
   | "CREATED"
   | "FORM_REGISTERED"
+  | "REDIRECT_READY"
   | "REDIRECTED"
+  | "PROCESSING"
   | "PAID"
+  | "REFUNDED"
   | "FAILED"
   | "EXPIRED"
   | "CANCELLED";
@@ -403,6 +406,11 @@ export type PaymentStatusResponse = {
   actionCodeDescription: string | null;
   membershipId: string | null;
   membershipIssuedAt: string | null;
+  gatewayStatus: string | null;
+  gatewayProvider: "ALFA" | "TBANK";
+  gatewayPaymentId: string | null;
+  refundedAmount: number;
+  refundedAt: string | null;
   canRetry: boolean;
   isFinal: boolean;
 };
@@ -476,6 +484,11 @@ export type AdminPaymentLedgerItem = {
   amount: number;
   currency: string;
   status: PaymentOrderStatus;
+  gatewayProvider: "ALFA" | "TBANK";
+  gatewayPaymentId: string | null;
+  gatewayStatus: string | null;
+  refundedAmount: number;
+  canRefund: boolean;
   user: {
     id: string;
     name: string;
@@ -497,6 +510,42 @@ export type AdminPaymentsLedgerPage = {
   range: "30d";
   items: AdminPaymentLedgerItem[];
   nextCursor: string | null;
+};
+
+export type AdminPaymentEvent = {
+  id: string;
+  type: string;
+  gatewayStatus: string | null;
+  success: boolean | null;
+  errorCode: string | null;
+  message: string | null;
+  payload: unknown;
+  createdAt: string;
+};
+
+export type AdminPaymentDetails = PaymentStatusResponse & {
+  gatewayOrderId: string | null;
+  gatewayErrorCode: string | null;
+  gatewayMessage: string | null;
+  gatewayDetails: string | null;
+  notificationTokenValid: boolean | null;
+  lastNotificationAt: string | null;
+  receiptPayload: unknown;
+  canRefund: boolean;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  plan: {
+    id: string;
+    title: string;
+    subtitle: string | null;
+    categoryTitle: string | null;
+    variantTitle: string | null;
+    groupTitle: string | null;
+  };
+  events: AdminPaymentEvent[];
 };
 
 export type MembershipQrViewModel = {
