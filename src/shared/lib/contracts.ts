@@ -180,7 +180,7 @@ export type PassCategoryDetails = {
   variants: PassVariant[];
 };
 
-export type MembershipStatus = "ACTIVE" | "FROZEN" | "EXPIRED";
+export type MembershipStatus = "ACTIVE" | "FROZEN" | "EXPIRED" | "REFUNDED";
 
 export type MembershipFreezeStatus = "ACTIVE" | "COMPLETED" | "CANCELLED";
 

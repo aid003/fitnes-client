@@ -17,6 +17,7 @@ import { useRequireAuth } from "@/shared/auth/auth-guards";
 import { apiFetch, ApiError } from "@/shared/lib/api";
 import type {
   FreezeMembershipPayload,
+  MembershipTone,
   MembershipQrViewModel,
   MyMembershipsResponse,
   UserMembershipCard,
@@ -237,6 +238,7 @@ export function MembershipsScreen() {
               <div className={styles.historyList}>
                 {completedMemberships.map((membership) => {
                   const isExpanded = expandedHistoryIds.includes(membership.id);
+                  const historyStatusClassName = getStatusClassName(membership.statusTone);
 
                   return (
                     <article key={membership.id} className={styles.historyCard}>
@@ -252,15 +254,23 @@ export function MembershipsScreen() {
                           <span className={styles.historyTitle}>{membership.title}</span>
                           <span className={styles.historySubtitle}>{membership.subtitle}</span>
                         </span>
-                        {isExpanded ? (
-                          <ChevronDown className={styles.historyChevron} strokeWidth={2.6} />
-                        ) : (
-                          <ChevronRight className={styles.historyChevron} strokeWidth={2.6} />
-                        )}
+                        <span className={styles.historyMeta}>
+                          <span className={historyStatusClassName}>{membership.statusLabel}</span>
+                          {isExpanded ? (
+                            <ChevronDown className={styles.historyChevron} strokeWidth={2.6} />
+                          ) : (
+                            <ChevronRight className={styles.historyChevron} strokeWidth={2.6} />
+                          )}
+                        </span>
                       </button>
 
                       {isExpanded ? (
                         <div className={styles.historyDetails}>
+                          {membership.status === "REFUNDED" ? (
+                            <p className={styles.pendingNote}>
+                              Возврат оформлен. Абонемент закрыт и больше не может использоваться.
+                            </p>
+                          ) : null}
                           {membership.hasQr ? (
                             <button
                               type="button"
@@ -343,17 +353,7 @@ function MembershipCard({
     membership.expiresAt,
     membership.startsAt,
   ]);
-
-  const statusClassName = [
-    styles.statusBadge,
-    membership.statusTone === "danger"
-      ? styles.statusDanger
-      : membership.statusTone === "warning"
-        ? styles.statusWarning
-        : membership.statusTone === "muted"
-          ? styles.statusMuted
-          : styles.statusSuccess,
-  ].join(" ");
+  const statusClassName = getStatusClassName(membership.statusTone);
 
   return (
     <article
@@ -513,6 +513,19 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <span className={styles.infoValue}>{value}</span>
     </div>
   );
+}
+
+function getStatusClassName(statusTone: MembershipTone) {
+  return [
+    styles.statusBadge,
+    statusTone === "danger"
+      ? styles.statusDanger
+      : statusTone === "warning"
+        ? styles.statusWarning
+        : statusTone === "muted"
+          ? styles.statusMuted
+          : styles.statusSuccess,
+  ].join(" ");
 }
 
 function getRingProgress(startsAt: string, expiresAt: string) {

@@ -537,6 +537,7 @@ export function AdminMembershipsScreen() {
                       <option value="ACTIVE">ACTIVE</option>
                       <option value="FROZEN">FROZEN</option>
                       <option value="EXPIRED">EXPIRED</option>
+                      <option value="REFUNDED">REFUNDED</option>
                     </select>
                   </label>
 
