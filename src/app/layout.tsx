@@ -8,6 +8,28 @@ import "../shared/styles/globals.css";
 export const metadata: Metadata = {
   title: "Эра Спорта",
   description: "Мобильное приложение фитнес-клуба",
+  manifest: "/favicon/site.webmanifest",
+  icons: {
+    icon: [
+      {
+        url: "/favicon/favicon-16x16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+      {
+        url: "/favicon/favicon-32x32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
+        url: "/favicon/android-chrome-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+    ],
+    apple: "/favicon/apple-touch-icon.png",
+    shortcut: "/favicon/favicon.ico",
+  },
 };
 
 export default function RootLayout({

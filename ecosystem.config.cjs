@@ -9,6 +9,8 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
+      min_uptime: '10s',
+      restart_delay: 5000,
       max_memory_restart: '500M',
     },
   ],
