@@ -43,6 +43,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const syncPromiseRef = useRef<Promise<AuthUser | null> | null>(null);
   const providerIdRef = useRef(
     typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID().slice(0, 8)
@@ -50,33 +51,71 @@ export function AuthProvider({ children }: PropsWithChildren) {
   );
 
   const refreshUser = async () => {
-    logAuthDebug(providerIdRef.current, "refreshUser:start");
-
-    try {
-      const nextUser = await apiFetch<AuthUser>("/auth/me");
-      setUser(nextUser);
-      setError(null);
-      logAuthDebug(providerIdRef.current, "refreshUser:success", {
-        userId: nextUser.id,
-        role: nextUser.role,
-      });
-      return nextUser;
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
-        setUser(null);
-        setError(null);
-        logAuthDebug(providerIdRef.current, "refreshUser:unauthorized");
-        return null;
-      }
-
-      setError(error instanceof Error ? error.message : "Не удалось загрузить профиль");
-      logAuthDebug(providerIdRef.current, "refreshUser:error", {
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-      return null;
-    } finally {
-      setIsLoading(false);
+    if (syncPromiseRef.current) {
+      return syncPromiseRef.current;
     }
+
+    const syncPromise = (async () => {
+      logAuthDebug(providerIdRef.current, "refreshUser:start");
+
+      try {
+        const nextUser = await apiFetch<AuthUser>("/auth/me");
+        setUser(nextUser);
+        setError(null);
+        logAuthDebug(providerIdRef.current, "refreshUser:success", {
+          userId: nextUser.id,
+          role: nextUser.role,
+        });
+        return nextUser;
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          logAuthDebug(providerIdRef.current, "refreshUser:session-missed");
+
+          try {
+            const restoredUser = await apiFetch<AuthUser>("/auth/refresh-session", {
+              method: "POST",
+            });
+            setUser(restoredUser);
+            setError(null);
+            logAuthDebug(providerIdRef.current, "refreshUser:restored", {
+              userId: restoredUser.id,
+              role: restoredUser.role,
+            });
+            return restoredUser;
+          } catch (restoreError) {
+            if (restoreError instanceof ApiError && restoreError.status === 401) {
+              setUser(null);
+              setError(null);
+              logAuthDebug(providerIdRef.current, "refreshUser:unauthorized");
+              return null;
+            }
+
+            setError(
+              restoreError instanceof Error
+                ? restoreError.message
+                : "Не удалось восстановить сессию",
+            );
+            logAuthDebug(providerIdRef.current, "refreshUser:restore-error", {
+              message:
+                restoreError instanceof Error ? restoreError.message : "Unknown error",
+            });
+            return null;
+          }
+        }
+
+        setError(error instanceof Error ? error.message : "Не удалось загрузить профиль");
+        logAuthDebug(providerIdRef.current, "refreshUser:error", {
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+        return null;
+      } finally {
+        setIsLoading(false);
+        syncPromiseRef.current = null;
+      }
+    })();
+
+    syncPromiseRef.current = syncPromise;
+    return syncPromise;
   };
 
   useEffect(() => {
@@ -87,7 +126,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
     });
     void refreshUser();
 
+    const syncOnForeground = () => {
+      if (document.visibilityState === "visible") {
+        void refreshUser();
+      }
+    };
+
+    const syncOnFocus = () => {
+      void refreshUser();
+    };
+
+    document.addEventListener("visibilitychange", syncOnForeground);
+    window.addEventListener("focus", syncOnFocus);
+
     return () => {
+      document.removeEventListener("visibilitychange", syncOnForeground);
+      window.removeEventListener("focus", syncOnFocus);
       logAuthDebug(providerId, "provider:unmounted");
     };
   }, []);

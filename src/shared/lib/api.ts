@@ -8,9 +8,7 @@ export class ApiError extends Error {
   }
 }
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ??
-  'http://localhost:3001';
+const API_BASE_URL = resolveApiBaseUrl();
 
 type ApiRequestInit = RequestInit & {
   skipJson?: boolean;
@@ -89,4 +87,22 @@ async function extractErrorMessage(response: Response): Promise<string> {
   }
 
   return `Request failed with status ${response.status}`;
+}
+
+function resolveApiBaseUrl(): string {
+  const configuredBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+
+  if (configuredBaseUrl) {
+    return configuredBaseUrl;
+  }
+
+  if (typeof window !== 'undefined') {
+    const { origin, hostname } = window.location;
+
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return origin;
+    }
+  }
+
+  return 'http://localhost:8000';
 }

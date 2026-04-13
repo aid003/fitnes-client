@@ -100,6 +100,41 @@ export function AdminAdsScreen() {
 
   const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
+  useEffect(() => {
+    if (!pendingUpload || !selectedItem || isCreateMode) {
+      return;
+    }
+
+    void runAction(
+      "Загружаем изображение баннера",
+      "Изображение загружено",
+      async () => {
+        const formData = new FormData();
+        formData.append("file", pendingUpload);
+        const response = await apiFetch<UploadImageResponse<AdminAdBanner>>(
+          `/admin/ads/${selectedItem.id}/image`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+        const nextItem = {
+          ...response.item,
+          imageUrl: resolveApiAssetUrl(response.item.imageUrl),
+        };
+
+        setItems((current) =>
+          current.map((item) => (item.id === nextItem.id ? nextItem : item)),
+        );
+        setPendingUpload(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      },
+      "Не удалось загрузить изображение баннера",
+    );
+  }, [isCreateMode, pendingUpload, runAction, selectedItem]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -387,46 +422,11 @@ export function AdminAdsScreen() {
                       </div>
 
                       <div className={styles.mediaButtons}>
-                        <button
-                          type="button"
-                          className={styles.secondaryButton}
-                          disabled={!pendingUpload}
-                          onClick={() => {
-                            if (!pendingUpload) {
-                              return;
-                            }
-
-                            void runAction(
-                              "Загружаем изображение баннера",
-                              "Изображение загружено",
-                              async () => {
-                                const formData = new FormData();
-                                formData.append("file", pendingUpload);
-                                const response = await apiFetch<UploadImageResponse<AdminAdBanner>>(
-                                  `/admin/ads/${selectedItem.id}/image`,
-                                  {
-                                    method: "POST",
-                                    body: formData,
-                                  },
-                                );
-
-                                setItems((current) =>
-                                  current.map((item) =>
-                                    item.id === response.item.id ? response.item : item,
-                                  ),
-                                );
-                                setPendingUpload(null);
-                                if (fileInputRef.current) {
-                                  fileInputRef.current.value = "";
-                                }
-                              },
-                              "Не удалось загрузить изображение баннера",
-                            );
-                          }}
-                        >
-                          <Upload size={16} />
-                          Загрузить картинку
-                        </button>
+                        <span className={styles.panelText}>
+                          {pendingUpload
+                            ? "Файл выбран, загрузка запускается автоматически."
+                            : "После выбора файла загрузка запускается автоматически."}
+                        </span>
 
                         <button
                           type="button"

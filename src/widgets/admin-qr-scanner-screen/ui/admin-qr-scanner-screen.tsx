@@ -180,7 +180,7 @@ export function AdminQrScannerScreen() {
             <p className={styles.eyebrow}>Административный раздел</p>
             <h1 className={styles.title}>Сканер QR</h1>
             <p className={styles.subtitle}>
-              Считайте QR абонемента камерой и сразу проверьте состав тарифа и данные оплаты.
+              Считайте QR абонемента камерой и сразу активируйте проход, проверьте тариф и состояние абонемента.
             </p>
           </div>
 
@@ -201,10 +201,10 @@ export function AdminQrScannerScreen() {
             <article className={styles.resultSummaryCard}>
               <div className={styles.resultSummaryHeader}>
                 <div>
-                  <p className={styles.resultEyebrow}>Результат проверки</p>
-                  <h2 className={styles.resultTitle}>QR-код подтверждён</h2>
+                  <p className={styles.resultEyebrow}>Результат сканирования</p>
+                  <h2 className={styles.resultTitle}>QR-код обработан</h2>
                   <p className={styles.cardText}>
-                    Сначала ключевые данные по абонементу и оплате, затем тариф и данные клиента.
+                    Сначала итог прохода, затем ключевые данные по абонементу, тарифу и оплате.
                   </p>
                 </div>
 
@@ -223,6 +223,17 @@ export function AdminQrScannerScreen() {
 
             <section className={styles.resultLayout}>
               <DenseSection
+                title="Итог прохода"
+                tone="primary"
+                rows={[
+                  ["Состояние", result.membershipStateLabel],
+                  ["Активация", result.activationPerformed ? "Выполнена этим сканом" : "Уже был активирован"],
+                  ["Посещение", result.visitConsumed ? "Списано" : "Не списывалось"],
+                  ["Остаток посещений", result.remainingVisits !== null ? String(result.remainingVisits) : "Не применяется"],
+                ]}
+              />
+
+              <DenseSection
                 title="Абонемент"
                 tone="primary"
                 rows={[
@@ -230,8 +241,15 @@ export function AdminQrScannerScreen() {
                   ["Название", result.membership.title],
                   ["Подзаголовок", result.membership.subtitle ?? "Без подзаголовка"],
                   ["Статус", result.membership.status],
-                  ["Начало", formatDateTime(result.membership.startsAt)],
-                  ["Окончание", formatDateTime(result.membership.endsAt)],
+                  ["Активация", result.membership.activationStatus],
+                  ["Выдан", formatDateTime(result.membership.issuedAt)],
+                  ["Активирован", result.membership.activatedAt ? formatDateTime(result.membership.activatedAt) : "Ещё нет"],
+                  ["Начало", result.membership.startsAt ? formatDateTime(result.membership.startsAt) : "После активации"],
+                  ["Окончание", result.membership.endsAt ? formatDateTime(result.membership.endsAt) : "Без срока"],
+                  ["Тип", result.membership.billingType ?? "Не задан"],
+                  ["Всего посещений", result.membership.totalVisits?.toString() ?? "Не применяется"],
+                  ["Использовано", result.membership.usedVisits.toString()],
+                  ["Осталось", result.membership.remainingVisits?.toString() ?? "Не применяется"],
                   ["Лимит заморозки", `${result.membership.freezeDaysLimit} дн.`],
                 ]}
               />
@@ -268,6 +286,7 @@ export function AdminQrScannerScreen() {
                   ["Описание", result.plan.description ?? "Без описания"],
                   ["Тип биллинга", result.plan.billingType ?? "Не задан"],
                   ["Срок", formatPlanDuration(result.plan.durationValue, result.plan.durationUnit)],
+                  ["Посещений в плане", result.plan.visitCount?.toString() ?? "Не задано"],
                 ]}
               />
 
@@ -296,7 +315,7 @@ export function AdminQrScannerScreen() {
               <div className={styles.scannerHeader}>
                 <div>
                   <h2 className={styles.cardTitle}>Камера</h2>
-                  <p className={styles.cardText}>Наведите камеру на QR-код из кабинета клиента.</p>
+                  <p className={styles.cardText}>Наведите камеру на QR-код из кабинета клиента. Первый проход может активировать абонемент.</p>
                 </div>
 
                 <button type="button" className={styles.refreshButton} onClick={() => void startScanner()}>

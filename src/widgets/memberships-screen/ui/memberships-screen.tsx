@@ -349,11 +349,15 @@ function MembershipCard({
   onShowQr,
   isQrLoading,
 }: MembershipCardProps) {
-  const progress = useMemo(() => getRingProgress(membership.startsAt, membership.expiresAt), [
-    membership.expiresAt,
-    membership.startsAt,
-  ]);
+  const progress = useMemo(
+    () => getRingProgress(membership.startsAt, membership.expiresAt),
+    [membership.expiresAt, membership.startsAt],
+  );
   const statusClassName = getStatusClassName(membership.statusTone);
+  const showsTermProgress =
+    membership.usageMode === "TERM" && membership.startsAt && membership.expiresAt;
+  const showsVisitCounter =
+    membership.usageMode === "VISIT" && membership.remainingVisits !== null;
 
   return (
     <article
@@ -383,22 +387,30 @@ function MembershipCard({
         <div className={styles.cardCopy}>
           {membership.planOrigin ? <p className={styles.planOrigin}>{membership.planOrigin}</p> : null}
           <h3 className={styles.cardTitle}>{membership.title}</h3>
-          <p className={styles.cardSubtitle}>
-            Действует до {formatDisplayDate(membership.expiresAt)}
-          </p>
+          <p className={styles.cardSubtitle}>{membership.subtitle}</p>
         </div>
 
-        <div
-          className={styles.ring}
-          style={{ "--progress": `${progress}%` } as CSSProperties}
-          aria-label={`Осталось ${membership.daysLeft} дней`}
-        >
-          <div className={styles.ringInner}>
-            <span className={styles.ringCaption}>Осталось</span>
-            <span className={styles.ringValue}>{membership.daysLeft}</span>
-            <span className={styles.ringUnit}>Дней</span>
+        {showsTermProgress ? (
+          <div
+            className={styles.ring}
+            style={{ "--progress": `${progress}%` } as CSSProperties}
+            aria-label={`Осталось ${membership.daysLeft ?? 0} дней`}
+          >
+            <div className={styles.ringInner}>
+              <span className={styles.ringCaption}>Осталось</span>
+              <span className={styles.ringValue}>{membership.daysLeft ?? 0}</span>
+              <span className={styles.ringUnit}>Дней</span>
+            </div>
           </div>
-        </div>
+        ) : showsVisitCounter ? (
+          <div className={styles.ring} style={{ "--progress": "100%" } as CSSProperties}>
+            <div className={styles.ringInner}>
+              <span className={styles.ringCaption}>Осталось</span>
+              <span className={styles.ringValue}>{membership.remainingVisits}</span>
+              <span className={styles.ringUnit}>Посещ.</span>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className={styles.featureList}>
@@ -408,13 +420,27 @@ function MembershipCard({
             <span>{feature.label}</span>
           </div>
         ))}
-        <div className={styles.featureItem}>
-          <Snowflake className={styles.featureIcon} strokeWidth={2.4} />
-          <span>Заморозка: осталось {membership.freezeDaysLeft} дн.</span>
-        </div>
+        {membership.usageMode === "TERM" ? (
+          <div className={styles.featureItem}>
+            <Snowflake className={styles.featureIcon} strokeWidth={2.4} />
+            <span>Заморозка: осталось {membership.freezeDaysLeft} дн.</span>
+          </div>
+        ) : null}
+        {membership.usageMode === "VISIT" && membership.totalVisits !== null ? (
+          <div className={styles.featureItem}>
+            <Check className={styles.featureIcon} strokeWidth={2.4} />
+            <span>
+              Использовано {membership.usedVisits} из {membership.totalVisits} посещений
+            </span>
+          </div>
+        ) : null}
       </div>
 
-      {membership.status === "FROZEN" ? (
+      {membership.status === "PENDING_ACTIVATION" ? (
+        <p className={styles.pendingNote}>
+          Абонемент запустится с первого сканирования в клубе.
+        </p>
+      ) : membership.status === "FROZEN" ? (
         <p className={styles.pendingNote}>Абонемент заморожен. Разморозить его можно в любой момент.</p>
       ) : membership.status === "EXPIRED" && membership.canRequestRenewalNow ? (
         <p className={styles.pendingNote}>Абонемент завершён. Можно перейти к оплате нового периода.</p>
@@ -497,7 +523,11 @@ function MembershipQrModal({ qr, onClose }: MembershipQrModalProps) {
             value={qr.payloadSummary.paidAt ? formatDateTime(qr.payloadSummary.paidAt) : "Не подтверждено"}
           />
           <InfoRow label="Номер заказа" value={qr.payloadSummary.merchantOrderNumber} />
-          <InfoRow label="Действует до" value={formatDateTime(qr.payloadSummary.expiresAt)} />
+          <InfoRow label="Статус" value={qr.payloadSummary.membershipStateLabel} />
+          <InfoRow
+            label="Действует до"
+            value={qr.payloadSummary.expiresAt ? formatDateTime(qr.payloadSummary.expiresAt) : "После активации"}
+          />
         </div>
 
         <p className={styles.modalFootnote}>QR сформирован {formatDateTime(qr.generatedAt)}</p>
@@ -528,7 +558,11 @@ function getStatusClassName(statusTone: MembershipTone) {
   ].join(" ");
 }
 
-function getRingProgress(startsAt: string, expiresAt: string) {
+function getRingProgress(startsAt: string | null, expiresAt: string | null) {
+  if (!startsAt || !expiresAt) {
+    return 0;
+  }
+
   const start = new Date(startsAt).getTime();
   const end = new Date(expiresAt).getTime();
   const total = Math.max(1, end - start);

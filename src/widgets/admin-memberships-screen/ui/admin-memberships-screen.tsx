@@ -67,6 +67,7 @@ export function AdminMembershipsScreen() {
           variant.groups.flatMap((group) =>
             group.plans.map((plan) => ({
               id: plan.id,
+              billingType: plan.billingType,
               label: `${category.title} / ${variant.title} / ${group.title} / ${plan.title}`,
             })),
           ),
@@ -74,6 +75,13 @@ export function AdminMembershipsScreen() {
       ),
     [categories],
   );
+  const selectedCreatePlan = useMemo(
+    () => planOptions.find((plan) => plan.id === createForm.passPlanId) ?? null,
+    [createForm.passPlanId, planOptions],
+  );
+  const createPlanIsVisitBased =
+    selectedCreatePlan?.billingType === "SINGLE_VISIT" ||
+    selectedCreatePlan?.billingType === "VISIT_PACK";
 
   const selectedMembership = useMemo(
     () => memberships.find((membership) => membership.id === selectedMembershipId) ?? null,
@@ -122,7 +130,7 @@ export function AdminMembershipsScreen() {
       startsAt: toDateTimeLocalInput(selectedMembership.startsAt),
       endsAt: toDateTimeLocalInput(selectedMembership.endsAt),
       freezeDaysLimit: String(selectedMembership.freezeDaysLimit),
-      canRenew: selectedMembership.canRenew,
+      canRenew: selectedMembership.usageMode === "TERM" ? selectedMembership.canRenew : false,
       sortOrder: String(selectedMembership.sortOrder),
       status: selectedMembership.status,
     });
@@ -195,16 +203,21 @@ export function AdminMembershipsScreen() {
                   "Назначаем абонемент",
                   "Абонемент назначен",
                   async () => {
+                    const payload: Record<string, unknown> = {
+                      userId: createForm.userId,
+                      passPlanId: createForm.passPlanId,
+                    };
+
+                    if (!createPlanIsVisitBased) {
+                      payload.startsAt = new Date(createForm.startsAt).toISOString();
+                      payload.endsAt = new Date(createForm.endsAt).toISOString();
+                      payload.freezeDaysLimit = Number(createForm.freezeDaysLimit) || 0;
+                      payload.canRenew = createForm.canRenew;
+                    }
+
                     const nextMemberships = await apiFetch<AdminMembership[]>("/admin/memberships", {
                       method: "POST",
-                      body: JSON.stringify({
-                        userId: createForm.userId,
-                        passPlanId: createForm.passPlanId,
-                        startsAt: new Date(createForm.startsAt).toISOString(),
-                        endsAt: new Date(createForm.endsAt).toISOString(),
-                        freezeDaysLimit: Number(createForm.freezeDaysLimit) || 0,
-                        canRenew: createForm.canRenew,
-                      }),
+                      body: JSON.stringify(payload),
                     });
 
                     setMemberships(nextMemberships);
@@ -252,65 +265,73 @@ export function AdminMembershipsScreen() {
                 </select>
               </label>
 
-              <div className={styles.formGrid}>
-                <label className={styles.field}>
-                  <span className={styles.fieldLabel}>Начало</span>
-                  <input
-                    className={styles.fieldControl}
-                    type="datetime-local"
-                    value={createForm.startsAt}
-                    onChange={(event) =>
-                      setCreateForm((current) => ({ ...current, startsAt: event.target.value }))
-                    }
-                    required
-                  />
-                </label>
+              {createPlanIsVisitBased ? (
+                <p className={styles.panelText}>
+                  Для посещаемых тарифов срок не задаётся вручную. Абонемент будет ждать первого сканирования в клубе.
+                </p>
+              ) : (
+                <>
+                  <div className={styles.formGrid}>
+                    <label className={styles.field}>
+                      <span className={styles.fieldLabel}>Начало</span>
+                      <input
+                        className={styles.fieldControl}
+                        type="datetime-local"
+                        value={createForm.startsAt}
+                        onChange={(event) =>
+                          setCreateForm((current) => ({ ...current, startsAt: event.target.value }))
+                        }
+                        required
+                      />
+                    </label>
 
-                <label className={styles.field}>
-                  <span className={styles.fieldLabel}>Окончание</span>
-                  <input
-                    className={styles.fieldControl}
-                    type="datetime-local"
-                    value={createForm.endsAt}
-                    onChange={(event) =>
-                      setCreateForm((current) => ({ ...current, endsAt: event.target.value }))
-                    }
-                    required
-                  />
-                </label>
-              </div>
+                    <label className={styles.field}>
+                      <span className={styles.fieldLabel}>Окончание</span>
+                      <input
+                        className={styles.fieldControl}
+                        type="datetime-local"
+                        value={createForm.endsAt}
+                        onChange={(event) =>
+                          setCreateForm((current) => ({ ...current, endsAt: event.target.value }))
+                        }
+                        required
+                      />
+                    </label>
+                  </div>
 
-              <div className={styles.formGrid}>
-                <label className={styles.field}>
-                  <span className={styles.fieldLabel}>Лимит заморозки, дней</span>
-                  <input
-                    className={styles.fieldControl}
-                    type="number"
-                    min="0"
-                    value={createForm.freezeDaysLimit}
-                    onChange={(event) =>
-                      setCreateForm((current) => ({
-                        ...current,
-                        freezeDaysLimit: event.target.value,
-                      }))
-                    }
-                  />
-                </label>
+                  <div className={styles.formGrid}>
+                    <label className={styles.field}>
+                      <span className={styles.fieldLabel}>Лимит заморозки, дней</span>
+                      <input
+                        className={styles.fieldControl}
+                        type="number"
+                        min="0"
+                        value={createForm.freezeDaysLimit}
+                        onChange={(event) =>
+                          setCreateForm((current) => ({
+                            ...current,
+                            freezeDaysLimit: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
 
-                <label className={[styles.field, styles.checkboxField].join(" ")}>
-                  <span className={styles.fieldLabel}>Продление доступно</span>
-                  <input
-                    type="checkbox"
-                    checked={createForm.canRenew}
-                    onChange={(event) =>
-                      setCreateForm((current) => ({
-                        ...current,
-                        canRenew: event.target.checked,
-                      }))
-                    }
-                  />
-                </label>
-              </div>
+                    <label className={[styles.field, styles.checkboxField].join(" ")}>
+                      <span className={styles.fieldLabel}>Продление доступно</span>
+                      <input
+                        type="checkbox"
+                        checked={createForm.canRenew}
+                        onChange={(event) =>
+                          setCreateForm((current) => ({
+                            ...current,
+                            canRenew: event.target.checked,
+                          }))
+                        }
+                      />
+                    </label>
+                  </div>
+                </>
+              )}
 
               <button type="submit" className={styles.primaryButton}>
                 Назначить абонемент
@@ -367,10 +388,18 @@ export function AdminMembershipsScreen() {
                     {isExpanded ? (
                       <div className={styles.membershipHistory}>
                         <div className={styles.historyBlock}>
-                          <span>Период: {formatShortDate(membership.startsAt)} - {formatShortDate(membership.endsAt)}</span>
                           <span>
-                            Заморозка: {membership.freezeDaysUsed}/{membership.freezeDaysLimit} дн.
+                            {membership.usageMode === "VISIT"
+                              ? `Посещений: ${membership.usedVisits}/${membership.totalVisits ?? 0}, осталось ${membership.remainingVisits ?? 0}`
+                              : `Период: ${formatShortDate(membership.startsAt)} - ${formatShortDate(membership.endsAt)}`}
                           </span>
+                          {membership.usageMode === "TERM" ? (
+                            <span>
+                              Заморозка: {membership.freezeDaysUsed}/{membership.freezeDaysLimit} дн.
+                            </span>
+                          ) : (
+                            <span>Активация: {membership.activationStatus === "PENDING" ? "ожидается" : "выполнена"}</span>
+                          )}
                         </div>
 
                         {membership.freezes.length > 0 ? (

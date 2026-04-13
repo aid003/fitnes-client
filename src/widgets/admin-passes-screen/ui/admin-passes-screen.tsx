@@ -1065,6 +1065,38 @@ function CategoryEditForm({
     }
   }, [category.id, category.coverImageUrl]);
 
+  useEffect(() => {
+    if (!pendingUpload) {
+      return;
+    }
+
+    void onRunAction(
+      "Загружаем обложку категории...",
+      "Обложка загружена",
+      async () => {
+        if (pendingUpload.size > MAX_IMAGE_UPLOAD_SIZE_BYTES) {
+          throw new Error("Размер изображения должен быть не больше 5 МБ");
+        }
+
+        const formData = new FormData();
+        formData.append("file", pendingUpload);
+        const response = await apiFetch<UploadImageResponse<PassCategoryDetails>>(
+          `/admin/passes/categories/${category.id}/cover`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+        onReplaceCategory(response.item);
+        setPendingUpload(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      },
+      "Не удалось загрузить обложку категории",
+    );
+  }, [category.id, onReplaceCategory, onRunAction, pendingUpload]);
+
   return (
     <form className={styles.editorForm} onSubmit={(event) => handleCategorySubmit(event, onSubmit)}>
       <BasicCategoryFields category={category} />
@@ -1125,45 +1157,11 @@ function CategoryEditForm({
           </div>
 
           <div className={styles.mediaButtons}>
-            <button
-              type="button"
-              className={styles.secondaryButton}
-              disabled={!pendingUpload}
-              onClick={() => {
-                if (!pendingUpload) {
-                  return;
-                }
-
-                void onRunAction(
-                  "Загружаем обложку категории...",
-                  "Обложка загружена",
-                  async () => {
-                    if (pendingUpload.size > MAX_IMAGE_UPLOAD_SIZE_BYTES) {
-                      throw new Error("Размер изображения должен быть не больше 5 МБ");
-                    }
-
-                    const formData = new FormData();
-                    formData.append("file", pendingUpload);
-                    const response = await apiFetch<UploadImageResponse<PassCategoryDetails>>(
-                      `/admin/passes/categories/${category.id}/cover`,
-                      {
-                        method: "POST",
-                        body: formData,
-                      },
-                    );
-                    onReplaceCategory(response.item);
-                    setPendingUpload(null);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = "";
-                    }
-                  },
-                  "Не удалось загрузить обложку категории",
-                );
-              }}
-            >
-              <Upload size={16} />
-              Загрузить обложку
-            </button>
+            <span className={styles.panelText}>
+              {pendingUpload
+                ? "Файл выбран, загрузка запускается автоматически."
+                : "После выбора файла загрузка запускается автоматически."}
+            </span>
           </div>
         </div>
       </section>

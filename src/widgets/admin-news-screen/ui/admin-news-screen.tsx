@@ -133,6 +133,41 @@ export function AdminNewsScreen() {
 
   const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
+  useEffect(() => {
+    if (!pendingUpload || !selectedItem || isCreateMode) {
+      return;
+    }
+
+    void runAction(
+      "Загружаем обложку новости",
+      "Обложка загружена",
+      async () => {
+        const formData = new FormData();
+        formData.append("file", pendingUpload);
+        const response = await apiFetch<UploadImageResponse<AdminNewsArticle>>(
+          `/admin/news/${selectedItem.id}/cover`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+        const nextItem = {
+          ...response.item,
+          coverImageUrl: resolveApiAssetUrl(response.item.coverImageUrl),
+        };
+
+        setItems((current) =>
+          current.map((item) => (item.id === nextItem.id ? nextItem : item)),
+        );
+        setPendingUpload(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      },
+      "Не удалось загрузить обложку новости",
+    );
+  }, [isCreateMode, pendingUpload, runAction, selectedItem]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -143,10 +178,10 @@ export function AdminNewsScreen() {
         const payload = {
           title: form.title,
           slug: form.slug,
-          excerpt: form.excerpt || undefined,
-          lead: form.lead || undefined,
+          excerpt: form.excerpt,
+          lead: form.lead,
           tags: splitCommaList(form.tags),
-          highlightsTitle: form.highlightsTitle || undefined,
+          highlightsTitle: form.highlightsTitle,
           highlights: splitLineList(form.highlights),
           contentRichText: form.contentRichText || "<p></p>",
           publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : null,
@@ -482,48 +517,11 @@ export function AdminNewsScreen() {
                         </span>
                       </div>
                       <div className={styles.mediaButtons}>
-                        <button
-                          type="button"
-                          className={styles.secondaryButton}
-                          disabled={!pendingUpload}
-                          onClick={() => {
-                            if (!pendingUpload) {
-                              return;
-                            }
-
-                            void runAction(
-                              "Загружаем обложку новости",
-                              "Обложка загружена",
-                              async () => {
-                                const formData = new FormData();
-                                formData.append("file", pendingUpload);
-                                const response = await apiFetch<UploadImageResponse<AdminNewsArticle>>(
-                                  `/admin/news/${selectedItem.id}/cover`,
-                                  {
-                                    method: "POST",
-                                    body: formData,
-                                  },
-                                );
-                                const nextItem = {
-                                  ...response.item,
-                                  coverImageUrl: resolveApiAssetUrl(response.item.coverImageUrl),
-                                };
-
-                                setItems((current) =>
-                                  current.map((item) => (item.id === nextItem.id ? nextItem : item)),
-                                );
-                                setPendingUpload(null);
-                                if (fileInputRef.current) {
-                                  fileInputRef.current.value = "";
-                                }
-                              },
-                              "Не удалось загрузить обложку новости",
-                            );
-                          }}
-                        >
-                          <Upload size={16} />
-                          Загрузить обложку
-                        </button>
+                        <span className={styles.panelText}>
+                          {pendingUpload
+                            ? "Файл выбран, загрузка запускается автоматически."
+                            : "После выбора файла загрузка запускается автоматически."}
+                        </span>
 
                         <button
                           type="button"

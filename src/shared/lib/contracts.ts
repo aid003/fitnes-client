@@ -180,7 +180,15 @@ export type PassCategoryDetails = {
   variants: PassVariant[];
 };
 
-export type MembershipStatus = "ACTIVE" | "FROZEN" | "EXPIRED" | "REFUNDED";
+export type MembershipStatus =
+  | "PENDING_ACTIVATION"
+  | "ACTIVE"
+  | "FROZEN"
+  | "EXPIRED"
+  | "REFUNDED";
+
+export type MembershipActivationStatus = "PENDING" | "ACTIVATED";
+export type MembershipUsageMode = "TERM" | "VISIT";
 
 export type MembershipFreezeStatus = "ACTIVE" | "COMPLETED" | "CANCELLED";
 
@@ -217,7 +225,6 @@ export type ScheduleItem = {
   endTime: string;
   ageBadge: string | null;
   secondaryBadge: string | null;
-  bookingEnabled: boolean;
   sortOrder: number;
 };
 
@@ -239,7 +246,6 @@ export type AdminScheduleTemplateSlot = {
   endTime: string;
   ageBadge: string | null;
   secondaryBadge: string | null;
-  bookingEnabled: boolean;
   sortOrder: number;
   isActive: boolean;
   createdAt: string;
@@ -277,12 +283,20 @@ export type UserMembershipCard = {
   title: string;
   subtitle: string;
   planOrigin: string | null;
-  startsAt: string;
+  issuedAt: string;
+  activatedAt: string | null;
+  startsAt: string | null;
   status: MembershipStatus;
+  activationStatus: MembershipActivationStatus;
   statusLabel: string;
   statusTone: MembershipTone;
-  expiresAt: string;
-  daysLeft: number;
+  billingType: string | null;
+  usageMode: MembershipUsageMode;
+  expiresAt: string | null;
+  daysLeft: number | null;
+  totalVisits: number | null;
+  usedVisits: number;
+  remainingVisits: number | null;
   freezeDaysLeft: number;
   features: UserMembershipFeature[];
   canFreeze: boolean;
@@ -299,11 +313,19 @@ export type UserMembershipHistoryItem = {
   title: string;
   subtitle: string;
   planOrigin: string | null;
-  startsAt: string;
+  issuedAt: string;
+  activatedAt: string | null;
+  startsAt: string | null;
   status: MembershipStatus;
+  activationStatus: MembershipActivationStatus;
   statusLabel: string;
   statusTone: MembershipTone;
-  expiresAt: string;
+  billingType: string | null;
+  usageMode: MembershipUsageMode;
+  expiresAt: string | null;
+  totalVisits: number | null;
+  usedVisits: number;
+  remainingVisits: number | null;
   hasQr: boolean;
   history: UserMembershipHistoryEntry[];
   features: UserMembershipFeature[];
@@ -345,9 +367,17 @@ export type AdminMembership = {
   title: string;
   subtitle: string | null;
   description: string | null;
+  issuedAt: string;
+  activatedAt: string | null;
   startsAt: string;
   endsAt: string;
   status: MembershipStatus;
+  activationStatus: MembershipActivationStatus;
+  billingType: string | null;
+  usageMode: MembershipUsageMode;
+  totalVisits: number | null;
+  usedVisits: number;
+  remainingVisits: number | null;
   freezeDaysLimit: number;
   freezeDaysUsed: number;
   canRenew: boolean;
@@ -562,7 +592,8 @@ export type MembershipQrViewModel = {
     currency: string;
     paidAt: string | null;
     merchantOrderNumber: string;
-    expiresAt: string;
+    expiresAt: string | null;
+    membershipStateLabel: string;
   };
 };
 
@@ -577,9 +608,16 @@ export type AdminScannedMembershipQrViewModel = {
     title: string;
     subtitle: string | null;
     status: MembershipStatus;
-    startsAt: string;
-    endsAt: string;
+    activationStatus: MembershipActivationStatus;
+    issuedAt: string;
+    activatedAt: string | null;
+    startsAt: string | null;
+    endsAt: string | null;
     freezeDaysLimit: number;
+    billingType: string | null;
+    totalVisits: number | null;
+    usedVisits: number;
+    remainingVisits: number | null;
   };
   plan: {
     id: string;
@@ -592,6 +630,7 @@ export type AdminScannedMembershipQrViewModel = {
     billingType: string | null;
     durationValue: number | null;
     durationUnit: string | null;
+    visitCount: number | null;
   };
   payment: {
     paymentId: string;
@@ -611,4 +650,8 @@ export type AdminScannedMembershipQrViewModel = {
     version: string;
     generatedAt: string;
   };
+  activationPerformed: boolean;
+  visitConsumed: boolean;
+  remainingVisits: number | null;
+  membershipStateLabel: string;
 };

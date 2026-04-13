@@ -23,7 +23,6 @@ type SlotFormState = {
   endTime: string;
   ageBadge: string;
   secondaryBadge: string;
-  bookingEnabled: boolean;
   sortOrder: string;
   isActive: boolean;
 };
@@ -66,7 +65,6 @@ const EMPTY_FORM: SlotFormState = {
   endTime: "11:00",
   ageBadge: "",
   secondaryBadge: "",
-  bookingEnabled: true,
   sortOrder: "0",
   isActive: true,
 };
@@ -80,24 +78,41 @@ export function AdminScheduleScreen() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const loadWorkspace = async () => {
-    const data = await apiFetch<AdminScheduleWorkspace>("/admin/schedule/workspace", {
-      cache: "no-store",
-    });
-    setWorkspace(data);
-  };
-
   useEffect(() => {
     if (!canRender) {
       return;
     }
 
-    void loadWorkspace()
-      .then(() => setError(null))
-      .catch((loadError) =>
-        setError(getErrorMessage(loadError, "Не удалось загрузить админку расписания")),
-      )
-      .finally(() => setIsDataLoading(false));
+    let cancelled = false;
+
+    const loadWorkspace = async () => {
+      try {
+        const data = await apiFetch<AdminScheduleWorkspace>("/admin/schedule/workspace", {
+          cache: "no-store",
+        });
+
+        if (cancelled) {
+          return;
+        }
+
+        setWorkspace(data);
+        setError(null);
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(getErrorMessage(loadError, "Не удалось загрузить админку расписания"));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsDataLoading(false);
+        }
+      }
+    };
+
+    void loadWorkspace();
+
+    return () => {
+      cancelled = true;
+    };
   }, [canRender]);
 
   const timeRows = useMemo(() => buildTimeRows(workspace?.templateDays ?? []), [workspace]);
@@ -141,7 +156,6 @@ export function AdminScheduleScreen() {
         endTime: slot.endTime,
         ageBadge: slot.ageBadge ?? "",
         secondaryBadge: slot.secondaryBadge ?? "",
-        bookingEnabled: slot.bookingEnabled,
         sortOrder: String(slot.sortOrder),
         isActive: slot.isActive,
       },
@@ -160,7 +174,6 @@ export function AdminScheduleScreen() {
       endTime: slotModal.form.endTime,
       ageBadge: slotModal.form.ageBadge || undefined,
       secondaryBadge: slotModal.form.secondaryBadge || undefined,
-      bookingEnabled: slotModal.form.bookingEnabled,
       sortOrder: Number(slotModal.form.sortOrder) || 0,
       isActive: slotModal.form.isActive,
     };
@@ -507,24 +520,6 @@ export function AdminScheduleScreen() {
             </div>
 
             <div className={styles.modalChecks}>
-              <label className={styles.checkboxRow}>
-                <input
-                  type="checkbox"
-                  checked={slotModal.form.bookingEnabled}
-                  onChange={(event) =>
-                    setSlotModal((current) =>
-                      current
-                        ? {
-                            ...current,
-                            form: { ...current.form, bookingEnabled: event.target.checked },
-                          }
-                        : current,
-                    )
-                  }
-                />
-                <span>Показывать кнопку записи</span>
-              </label>
-
               <label className={styles.checkboxRow}>
                 <input
                   type="checkbox"

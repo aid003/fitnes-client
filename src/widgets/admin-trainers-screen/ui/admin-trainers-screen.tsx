@@ -97,6 +97,41 @@ export function AdminTrainersScreen() {
 
   const runAction = useAdminActionFeedback({ setStatus, setError, getErrorMessage });
 
+  useEffect(() => {
+    if (!pendingUpload || !selectedItem || isCreateMode) {
+      return;
+    }
+
+    void runAction(
+      "Загружаем фото тренера",
+      "Фото загружено",
+      async () => {
+        const formData = new FormData();
+        formData.append("file", pendingUpload);
+        const response = await apiFetch<UploadImageResponse<AdminTrainer>>(
+          `/admin/trainers/${selectedItem.id}/photo`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+        const nextItem = {
+          ...response.item,
+          photoUrl: resolveApiAssetUrl(response.item.photoUrl),
+        };
+
+        setItems((current) =>
+          current.map((item) => (item.id === nextItem.id ? nextItem : item)),
+        );
+        setPendingUpload(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      },
+      "Не удалось загрузить фото тренера",
+    );
+  }, [isCreateMode, pendingUpload, runAction, selectedItem]);
+
   if (isLoading) {
     return <SessionStatus title="Загрузка" text="Проверяем права доступа." />;
   }
@@ -354,48 +389,11 @@ export function AdminTrainersScreen() {
                         </span>
                       </div>
                       <div className={styles.mediaButtons}>
-                        <button
-                          type="button"
-                          className={styles.secondaryButton}
-                          disabled={!pendingUpload}
-                          onClick={() => {
-                            if (!pendingUpload) {
-                              return;
-                            }
-
-                            void runAction(
-                              "Загружаем фотографию тренера",
-                              "Фотография загружена",
-                              async () => {
-                                const formData = new FormData();
-                                formData.append("file", pendingUpload);
-                                const response = await apiFetch<UploadImageResponse<AdminTrainer>>(
-                                  `/admin/trainers/${selectedItem.id}/photo`,
-                                  {
-                                    method: "POST",
-                                    body: formData,
-                                  },
-                                );
-                                const nextItem = {
-                                  ...response.item,
-                                  photoUrl: resolveApiAssetUrl(response.item.photoUrl),
-                                };
-
-                                setItems((current) =>
-                                  current.map((item) => (item.id === nextItem.id ? nextItem : item)),
-                                );
-                                setPendingUpload(null);
-                                if (fileInputRef.current) {
-                                  fileInputRef.current.value = "";
-                                }
-                              },
-                              "Не удалось загрузить фотографию тренера",
-                            );
-                          }}
-                        >
-                          <Upload size={16} />
-                          Загрузить фото
-                        </button>
+                        <span className={styles.panelText}>
+                          {pendingUpload
+                            ? "Файл выбран, загрузка запускается автоматически."
+                            : "После выбора файла загрузка запускается автоматически."}
+                        </span>
 
                         <button
                           type="button"

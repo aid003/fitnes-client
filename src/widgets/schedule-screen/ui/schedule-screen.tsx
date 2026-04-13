@@ -183,13 +183,6 @@ export function ScheduleScreen() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      className={styles.bookButton}
-                      disabled={!item.bookingEnabled}
-                    >
-                      Записаться
-                    </button>
                   </div>
                 </article>
               ))}
