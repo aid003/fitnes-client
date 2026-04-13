@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
+        url: "/favicon/kal.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+      {
         url: "/favicon/favicon-16x16.png",
         sizes: "16x16",
         type: "image/png",
@@ -22,12 +27,17 @@ export const metadata: Metadata = {
         type: "image/png",
       },
       {
-        url: "/favicon/android-chrome-192x192.png",
-        sizes: "192x192",
+        url: "/favicon/favicon.ico",
+        type: "image/x-icon",
+      },
+    ],
+    apple: [
+      {
+        url: "/favicon/kal.png",
+        sizes: "180x180",
         type: "image/png",
       },
     ],
-    apple: "/favicon/apple-touch-icon.png",
     shortcut: "/favicon/favicon.ico",
   },
 };

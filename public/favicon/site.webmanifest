@@ -1,14 +1,13 @@
 {
   "name": "Эра Спорта",
   "short_name": "Эра Спорта",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/favicon/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/favicon/apple-touch-icon.png",
+      "src": "/favicon/kal.png",
       "sizes": "180x180",
       "type": "image/png"
     },
@@ -24,7 +23,7 @@
     },
     {
       "src": "/favicon/favicon.ico",
-      "sizes": "48x48",
+      "sizes": "any",
       "type": "image/x-icon"
     }
   ]
