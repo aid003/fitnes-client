@@ -13,7 +13,9 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   color: var(--color-text);
-  background: var(--color-shell-bg);
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 34%),
+    linear-gradient(180deg, #eef2f7 0%, var(--color-shell-bg) 100%);
   font-family: var(--font-sans);
 }
 

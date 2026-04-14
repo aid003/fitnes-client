@@ -9,6 +9,7 @@
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.03em;
+  box-shadow: 0 16px 30px rgba(240, 92, 43, 0.18);
 }
 
 .primary {

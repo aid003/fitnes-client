@@ -1,9 +1,9 @@
 .screen {
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 14% 8%, rgba(146, 83, 41, 0.26), transparent 24%),
-    radial-gradient(circle at 84% 100%, rgba(55, 55, 95, 0.32), transparent 28%),
-    linear-gradient(180deg, #23191c 0%, #22191f 48%, #262036 100%);
+    radial-gradient(circle at 14% 8%, rgba(255, 255, 255, 0.84), transparent 24%),
+    radial-gradient(circle at 84% 100%, rgba(255, 255, 255, 0.44), transparent 28%),
+    linear-gradient(180deg, #e8edf4 0%, #dce2eb 100%);
 }
 
 .panel {
@@ -34,9 +34,10 @@
   width: 52px;
   height: 52px;
   border-radius: 18px;
-  border: 3px solid rgba(255, 255, 255, 0.92);
-  color: #ffffff;
+  border: 2px solid rgba(240, 92, 43, 0.24);
+  color: var(--color-text);
   text-decoration: none;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .logo {
@@ -53,7 +54,7 @@
 
 .title {
   margin: 0;
-  color: #ffffff;
+  color: var(--color-text);
   font-size: 28px;
   line-height: 0.98;
   font-weight: 800;
@@ -74,7 +75,7 @@
 
 .sectionTitle {
   margin: 0;
-  color: #ffffff;
+  color: var(--color-text);
   font-size: 23px;
   line-height: 1;
   font-weight: 800;
@@ -91,12 +92,11 @@
   gap: 18px;
   padding: 14px 14px 16px;
   border-radius: 24px;
-  border: 3px solid rgba(248, 154, 62, 0.92);
-  background:
-    linear-gradient(180deg, rgba(43, 31, 36, 0.98) 0%, rgba(36, 27, 38, 0.98) 100%);
+  border: 2px solid rgba(240, 92, 43, 0.24);
+  background: rgba(255, 255, 255, 0.8);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 16px 34px rgba(18, 10, 14, 0.26);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 16px 34px rgba(91, 103, 124, 0.12);
 }
 
 .membershipCardExpired {
@@ -184,7 +184,7 @@
 
 .cardTitle {
   margin: 0;
-  color: #ffffff;
+  color: var(--color-text);
   font-size: 22px;
   line-height: 1.05;
   font-weight: 800;
@@ -193,7 +193,7 @@
 
 .cardSubtitle {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--color-muted-text);
   font-size: 14px;
   line-height: 1.3;
   font-weight: 700;
@@ -216,10 +216,10 @@
   position: absolute;
   inset: 8px;
   border-radius: inherit;
-  background: linear-gradient(180deg, #261d25 0%, #2d2331 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #eef2f7 100%);
   box-shadow:
-    inset 0 0 0 2px rgba(255, 184, 90, 0.3),
-    0 8px 18px rgba(0, 0, 0, 0.18);
+    inset 0 0 0 2px rgba(240, 92, 43, 0.18),
+    0 8px 18px rgba(91, 103, 124, 0.12);
 }
 
 .ringInner {
@@ -317,13 +317,13 @@
 
 .primaryAction {
   border: none;
-  color: #24160e;
-  background: linear-gradient(90deg, #d97a1a 0%, #ffad47 100%);
+  color: #ffffff;
+  background: var(--color-button-primary);
 }
 
 .secondaryAction {
-  border: 1.5px solid rgba(248, 154, 62, 0.92);
-  color: rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(240, 92, 43, 0.24);
+  color: var(--color-text);
   background: transparent;
 }
 
@@ -360,8 +360,8 @@
 
 .historyCard {
   border-radius: 18px;
-  border: 2px solid rgba(248, 154, 62, 0.92);
-  background: rgba(45, 34, 46, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .historyToggle {
@@ -447,13 +447,13 @@
   gap: 10px;
   padding: 18px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.88);
 }
 
 .emptyTitle {
   margin: 0;
-  color: #ffffff;
+  color: var(--color-text);
   font-size: 18px;
   line-height: 1.1;
   font-weight: 800;
@@ -468,18 +468,18 @@
 }
 
 .emptyText {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--color-muted-text);
 }
 
 .emptyAction {
   width: fit-content;
   padding: 0 18px;
   color: #ffffff;
-  background: #cf6e20;
+  background: var(--color-button-primary);
 }
 
 .errorText {
-  color: #ffb2ab;
+  color: var(--color-error);
 }
 
 .feedback {

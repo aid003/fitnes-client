@@ -22,9 +22,10 @@ import styles from "./home-screen.module.css";
 
 type HomeTile = {
   title: string;
-  subtitle?: string;
   Icon: typeof CreditCard;
   className: string;
+  titleClassName?: string;
+  iconClassName?: string;
   href?: string;
 };
 
@@ -36,15 +37,17 @@ export function HomeScreen() {
 
   const homeTiles: HomeTile[] = [
     {
-      title: "Тренера",
+      title: "Тренерский\nсостав",
       Icon: UsersRound,
       className: [styles.tile, styles.tileToday].join(" "),
+      iconClassName: styles.tileIconCompact,
       href: "/trainers",
     },
     {
       title: "Новости",
       Icon: Newspaper,
       className: [styles.tile, styles.tileNews].join(" "),
+      iconClassName: styles.tileIconCompact,
       href: "/news",
     },
     {
@@ -63,12 +66,16 @@ export function HomeScreen() {
       title: "Расписание\nзанятий",
       Icon: CalendarCheck2,
       className: [styles.tile, styles.tileSchedule].join(" "),
+      titleClassName: styles.tileTitleDark,
+      iconClassName: styles.tileIconAccent,
       href: "/schedule",
     },
     {
       title: "Наши контакты",
       Icon: MapPinned,
       className: [styles.tile, styles.tileContacts].join(" "),
+      titleClassName: styles.tileTitleAccent,
+      iconClassName: styles.tileIconAccent,
       href: "/contacts",
     },
   ];
@@ -191,21 +198,24 @@ export function HomeScreen() {
         </header>
 
         <section className={styles.tiles} aria-label="Главные разделы">
-          {homeTiles.map(({ title, subtitle, Icon, className, href }) => {
+          {homeTiles.map(({ title, Icon, className, href, titleClassName, iconClassName }) => {
             const content = (
               <>
                 <div className={styles.tileCopy}>
-                  <h2 className={styles.tileTitle}>
+                  <h2 className={[styles.tileTitle, titleClassName].filter(Boolean).join(" ")}>
                     {title.split("\n").map((line) => (
                       <span key={line} className={styles.tileLine}>
                         {line}
                       </span>
                     ))}
                   </h2>
-                  {subtitle ? <p className={styles.tileSubtitle}>{subtitle}</p> : null}
                 </div>
 
-                <Icon className={styles.tileIcon} strokeWidth={2.1} aria-hidden="true" />
+                <Icon
+                  className={[styles.tileIcon, iconClassName].filter(Boolean).join(" ")}
+                  strokeWidth={2.2}
+                  aria-hidden="true"
+                />
               </>
             );
 

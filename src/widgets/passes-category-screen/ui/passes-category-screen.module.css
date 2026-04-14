@@ -1,9 +1,9 @@
 .screen {
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 20% 12%, rgba(113, 57, 26, 0.28), transparent 28%),
-    radial-gradient(circle at 82% 100%, rgba(76, 43, 60, 0.3), transparent 25%),
-    linear-gradient(180deg, #21181d 0%, #251b20 54%, #261f34 100%);
+    radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.84), transparent 28%),
+    radial-gradient(circle at 82% 100%, rgba(255, 255, 255, 0.44), transparent 25%),
+    linear-gradient(180deg, #e8edf4 0%, #dce2eb 100%);
 }
 
 .panel {
@@ -431,8 +431,8 @@
   min-height: 42px;
   padding: 10px 16px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--color-text);
   font-weight: 700;
   text-decoration: none;
 }

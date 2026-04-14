@@ -46,7 +46,7 @@
 
 .errorText {
   margin: 0;
-  color: #ffb4a8;
+  color: var(--color-error);
   font-size: 14px;
   line-height: 1.4;
 }
