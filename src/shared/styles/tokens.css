@@ -1,4 +1,5 @@
 :root {
+  /* --- Primitives (palette) --- */
   --color-bg: #dce2eb;
   --color-text: #232834;
   --color-surface: #eef2f7;
@@ -28,4 +29,359 @@
   --mobile-min-height: 100dvh;
   --font-sans: "Nunito Sans Variable", "Segoe UI", Arial, Helvetica, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, monospace;
+
+  /* --- Page layout --- */
+  --color-page-gradient-top: #e8edf4;
+  --color-page-gradient-bottom: #dce2eb;
+  --color-page-gradient-mid: #eef2f7;
+
+  --gradient-app-body:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 34%),
+    linear-gradient(180deg, var(--color-page-gradient-mid) 0%, var(--color-shell-bg) 100%);
+
+  --gradient-screen:
+    radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.84), transparent 26%),
+    radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.44), transparent 28%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+
+  --gradient-screen-tight:
+    radial-gradient(circle at 14% 8%, rgba(255, 255, 255, 0.84), transparent 24%),
+    radial-gradient(circle at 84% 100%, rgba(255, 255, 255, 0.44), transparent 28%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+
+  --gradient-auth-shell:
+    radial-gradient(circle at 14% 12%, rgba(255, 255, 255, 0.82), transparent 28%),
+    radial-gradient(circle at 82% 84%, rgba(255, 255, 255, 0.45), transparent 24%),
+    linear-gradient(180deg, #e7ecf3 0%, var(--color-surface-strong) 100%);
+
+  --gradient-home-hero:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.78), transparent 28%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+
+  /* --- Semantic: text --- */
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-muted-text);
+  --text-tertiary: rgba(35, 40, 52, 0.55);
+  --text-on-accent: var(--color-button-primary-text);
+  --text-on-dark: #ffffff;
+  --text-on-dark-muted: rgba(255, 255, 255, 0.72);
+  --text-on-dark-subtle: rgba(255, 255, 255, 0.54);
+  --text-headline-strong: #08090d;
+  --text-body-on-surface: #333948;
+
+  /* --- Semantic: surfaces --- */
+  --surface-page: var(--color-shell-bg);
+  --surface-glass: rgba(255, 255, 255, 0.72);
+  --surface-glass-strong: rgba(255, 255, 255, 0.82);
+  --surface-card: rgba(255, 255, 255, 0.8);
+  --surface-card-solid: #ffffff;
+  --surface-tabs: rgba(255, 255, 255, 0.38);
+  --surface-muted-tile: rgba(232, 237, 244, 0.58);
+  --surface-timeline: rgba(35, 40, 52, 0.06);
+  --surface-timeline-accent: rgba(255, 173, 71, 0.16);
+
+  /* --- Semantic: borders --- */
+  --border-subtle: rgba(240, 92, 43, 0.14);
+  --border-accent: rgba(240, 92, 43, 0.24);
+  --border-accent-strong: rgba(240, 92, 43, 0.32);
+  --border-divider-warm: rgba(240, 92, 43, 0.16);
+  --border-photo-ring: rgba(240, 92, 43, 0.45);
+  --border-card: rgba(255, 255, 255, 0.88);
+  --border-card-inner: rgba(255, 255, 255, 0.12);
+  --border-schedule-accent: rgba(248, 154, 62, 0.26);
+  --border-expired: rgba(221, 76, 36, 0.92);
+
+  /* --- Semantic: accent & interactive --- */
+  --accent-primary: var(--color-button-primary);
+  --accent-secondary-text: #ff5a1f;
+  --accent-secondary-text-hover: #f14f1b;
+  --accent-soft: rgba(240, 92, 43, 0.08);
+  --accent-outline-focus: rgba(240, 92, 43, 0.72);
+  --accent-outline-strong: rgba(240, 92, 43, 0.92);
+  --link-primary: #1d4ed8;
+
+  /* --- Shadows --- */
+  --shadow-card: 0 16px 34px rgba(91, 103, 124, 0.12);
+  --shadow-card-soft: 0 8px 18px rgba(91, 103, 124, 0.12);
+  --shadow-elevated: 0 28px 60px rgba(76, 88, 108, 0.28);
+  --shadow-modal: 0 28px 60px rgba(0, 0, 0, 0.26);
+  --shadow-tab-active: 0 10px 22px rgba(240, 92, 43, 0.18);
+
+  /* --- Status (solid pills on light cards) --- */
+  --status-success-bg: #4a9e3a;
+  --status-warning-bg: #9a7418;
+  --status-muted-bg: #4c5664;
+  --status-danger-bg: #8d1424;
+  --status-on-solid: #ffffff;
+
+  /* --- Badges (schedule etc.) --- */
+  --badge-age-bg: #ff9e28;
+  --badge-age-text: #251517;
+  --badge-meta-bg: var(--color-surface-muted);
+  --badge-meta-text: var(--color-text);
+  --badge-meta-border: rgba(240, 92, 43, 0.22);
+
+  /* --- Ring / progress indicator --- */
+  --ring-conic-a: #ffbf46;
+  --ring-conic-b: #ff9f33;
+  --ring-track: rgba(230, 235, 242, 0.95);
+  --ring-inner-fill: linear-gradient(180deg, #ffffff 0%, #eef2f7 100%);
+  --ring-inner-border: rgba(240, 92, 43, 0.18);
+  --ring-glow: rgba(43, 31, 36, 0.12);
+
+  /* --- Callouts --- */
+  --callout-warning-bg: rgba(255, 196, 78, 0.22);
+  --callout-warning-text: #5c4510;
+  --feedback-warm: #b45309;
+
+  /* --- QR / ghost buttons on light cards --- */
+  --ghost-button-border: rgba(35, 40, 52, 0.12);
+  --ghost-button-bg: rgba(35, 40, 52, 0.06);
+  --ghost-button-text: var(--text-secondary);
+
+  /* --- Modal --- */
+  --overlay-scrim: rgba(12, 9, 17, 0.76);
+  --modal-surface-warm: linear-gradient(
+    180deg,
+    rgba(252, 249, 243, 0.98) 0%,
+    rgba(241, 235, 227, 0.98) 100%
+  );
+  --modal-text: #251a12;
+  --modal-text-muted: rgba(37, 26, 18, 0.62);
+  --modal-text-faint: rgba(37, 26, 18, 0.56);
+  --modal-eyebrow: #97591d;
+  --modal-control-bg: rgba(37, 26, 18, 0.08);
+  --modal-info-row-bg: rgba(37, 26, 18, 0.06);
+  --modal-qr-border: rgba(37, 26, 18, 0.08);
+
+  /* --- Bottom nav (light shell) --- */
+  --nav-bar-bg: #23222d;
+  --nav-bar-border: rgba(235, 245, 255, 0.92);
+  --nav-inactive: #ffffff;
+  --nav-active: #ff5a1f;
+  --nav-pill-bg: rgba(255, 255, 255, 0.08);
+
+  /* --- Tiles / marketing (home) --- */
+  --tile-dark-bg: rgba(33, 36, 43, 0.82);
+  --tile-dark-shadow: rgba(0, 0, 0, 0.28);
+  --tile-icon-backdrop: rgba(97, 110, 130, 0.32);
+
+  /* --- Payments result --- */
+  --result-success-bg: rgba(86, 214, 154, 0.16);
+  --result-success-text: #166534;
+  --result-error-bg: rgba(255, 103, 103, 0.16);
+  --result-error-text: #b91c1c;
+  --result-pending-bg: rgba(255, 184, 102, 0.18);
+  --result-pending-text: #9a3412;
+  --result-neutral-bg: rgba(185, 194, 214, 0.2);
+  --result-neutral-text: var(--text-secondary);
+
+  /* --- Misc --- */
+  --placeholder-block: #dbdbdb;
+  --color-slate-600: #6b7a94;
+
+  /* --- Shadows (shared cards) --- */
+  --shadow-tile: 0 10px 24px rgba(91, 103, 124, 0.1);
+  --shadow-news-card: 0 18px 34px rgba(91, 103, 124, 0.12);
+  --shadow-passes-card: 0 18px 32px rgba(91, 103, 124, 0.12);
+  --shadow-payments-card: 0 24px 60px rgba(91, 103, 124, 0.12);
+  --shadow-icon-drop: 0 6px 18px rgba(0, 0, 0, 0.24);
+
+  /* --- Borders (tiles, ads) --- */
+  --border-tile-outer: rgba(255, 255, 255, 0.9);
+  --border-tile-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  --border-ad-card: rgba(255, 255, 255, 0.82);
+  --border-ad-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  --border-ad-close: rgba(255, 255, 255, 0.76);
+
+  /* --- Overlays --- */
+  --overlay-ad-scrim: var(--tile-icon-backdrop);
+  --gradient-passes-card-overlay:
+    linear-gradient(90deg, rgba(35, 40, 52, 0.68) 0%, rgba(35, 40, 52, 0.4) 48%, rgba(35, 40, 52, 0.18) 100%),
+    linear-gradient(180deg, rgba(35, 40, 52, 0.04) 0%, rgba(35, 40, 52, 0.22) 100%);
+
+  /* --- Welcome --- */
+  --gradient-welcome:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.82), transparent 26%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-surface) 100%);
+
+  /* --- Documents (slightly different radials) --- */
+  --gradient-documents:
+    radial-gradient(circle at 16% 14%, rgba(255, 255, 255, 0.84), transparent 30%),
+    radial-gradient(circle at 82% 88%, rgba(255, 255, 255, 0.5), transparent 26%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-surface-strong) 100%);
+
+  /* --- Contacts --- */
+  --gradient-screen-contacts:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.84), transparent 28%),
+    radial-gradient(circle at 86% 90%, rgba(255, 255, 255, 0.44), transparent 32%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+  --contacts-services-glow: radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 167, 74, 0.72) 0%,
+      rgba(255, 167, 74, 0.18) 36%,
+      transparent 74%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 144, 43, 0.6) 28%,
+      rgba(255, 171, 99, 0.95) 50%,
+      rgba(255, 144, 43, 0.6) 72%,
+      transparent 100%
+    );
+  --contacts-services-glow-shadow: 0 0 22px rgba(255, 143, 37, 0.3);
+  --contacts-icon-bg: linear-gradient(
+    180deg,
+    rgba(117, 79, 67, 0.55) 0%,
+    rgba(78, 51, 47, 0.48) 100%
+  );
+  --contacts-icon-border: rgba(173, 121, 97, 0.34);
+  --contacts-icon-inset: inset 0 0 0 1px rgba(255, 226, 205, 0.04);
+  --contacts-divider-on-card: rgba(255, 255, 255, 0.82);
+  --contacts-card-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  --contacts-address-bg: linear-gradient(
+      180deg,
+      rgba(78, 45, 28, 0.18) 0%,
+      rgba(46, 31, 28, 0.34) 100%
+    ),
+    #2f2427;
+  --contacts-address-border: rgba(182, 127, 110, 0.52);
+  --contacts-address-divider: rgba(165, 112, 94, 0.52);
+  --contacts-text-warm-muted: #d6b7aa;
+  --contacts-text-warm: #e0c1b5;
+  --contacts-accent-yellow: #ffae3a;
+  --contacts-outline-focus: rgba(255, 172, 67, 0.85);
+
+  /* --- News list --- */
+  --gradient-news:
+    radial-gradient(circle at 78% 10%, rgba(255, 255, 255, 0.8), transparent 24%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+
+  /* --- News details --- */
+  --gradient-news-details:
+    radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.8), transparent 24%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+
+  /* --- Passes list --- */
+  --gradient-passes-screen:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.84), transparent 30%),
+    radial-gradient(circle at 86% 100%, rgba(255, 255, 255, 0.44), transparent 28%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+
+  --gradient-passes-category:
+    radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.84), transparent 28%),
+    radial-gradient(circle at 82% 100%, rgba(255, 255, 255, 0.44), transparent 25%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+
+  /* --- Trainers --- */
+  --gradient-trainers:
+    radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.82), transparent 32%),
+    linear-gradient(180deg, var(--color-page-gradient-top) 0%, var(--color-page-gradient-bottom) 100%);
+  --gradient-trainer-photo-fallback: linear-gradient(135deg, var(--accent-primary), var(--color-slate-600));
+
+  /* --- Passes category (dark hero & plan cards) --- */
+  --pass-hero-overlay-deep: linear-gradient(
+    180deg,
+    rgba(30, 20, 18, 0.14) 0%,
+    rgba(30, 18, 14, 0.46) 58%,
+    rgba(29, 21, 24, 0.94) 100%
+  );
+  --pass-hero-overlay-warm: linear-gradient(
+    120deg,
+    rgba(255, 122, 28, 0.18) 12%,
+    transparent 34%,
+    rgba(255, 140, 45, 0.16) 70%,
+    transparent 100%
+  );
+  --pass-hero-title: #ffd08b;
+  --pass-hero-subtitle: rgba(255, 255, 255, 0.76);
+  --pass-hero-back-bg: rgba(255, 255, 255, 0.02);
+  --pass-tabs-fade-left: linear-gradient(90deg, rgba(35, 25, 30, 0.96) 0%, rgba(35, 25, 30, 0) 100%);
+  --pass-tabs-fade-right: linear-gradient(270deg, rgba(35, 25, 30, 0.98) 0%, rgba(35, 25, 30, 0) 100%);
+  /* Затухание к светлому фону страницы (полоса табов под hero) */
+  --pass-tabs-fade-edge-light-left: linear-gradient(
+    90deg,
+    var(--color-page-gradient-bottom) 0%,
+    rgba(220, 226, 235, 0) 100%
+  );
+  --pass-tabs-fade-edge-light-right: linear-gradient(
+    270deg,
+    var(--color-page-gradient-bottom) 0%,
+    rgba(220, 226, 235, 0) 100%
+  );
+  --pass-tab-bg: #2a1f24;
+  --pass-tab-text: rgba(255, 255, 255, 0.84);
+  --pass-tab-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --pass-tab-active-bg: linear-gradient(180deg, rgba(103, 54, 25, 0.96) 0%, rgba(72, 35, 14, 0.98) 100%);
+  --pass-tab-active-text: #ffd089;
+  --pass-tab-active-shadow:
+    inset 0 0 0 2px rgba(255, 157, 46, 0.5),
+    0 10px 24px rgba(48, 19, 3, 0.34);
+  --pass-scroll-hint-bg: rgba(26, 18, 24, 0.78);
+  --pass-scroll-hint-border: rgba(255, 184, 102, 0.18);
+  --pass-scroll-hint-text: rgba(255, 214, 163, 0.92);
+  --pass-scroll-hint-shadow: 0 10px 24px rgba(17, 11, 17, 0.22);
+  --pass-on-dark: #ffffff;
+  --pass-on-dark-muted: rgba(255, 255, 255, 0.72);
+  --pass-on-dark-soft: rgba(255, 255, 255, 0.76);
+  --pass-on-dark-empty: rgba(255, 255, 255, 0.78);
+  --pass-plan-card-bg: linear-gradient(180deg, rgba(58, 49, 55, 0.95) 0%, rgba(53, 44, 51, 0.98) 100%);
+  --pass-plan-card-border: rgba(122, 117, 145, 0.72);
+  --pass-plan-card-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --pass-plan-highlight-border: #f4e6b5;
+  --pass-badge-warm-bg: #efc75d;
+  --pass-badge-warm-text: #2a1b0f;
+  --pass-badge-success-bg: #a4c64d;
+  --pass-badge-success-text: #ffffff;
+  --pass-feature-icon: #ffb24d;
+  --pass-price: #ffd08b;
+  --pass-action-bg: linear-gradient(180deg, #d77222 0%, #a54d14 100%);
+  --pass-action-text: #ffffff;
+  --pass-action-shadow: 0 8px 18px rgba(57, 23, 4, 0.32);
+  --pass-action-alt-bg: linear-gradient(180deg, #dbe775 0%, #c7d75c 100%);
+  --pass-action-alt-text: #19150c;
+  --pass-feedback: #ffd08b;
+
+  /* --- Button primary shadow (welcome) --- */
+  --shadow-primary-cta: 0 18px 34px rgba(240, 92, 43, 0.18);
+
+  /* --- Auth shell --- */
+  --surface-auth-panel: rgba(255, 255, 255, 0.56);
+
+  /* --- Form controls --- */
+  --input-border: var(--border-subtle);
+  --input-border-focus: rgba(240, 92, 43, 0.42);
+  --input-border-error: rgba(211, 79, 58, 0.52);
+  --shadow-input: 0 10px 24px rgba(115, 127, 149, 0.1);
+  --text-toggle: #4e5666;
+  --focus-toggle-ring: rgba(240, 92, 43, 0.28);
+  --digit-focus-ring: 0 0 0 1px rgba(255, 255, 255, 0.42);
+
+  /* --- Status pill gloss --- */
+  --status-pill-gloss: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+
+  /* --- Bottom nav --- */
+  --shadow-nav-bar: 0 14px 28px rgba(48, 57, 73, 0.18);
+
+  /* --- Desktop app shell --- */
+  --gradient-desktop-shell:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.75), transparent 28%),
+    linear-gradient(180deg, #edf1f6 0%, #e2e8f0 100%);
+  --gradient-desktop-viewport: linear-gradient(
+    180deg,
+    var(--color-page-gradient-top) 0%,
+    var(--color-page-gradient-bottom) 100%
+  );
+  --shell-viewport-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+  /* --- Session gate --- */
+  --shadow-session-card: 0 20px 60px rgba(91, 103, 124, 0.12);
+
+  /* --- Toast --- */
+  --toast-surface: rgba(255, 255, 255, 0.94);
+  --toast-shadow: 0 16px 36px rgba(90, 102, 121, 0.14);
+  --toast-border-success: rgba(128, 183, 144, 0.32);
+  --toast-border-error: rgba(211, 79, 58, 0.28);
+  --toast-border-info: rgba(240, 92, 43, 0.18);
 }

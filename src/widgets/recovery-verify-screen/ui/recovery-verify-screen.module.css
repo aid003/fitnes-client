@@ -15,7 +15,7 @@
 .description {
   margin-top: 14px;
   max-width: 270px;
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -41,7 +41,7 @@
 }
 
 .digit:focus {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.42);
+  box-shadow: var(--digit-focus-ring);
 }
 
 .error {

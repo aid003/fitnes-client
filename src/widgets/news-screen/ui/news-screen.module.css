@@ -1,8 +1,6 @@
 .screen {
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 78% 10%, rgba(255, 255, 255, 0.8), transparent 24%),
-    linear-gradient(180deg, #e8edf4 0%, #dce2eb 100%);
+  background: var(--gradient-news);
 }
 
 .panel {
@@ -36,9 +34,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 18px;
-  border: 2px solid rgba(240, 92, 43, 0.24);
-  background: rgba(255, 255, 255, 0.72);
-  color: var(--color-text);
+  border: 2px solid var(--border-accent);
+  background: var(--surface-glass);
+  color: var(--text-primary);
   text-decoration: none;
 }
 
@@ -51,9 +49,9 @@
   width: 100%;
   border-radius: 24px;
   padding: 22px 20px;
-  background: #f05c2b;
-  border: 4px solid rgba(255, 255, 255, 0.88);
-  color: #fff;
+  background: var(--accent-primary);
+  border: 4px solid var(--border-card);
+  color: var(--text-on-accent);
   font-size: 34px;
   line-height: 1;
   font-weight: 800;
@@ -69,7 +67,7 @@
 
 .stateText,
 .errorText {
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
   font-size: 15px;
 }
 
@@ -80,12 +78,12 @@
 .emptyState {
   padding: 22px 18px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid rgba(255, 255, 255, 0.88);
+  background: var(--surface-glass-strong);
+  border: 1px solid var(--border-card);
 }
 
 .emptyTitle {
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 22px;
   line-height: 1.04;
   font-weight: 800;
@@ -93,7 +91,7 @@
 
 .emptyText {
   margin-top: 8px;
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.4;
 }
@@ -112,9 +110,9 @@
   border-radius: 24px;
   text-decoration: none;
   color: inherit;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.88);
-  box-shadow: 0 18px 34px rgba(91, 103, 124, 0.12);
+  background: var(--surface-glass-strong);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-news-card);
 }
 
 .cardMedia {
@@ -122,7 +120,7 @@
   min-height: 136px;
   border-radius: 16px;
   overflow: hidden;
-  background: rgba(240, 92, 43, 0.08);
+  background: var(--accent-soft);
 }
 
 .cardImage {
@@ -136,7 +134,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(35, 40, 52, 0.72);
+  color: var(--text-secondary);
   font-size: 18px;
   font-weight: 800;
 }
@@ -146,7 +144,7 @@
 }
 
 .cardTitle {
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 18px;
   line-height: 1.06;
   font-weight: 800;
@@ -155,7 +153,7 @@
 
 .cardText {
   margin-top: 10px;
-  color: rgba(35, 40, 52, 0.62);
+  color: var(--text-tertiary);
   font-size: 14px;
   line-height: 1.24;
   display: -webkit-box;
@@ -166,7 +164,7 @@
 
 .cardMeta {
   margin-top: 12px;
-  color: #f05c2b;
+  color: var(--accent-primary);
   font-size: 13px;
   line-height: 1.2;
   font-weight: 700;

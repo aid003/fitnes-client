@@ -1,9 +1,7 @@
 .screen {
   position: relative;
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.78), transparent 28%),
-    linear-gradient(180deg, #e8edf4 0%, #dce2eb 100%);
+  background: var(--gradient-home-hero);
 }
 
 .panel {
@@ -38,7 +36,7 @@
   flex-direction: column;
   align-items: flex-start;
   padding-top: 8px;
-  color: #08090d;
+  color: var(--text-headline-strong);
   font-size: 34px;
   line-height: 0.96;
   font-weight: 800;
@@ -66,10 +64,8 @@
   min-height: 124px;
   border-radius: 28px;
   padding: 18px 16px 18px 18px;
-  border: 6px solid rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 10px 24px rgba(91, 103, 124, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  border: 6px solid var(--border-tile-outer);
+  box-shadow: var(--shadow-tile), var(--border-tile-highlight);
 }
 
 .tile:first-child,
@@ -84,51 +80,53 @@
 }
 
 .tileLink:focus-visible {
-  outline: 2px solid rgba(240, 92, 43, 0.72);
+  outline: 2px solid var(--accent-outline-focus);
   outline-offset: 3px;
 }
 
 .tileToday {
-  background: #f05c2b;
+  background: var(--accent-primary);
 }
 
 .tileNews {
-  background: #f05c2b;
+  background: var(--accent-primary);
 }
 
 .tileBuy {
-  background: #f05c2b;
+  background: var(--accent-primary);
   grid-column: 1 / -1;
 }
 
 .tileMemberships {
-  background: #f05c2b;
+  background: var(--accent-primary);
   grid-column: 1 / -1;
 }
 
 .tileSchedule {
-  background: rgba(232, 237, 244, 0.58);
+  background: var(--surface-muted-tile);
   grid-column: 1 / -1;
 }
 
 .tileContacts {
-  background: rgba(232, 237, 244, 0.58);
+  background: var(--surface-muted-tile);
   grid-column: 1 / -1;
 }
 
 .tileCopy {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
 .tileTitle {
-  color: #ffffff;
+  color: var(--text-on-dark);
   font-size: 23px;
   line-height: 1.04;
   font-weight: 800;
   letter-spacing: -0.05em;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .tileLine {
@@ -136,14 +134,14 @@
 }
 
 .tileTitleDark {
-  color: #333948;
+  color: var(--text-body-on-surface);
 }
 
 .tileIcon {
   width: 48px;
   height: 48px;
   flex: 0 0 auto;
-  color: #ffffff;
+  color: var(--text-on-dark);
 }
 
 .tileIconCompact {
@@ -152,11 +150,11 @@
 }
 
 .tileIconAccent {
-  color: #ff5a1f;
+  color: var(--accent-secondary-text);
 }
 
 .tileTitleAccent {
-  color: #f14f1b;
+  color: var(--accent-secondary-text-hover);
 }
 
 .adOverlay {
@@ -167,7 +165,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px 16px;
-  background: rgba(97, 110, 130, 0.32);
+  background: var(--overlay-ad-scrim);
   backdrop-filter: blur(10px);
 }
 
@@ -175,17 +173,15 @@
   position: relative;
   width: min(100%, 430px);
   aspect-ratio: 0.92;
-  border: 1px solid rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--border-ad-card);
   border-radius: 28px;
   overflow: hidden;
   cursor: pointer;
-  box-shadow:
-    0 28px 60px rgba(76, 88, 108, 0.28),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  box-shadow: var(--shadow-elevated), var(--border-ad-inset);
 }
 
 .adCard:focus-visible {
-  outline: 2px solid rgba(240, 92, 43, 0.92);
+  outline: 2px solid var(--accent-outline-strong);
   outline-offset: 4px;
 }
 
@@ -199,21 +195,68 @@
   right: 14px;
   width: 54px;
   height: 54px;
-  border: 2px solid rgba(255, 255, 255, 0.76);
+  border: 2px solid var(--border-ad-close);
   border-radius: 999px;
-  background: rgba(33, 36, 43, 0.82);
-  color: #ffffff;
+  background: var(--tile-dark-bg);
+  color: var(--text-on-dark);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 8px 18px var(--tile-dark-shadow);
 }
 
 @media (min-width: 768px) {
   .screen,
   .panel {
     min-height: 100%;
+  }
+
+  .panel {
+    gap: 16px;
+    padding:
+      22px
+      18px
+      calc(120px + env(safe-area-inset-bottom))
+      18px;
+    box-sizing: border-box;
+  }
+
+  .tiles {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 12px 10px;
+    grid-template-rows: repeat(5, minmax(0, 1fr));
+    align-content: stretch;
+  }
+
+  .tile {
+    min-height: 0;
+    padding: 14px 14px 14px 16px;
+  }
+
+  .tile:first-child,
+  .tile:nth-child(2) {
+    min-height: 0;
+    gap: 10px;
+    padding: 12px 10px 12px 14px;
+  }
+
+  .tile:first-child .tileCopy,
+  .tile:nth-child(2) .tileCopy {
+    max-width: calc(100% - 46px);
+  }
+
+  .tile:first-child .tileTitle,
+  .tile:nth-child(2) .tileTitle {
+    font-size: 20px;
+    line-height: 1.08;
+  }
+
+  .tile:first-child .tileIcon,
+  .tile:nth-child(2) .tileIcon {
+    width: 36px;
+    height: 36px;
   }
 }
 

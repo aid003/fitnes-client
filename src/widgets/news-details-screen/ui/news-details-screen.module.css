@@ -1,8 +1,6 @@
 .screen {
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.8), transparent 24%),
-    linear-gradient(180deg, #e8edf4 0%, #dce2eb 100%);
+  background: var(--gradient-news-details);
 }
 
 .panel {
@@ -36,9 +34,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 18px;
-  border: 2px solid rgba(240, 92, 43, 0.24);
-  background: rgba(255, 255, 255, 0.72);
-  color: var(--color-text);
+  border: 2px solid var(--border-accent);
+  background: var(--surface-glass);
+  color: var(--text-primary);
   text-decoration: none;
 }
 
@@ -48,7 +46,7 @@
 }
 
 .pageTitle {
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 28px;
   line-height: 1;
   font-weight: 800;
@@ -66,7 +64,7 @@
   min-height: 220px;
   border-radius: 28px;
   overflow: hidden;
-  background: rgba(240, 92, 43, 0.08);
+  background: var(--accent-soft);
 }
 
 .cover {
@@ -79,11 +77,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(0, 0, 0, 0.88);
+  color: var(--text-primary);
   font-size: 52px;
   font-weight: 800;
   letter-spacing: -0.06em;
-  background: #dbdbdb;
+  background: var(--placeholder-block);
 }
 
 .copy {
@@ -93,7 +91,7 @@
 }
 
 .title {
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 32px;
   line-height: 0.98;
   font-weight: 800;
@@ -113,14 +111,14 @@
   min-height: 32px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: #f05c2b;
-  color: #fff;
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
   font-size: 13px;
   font-weight: 800;
 }
 
 .lead {
-  color: rgba(35, 40, 52, 0.84);
+  color: var(--text-secondary);
   font-size: 17px;
   line-height: 1.36;
 }
@@ -128,12 +126,12 @@
 .highlightBox {
   padding: 18px 16px;
   border-radius: 24px;
-  border: 2px solid rgba(240, 92, 43, 0.18);
-  background: rgba(255, 255, 255, 0.72);
+  border: 2px solid var(--border-subtle);
+  background: var(--surface-glass);
 }
 
 .highlightTitle {
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 24px;
   line-height: 1.04;
   font-weight: 800;
@@ -142,13 +140,13 @@
 .highlightList {
   margin: 12px 0 0;
   padding-left: 18px;
-  color: rgba(35, 40, 52, 0.82);
+  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.5;
 }
 
 .richText {
-  color: rgba(35, 40, 52, 0.88);
+  color: var(--text-primary);
   font-size: 16px;
   line-height: 1.56;
 }
@@ -164,7 +162,7 @@
 }
 
 .richText :global(strong) {
-  color: var(--color-text);
+  color: var(--text-primary);
 }
 
 .errorWrap {
@@ -189,8 +187,8 @@
   min-height: 48px;
   padding: 0 18px;
   border-radius: 999px;
-  background: var(--color-button-primary);
-  color: var(--color-button-primary-text);
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
   text-decoration: none;
   font-weight: 800;
 }

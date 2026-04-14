@@ -1,9 +1,6 @@
 .screen {
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.84), transparent 28%),
-    radial-gradient(circle at 82% 100%, rgba(255, 255, 255, 0.44), transparent 25%),
-    linear-gradient(180deg, #e8edf4 0%, #dce2eb 100%);
+  background: var(--gradient-passes-category);
 }
 
 .panel {
@@ -33,9 +30,7 @@
 }
 
 .heroOverlay {
-  background:
-    linear-gradient(180deg, rgba(30, 20, 18, 0.14) 0%, rgba(30, 18, 14, 0.46) 58%, rgba(29, 21, 24, 0.94) 100%),
-    linear-gradient(120deg, rgba(255, 122, 28, 0.18) 12%, transparent 34%, rgba(255, 140, 45, 0.16) 70%, transparent 100%);
+  background: var(--pass-hero-overlay-deep), var(--pass-hero-overlay-warm);
 }
 
 .heroContent {
@@ -64,11 +59,11 @@
   justify-content: center;
   width: 58px;
   height: 58px;
-  border: 4px solid #ffffff;
+  border: 4px solid var(--surface-card-solid);
   border-radius: 20px;
-  color: #ffffff;
+  color: var(--text-on-dark);
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--pass-hero-back-bg);
 }
 
 .heroText {
@@ -80,7 +75,7 @@
 
 .heroTitle {
   margin: 0;
-  color: #ffd08b;
+  color: var(--pass-hero-title);
   font-size: 30px;
   line-height: 0.96;
   font-weight: 800;
@@ -90,7 +85,7 @@
 
 .heroSubtitle {
   margin: 0;
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--pass-hero-subtitle);
   font-size: 15px;
   line-height: 1.15;
   font-weight: 600;
@@ -132,12 +127,12 @@
 
 .tabsSection::before {
   left: 0;
-  background: linear-gradient(90deg, rgba(35, 25, 30, 0.96) 0%, rgba(35, 25, 30, 0) 100%);
+  background: var(--pass-tabs-fade-edge-light-left);
 }
 
 .tabsSection::after {
   right: 0;
-  background: linear-gradient(270deg, rgba(35, 25, 30, 0.98) 0%, rgba(35, 25, 30, 0) 100%);
+  background: var(--pass-tabs-fade-edge-light-right);
 }
 
 .tabs::-webkit-scrollbar {
@@ -155,20 +150,17 @@
   padding: 12px 14px;
   border: 0;
   border-radius: 18px;
-  background: #2a1f24;
-  color: rgba(255, 255, 255, 0.84);
+  background: var(--pass-tab-bg);
+  color: var(--pass-tab-text);
   font: inherit;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: var(--pass-tab-inset);
   scroll-snap-align: start;
 }
 
 .tabActive {
-  background:
-    linear-gradient(180deg, rgba(103, 54, 25, 0.96) 0%, rgba(72, 35, 14, 0.98) 100%);
-  color: #ffd089;
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 157, 46, 0.5),
-    0 10px 24px rgba(48, 19, 3, 0.34);
+  background: var(--pass-tab-active-bg);
+  color: var(--pass-tab-active-text);
+  box-shadow: var(--pass-tab-active-shadow);
 }
 
 .tabIcon {
@@ -202,10 +194,10 @@
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  background: rgba(26, 18, 24, 0.78);
-  border: 1px solid rgba(255, 184, 102, 0.18);
-  color: rgba(255, 214, 163, 0.92);
-  box-shadow: 0 10px 24px rgba(17, 11, 17, 0.22);
+  background: var(--pass-scroll-hint-bg);
+  border: 1px solid var(--pass-scroll-hint-border);
+  color: var(--pass-scroll-hint-text);
+  box-shadow: var(--pass-scroll-hint-shadow);
   backdrop-filter: blur(10px);
 }
 
@@ -231,25 +223,25 @@
 
 .variantTitle {
   margin: 0;
-  color: #ffffff;
-  font-size: 29px;
-  line-height: 0.98;
+  color: var(--text-primary);
+  font-size: 26px;
+  line-height: 1.02;
   font-weight: 800;
   letter-spacing: -0.04em;
 }
 
 .variantDescription {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 16px;
-  line-height: 1.2;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.28;
 }
 
 .groupTitle {
   margin: 0;
-  color: #ffffff;
-  font-size: 24px;
-  line-height: 1.02;
+  color: var(--text-primary);
+  font-size: 22px;
+  line-height: 1.05;
   font-weight: 800;
   letter-spacing: -0.03em;
   text-wrap: balance;
@@ -267,13 +259,13 @@
   gap: 10px;
   padding: 16px 16px 18px;
   border-radius: 24px;
-  border: 1px solid rgba(122, 117, 145, 0.72);
-  background: linear-gradient(180deg, rgba(58, 49, 55, 0.95) 0%, rgba(53, 44, 51, 0.98) 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--pass-plan-card-border);
+  background: var(--pass-plan-card-bg);
+  box-shadow: var(--pass-plan-card-inset);
 }
 
 .planCardHighlighted {
-  border: 2px solid #f4e6b5;
+  border: 2px solid var(--pass-plan-highlight-border);
 }
 
 .planBadgesTop {
@@ -296,13 +288,13 @@
 
 .badgeDefault,
 .badgeFeatured {
-  background: #efc75d;
-  color: #2a1b0f;
+  background: var(--pass-badge-warm-bg);
+  color: var(--pass-badge-warm-text);
 }
 
 .badgeSuccess {
-  background: #a4c64d;
-  color: #ffffff;
+  background: var(--pass-badge-success-bg);
+  color: var(--pass-badge-success-text);
 }
 
 .planMain {
@@ -321,7 +313,7 @@
 
 .planTitle {
   margin: 0;
-  color: #ffffff;
+  color: var(--pass-on-dark);
   font-size: 20px;
   line-height: 1.04;
   font-weight: 800;
@@ -331,7 +323,7 @@
 .planDescription,
 .planSubtitle {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--pass-on-dark-muted);
   font-size: 14px;
   line-height: 1.25;
 }
@@ -348,7 +340,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--pass-on-dark-soft);
   font-size: 14px;
   line-height: 1.2;
 }
@@ -356,7 +348,7 @@
 .featureIcon {
   width: 20px;
   height: 20px;
-  color: #ffb24d;
+  color: var(--pass-feature-icon);
   flex: 0 0 auto;
 }
 
@@ -369,7 +361,7 @@
 }
 
 .planPrice {
-  color: #ffd08b;
+  color: var(--pass-price);
   font-size: 24px;
   line-height: 0.96;
   font-weight: 800;
@@ -383,18 +375,18 @@
   padding: 10px 18px;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(180deg, #d77222 0%, #a54d14 100%);
-  color: #ffffff;
+  background: var(--pass-action-bg);
+  color: var(--pass-action-text);
   font: inherit;
   font-size: 18px;
   line-height: 1;
   font-weight: 800;
-  box-shadow: 0 8px 18px rgba(57, 23, 4, 0.32);
+  box-shadow: var(--pass-action-shadow);
 }
 
 .planCardHighlighted .planAction {
-  background: linear-gradient(180deg, #dbe775 0%, #c7d75c 100%);
-  color: #19150c;
+  background: var(--pass-action-alt-bg);
+  color: var(--pass-action-alt-text);
 }
 
 .planFooter {
@@ -405,13 +397,20 @@
 .feedback,
 .errorText {
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
   font-size: 14px;
   line-height: 1.4;
 }
 
+.emptyText {
+  color: var(--text-secondary);
+}
+
+.errorText {
+  color: var(--color-error);
+}
+
 .feedback {
-  color: #ffd08b;
+  color: var(--feedback-warm);
 }
 
 .stateBlock {
@@ -431,8 +430,8 @@
   min-height: 42px;
   padding: 10px 16px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  color: var(--color-text);
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-weight: 700;
   text-decoration: none;
 }
@@ -476,6 +475,18 @@
   .content {
     gap: 20px;
     padding: 24px 14px 0;
+  }
+
+  .variantTitle {
+    font-size: 24px;
+  }
+
+  .groupTitle {
+    font-size: 20px;
+  }
+
+  .variantDescription {
+    font-size: 14px;
   }
 
   .planCard {

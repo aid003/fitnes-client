@@ -22,8 +22,8 @@
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--color-text);
+  background: var(--surface-card);
+  color: var(--text-primary);
 }
 
 .title {
@@ -34,7 +34,7 @@
 
 .subtitle {
   margin: 8px 0 0;
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.4;
 }
@@ -47,10 +47,10 @@
 .card,
 .emptyState {
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--border-card);
+  background: var(--surface-card);
   padding: 24px;
-  box-shadow: 0 24px 60px rgba(91, 103, 124, 0.12);
+  box-shadow: var(--shadow-payments-card);
 }
 
 .statusBadge {
@@ -65,23 +65,23 @@
 }
 
 .statusSuccess {
-  background: rgba(86, 214, 154, 0.14);
-  color: #82efb5;
+  background: var(--result-success-bg);
+  color: var(--result-success-text);
 }
 
 .statusDanger {
-  background: rgba(255, 103, 103, 0.14);
-  color: #ff8c8c;
+  background: var(--result-error-bg);
+  color: var(--result-error-text);
 }
 
 .statusWarning {
-  background: rgba(255, 184, 102, 0.14);
-  color: #ffc46f;
+  background: var(--result-pending-bg);
+  color: var(--result-pending-text);
 }
 
 .statusMuted {
-  background: rgba(185, 194, 214, 0.14);
-  color: #d2daef;
+  background: var(--result-neutral-bg);
+  color: var(--result-neutral-text);
 }
 
 .planTitle {
@@ -100,12 +100,12 @@
 }
 
 .planSubtitle {
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
 }
 
 .planOriginValue {
   margin-top: 18px;
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 14px;
   line-height: 1.4;
   font-weight: 700;
@@ -119,13 +119,13 @@
 
 .message {
   margin-top: 16px;
-  color: rgba(35, 40, 52, 0.82);
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
 .metaText {
   margin-top: 12px;
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -148,8 +148,8 @@
 }
 
 .primaryAction {
-  background: var(--color-button-primary);
-  color: var(--color-button-primary-text);
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
 }
 
 .secondaryAction {

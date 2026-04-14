@@ -18,21 +18,21 @@
   padding: 14px 16px;
   border-radius: 24px;
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 16px 36px rgba(90, 102, 121, 0.14);
+  background: var(--toast-surface);
+  box-shadow: var(--toast-shadow);
   pointer-events: auto;
 }
 
 .toastSuccess {
-  border-color: rgba(128, 183, 144, 0.32);
+  border-color: var(--toast-border-success);
 }
 
 .toastError {
-  border-color: rgba(211, 79, 58, 0.28);
+  border-color: var(--toast-border-error);
 }
 
 .toastInfo {
-  border-color: rgba(240, 92, 43, 0.18);
+  border-color: var(--toast-border-info);
 }
 
 .iconWrap {
@@ -43,7 +43,7 @@
   height: 36px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: rgba(240, 92, 43, 0.08);
+  background: var(--accent-soft);
 }
 
 .iconSuccess {
@@ -55,7 +55,7 @@
 }
 
 .iconInfo {
-  color: var(--color-text);
+  color: var(--text-primary);
 }
 
 .content {
@@ -71,7 +71,7 @@
 
 .description {
   margin: 4px 0 0;
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
   font-size: 0.88rem;
   line-height: 1.4;
 }
@@ -85,7 +85,7 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
   cursor: pointer;
   transition:
     background 0.2s ease,
@@ -93,8 +93,8 @@
 }
 
 .closeButton:hover {
-  background: rgba(240, 92, 43, 0.08);
-  color: var(--color-text);
+  background: var(--accent-soft);
+  color: var(--text-primary);
 }
 
 @media (max-width: 720px) {

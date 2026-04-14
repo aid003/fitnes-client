@@ -1,9 +1,6 @@
 .screen {
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 14% 8%, rgba(255, 255, 255, 0.84), transparent 24%),
-    radial-gradient(circle at 84% 100%, rgba(255, 255, 255, 0.44), transparent 28%),
-    linear-gradient(180deg, #e8edf4 0%, #dce2eb 100%);
+  background: var(--gradient-screen-tight);
 }
 
 .panel {
@@ -34,10 +31,10 @@
   width: 52px;
   height: 52px;
   border-radius: 18px;
-  border: 2px solid rgba(240, 92, 43, 0.24);
-  color: var(--color-text);
+  border: 2px solid var(--border-accent);
+  color: var(--text-primary);
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--surface-glass);
 }
 
 .logo {
@@ -54,7 +51,7 @@
 
 .title {
   margin: 0;
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 28px;
   line-height: 0.98;
   font-weight: 800;
@@ -75,7 +72,7 @@
 
 .sectionTitle {
   margin: 0;
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 23px;
   line-height: 1;
   font-weight: 800;
@@ -92,15 +89,15 @@
   gap: 18px;
   padding: 14px 14px 16px;
   border-radius: 24px;
-  border: 2px solid rgba(240, 92, 43, 0.24);
-  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid var(--border-accent);
+  background: var(--surface-card);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-    0 16px 34px rgba(91, 103, 124, 0.12);
+    inset 0 0 0 1px var(--border-card-inner),
+    var(--shadow-card);
 }
 
 .membershipCardExpired {
-  border-color: rgba(221, 76, 36, 0.92);
+  border-color: var(--border-expired);
 }
 
 .cardHeader {
@@ -118,27 +115,27 @@
   min-height: 34px;
   padding: 6px 14px;
   border-radius: 12px;
-  color: #ffffff;
+  color: var(--status-on-solid);
   font-size: 14px;
   line-height: 1;
   font-weight: 800;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+  box-shadow: var(--status-pill-gloss);
 }
 
 .statusSuccess {
-  background: #5aaf3f;
+  background: var(--status-success-bg);
 }
 
 .statusWarning {
-  background: #b6801f;
+  background: var(--status-warning-bg);
 }
 
 .statusMuted {
-  background: #4c5664;
+  background: var(--status-muted-bg);
 }
 
 .statusDanger {
-  background: #8d1424;
+  background: var(--status-danger-bg);
 }
 
 .qrButton,
@@ -150,9 +147,9 @@
   min-height: 34px;
   padding: 6px 10px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--ghost-button-border);
+  background: var(--ghost-button-bg);
+  color: var(--ghost-button-text);
   font: inherit;
   font-size: 12px;
   line-height: 1;
@@ -174,7 +171,7 @@
 .planOrigin,
 .historyOrigin {
   margin: 0;
-  color: rgba(255, 206, 149, 0.86);
+  color: var(--text-tertiary);
   font-size: 11px;
   line-height: 1.25;
   font-weight: 800;
@@ -184,7 +181,7 @@
 
 .cardTitle {
   margin: 0;
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 22px;
   line-height: 1.05;
   font-weight: 800;
@@ -193,7 +190,7 @@
 
 .cardSubtitle {
   margin: 0;
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.3;
   font-weight: 700;
@@ -207,8 +204,14 @@
   height: 128px;
   border-radius: 999px;
   background:
-    radial-gradient(circle at center, rgba(43, 31, 36, 0.2) 57%, transparent 58%),
-    conic-gradient(from -90deg, #ffbf46 0deg, #ff9f33 calc(var(--progress) * 3.6deg), rgba(255, 255, 255, 0.14) calc(var(--progress) * 3.6deg), rgba(255, 255, 255, 0.14) 360deg);
+    radial-gradient(circle at center, var(--ring-glow) 57%, transparent 58%),
+    conic-gradient(
+      from -90deg,
+      var(--ring-conic-a) 0deg,
+      var(--ring-conic-b) calc(var(--progress) * 3.6deg),
+      var(--ring-track) calc(var(--progress) * 3.6deg),
+      var(--ring-track) 360deg
+    );
 }
 
 .ring::before {
@@ -216,10 +219,10 @@
   position: absolute;
   inset: 8px;
   border-radius: inherit;
-  background: linear-gradient(180deg, #ffffff 0%, #eef2f7 100%);
+  background: var(--ring-inner-fill);
   box-shadow:
-    inset 0 0 0 2px rgba(240, 92, 43, 0.18),
-    0 8px 18px rgba(91, 103, 124, 0.12);
+    inset 0 0 0 2px var(--ring-inner-border),
+    var(--shadow-card-soft);
 }
 
 .ringInner {
@@ -231,13 +234,13 @@
 }
 
 .ringCaption {
-  color: rgba(255, 255, 255, 0.86);
+  color: var(--text-secondary);
   font-size: 11px;
   line-height: 1;
 }
 
 .ringValue {
-  color: #ffffff;
+  color: var(--accent-primary);
   font-size: 54px;
   line-height: 0.9;
   font-weight: 900;
@@ -245,7 +248,7 @@
 }
 
 .ringUnit {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 18px;
   line-height: 1;
 }
@@ -264,7 +267,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.35;
   font-weight: 700;
@@ -273,7 +276,7 @@
 .featureIcon {
   width: 18px;
   height: 18px;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--text-primary);
   flex: 0 0 auto;
 }
 
@@ -281,8 +284,8 @@
   margin: 0;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 196, 78, 0.12);
-  color: #ffd98e;
+  background: var(--callout-warning-bg);
+  color: var(--callout-warning-text);
   font-size: 13px;
   line-height: 1.35;
   font-weight: 700;
@@ -317,13 +320,13 @@
 
 .primaryAction {
   border: none;
-  color: #ffffff;
-  background: var(--color-button-primary);
+  color: var(--text-on-accent);
+  background: var(--accent-primary);
 }
 
 .secondaryAction {
-  border: 1.5px solid rgba(240, 92, 43, 0.24);
-  color: var(--color-text);
+  border: 1.5px solid var(--border-accent);
+  color: var(--text-primary);
   background: transparent;
 }
 
@@ -332,10 +335,10 @@
   justify-content: flex-start;
   padding: 0;
   border: none;
-  border-top: 3px solid rgba(248, 154, 62, 0.92);
+  border-top: 3px solid var(--border-schedule-accent);
   border-radius: 0;
   background: transparent;
-  color: rgba(89, 138, 255, 0.92);
+  color: var(--link-primary);
   text-align: left;
 }
 
@@ -360,8 +363,8 @@
 
 .historyCard {
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border-card);
+  background: var(--surface-card);
 }
 
 .historyToggle {
@@ -392,14 +395,14 @@
 }
 
 .historyTitle {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 15px;
   line-height: 1.2;
   font-weight: 800;
 }
 
 .historySubtitle {
-  color: rgba(255, 255, 255, 0.54);
+  color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.3;
 }
@@ -407,7 +410,7 @@
 .historyChevron {
   width: 20px;
   height: 20px;
-  color: rgba(255, 255, 255, 0.54);
+  color: var(--text-tertiary);
   flex: 0 0 auto;
 }
 
@@ -415,7 +418,7 @@
   display: grid;
   gap: 12px;
   padding: 0 14px 14px;
-  border-top: 1px solid rgba(248, 154, 62, 0.26);
+  border-top: 1px solid var(--border-schedule-accent);
 }
 
 .historyQrButton {
@@ -430,16 +433,16 @@
 .timelineItem {
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.72);
+  background: var(--surface-timeline);
+  color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.35;
   font-weight: 700;
 }
 
 .timelineItemAccent {
-  color: #ffd38c;
-  background: rgba(255, 173, 71, 0.1);
+  color: var(--feedback-warm);
+  background: var(--surface-timeline-accent);
 }
 
 .emptyState {
@@ -447,13 +450,13 @@
   gap: 10px;
   padding: 18px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.88);
+  background: var(--surface-glass-strong);
+  border: 1px solid var(--border-card);
 }
 
 .emptyTitle {
   margin: 0;
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 18px;
   line-height: 1.1;
   font-weight: 800;
@@ -468,14 +471,14 @@
 }
 
 .emptyText {
-  color: var(--color-muted-text);
+  color: var(--text-secondary);
 }
 
 .emptyAction {
   width: fit-content;
   padding: 0 18px;
-  color: #ffffff;
-  background: var(--color-button-primary);
+  color: var(--text-on-accent);
+  background: var(--accent-primary);
 }
 
 .errorText {
@@ -483,7 +486,7 @@
 }
 
 .feedback {
-  color: #ffcc83;
+  color: var(--feedback-warm);
 }
 
 .modalOverlay {
@@ -493,7 +496,7 @@
   display: grid;
   align-items: end;
   padding: 18px;
-  background: rgba(12, 9, 17, 0.76);
+  background: var(--overlay-scrim);
   backdrop-filter: blur(10px);
 }
 
@@ -504,10 +507,9 @@
   gap: 18px;
   padding: 20px;
   border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(252, 249, 243, 0.98) 0%, rgba(241, 235, 227, 0.98) 100%);
-  color: #251a12;
-  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.26);
+  background: var(--modal-surface-warm);
+  color: var(--modal-text);
+  box-shadow: var(--shadow-modal);
 }
 
 .modalHeader {
@@ -519,7 +521,7 @@
 
 .modalEyebrow {
   margin: 0 0 6px;
-  color: #97591d;
+  color: var(--modal-eyebrow);
   font-size: 12px;
   line-height: 1.2;
   font-weight: 900;
@@ -537,7 +539,7 @@
 
 .modalSubtitle {
   margin: 8px 0 0;
-  color: rgba(37, 26, 18, 0.62);
+  color: var(--modal-text-muted);
   font-size: 14px;
   line-height: 1.4;
   font-weight: 700;
@@ -551,8 +553,8 @@
   justify-content: center;
   border: none;
   border-radius: 14px;
-  background: rgba(37, 26, 18, 0.08);
-  color: #251a12;
+  background: var(--modal-control-bg);
+  color: var(--modal-text);
 }
 
 .qrCanvas {
@@ -560,8 +562,8 @@
   place-items: center;
   padding: 16px;
   border-radius: 24px;
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1px rgba(37, 26, 18, 0.08);
+  background: var(--surface-card-solid);
+  box-shadow: inset 0 0 0 1px var(--modal-qr-border);
 }
 
 .qrCanvas :global(svg) {
@@ -579,11 +581,11 @@
   gap: 4px;
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(37, 26, 18, 0.06);
+  background: var(--modal-info-row-bg);
 }
 
 .infoLabel {
-  color: rgba(37, 26, 18, 0.56);
+  color: var(--modal-text-faint);
   font-size: 12px;
   line-height: 1.2;
   font-weight: 800;
@@ -592,7 +594,7 @@
 }
 
 .infoValue {
-  color: #251a12;
+  color: var(--modal-text);
   font-size: 14px;
   line-height: 1.4;
   font-weight: 800;
@@ -600,7 +602,7 @@
 
 .modalFootnote {
   margin: 0;
-  color: rgba(37, 26, 18, 0.56);
+  color: var(--modal-text-faint);
   font-size: 12px;
   line-height: 1.4;
   font-weight: 700;

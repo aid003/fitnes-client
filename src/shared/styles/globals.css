@@ -12,10 +12,8 @@ body {
 body {
   min-height: 100vh;
   min-height: 100dvh;
-  color: var(--color-text);
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 34%),
-    linear-gradient(180deg, #eef2f7 0%, var(--color-shell-bg) 100%);
+  color: var(--text-primary);
+  background: var(--gradient-app-body);
   font-family: var(--font-sans);
 }
 
