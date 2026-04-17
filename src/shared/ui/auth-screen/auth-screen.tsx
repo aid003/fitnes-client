@@ -38,7 +38,7 @@ export function AuthScreen({
           )}
 
           <Image
-            src="/asset/logo.png"
+            src="/new_logo.png"
             alt="Эра Спорта"
             width={compactLogo ? 128 : 220}
             height={compactLogo ? 84 : 144}

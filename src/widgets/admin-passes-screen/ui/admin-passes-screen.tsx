@@ -710,16 +710,18 @@ function TreeRow({
         </span>
       </button>
 
-      {onCreate ? (
-        <button
-          type="button"
-          className={styles.iconButton}
-          onClick={onCreate}
-          title="Создать дочерний элемент"
-        >
-          <Plus size={16} />
-        </button>
-      ) : null}
+      <span className={styles.treeCreateSlot}>
+        {onCreate ? (
+          <button
+            type="button"
+            className={styles.iconButton}
+            onClick={onCreate}
+            title="Создать дочерний элемент"
+          >
+            <Plus size={16} />
+          </button>
+        ) : null}
+      </span>
     </div>
   );
 }

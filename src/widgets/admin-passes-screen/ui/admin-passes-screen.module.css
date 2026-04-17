@@ -1,5 +1,6 @@
 .screen {
   min-height: 100dvh;
+  color: #f4f7ff;
   background:
     radial-gradient(circle at top left, rgba(224, 153, 73, 0.18), transparent 28%),
     radial-gradient(circle at bottom right, rgba(54, 114, 126, 0.2), transparent 32%),
@@ -50,6 +51,18 @@
 .panelText,
 .previewMeta {
   color: rgba(255, 255, 255, 0.72);
+}
+
+.subtitle,
+.statusText,
+.panelText,
+.previewMeta,
+.treeMeta,
+.treeDetails,
+.fileHint,
+.previewPlanDescription,
+.previewFeatureItem {
+  color: rgba(244, 247, 255, 0.84);
 }
 
 .errorText {
@@ -162,7 +175,8 @@
 }
 
 .treeRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 32px;
   align-items: center;
   gap: 8px;
   min-height: 54px;
@@ -189,7 +203,7 @@
 }
 
 .treeMain {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -210,6 +224,10 @@
   gap: 3px;
 }
 
+.treeText {
+  flex: 1 1 auto;
+}
+
 .treeTitle {
   font-size: 14px;
   font-weight: 800;
@@ -224,7 +242,17 @@
 }
 
 .treeInfo {
+  flex: 0 0 auto;
+  width: 96px;
   justify-items: end;
+}
+
+.treeCreateSlot {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .treeState {
@@ -465,6 +493,16 @@
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
   font: inherit;
+}
+
+select.input {
+  color-scheme: dark;
+  background-color: rgba(27, 39, 42, 0.95);
+}
+
+select.input option {
+  background: #1b272a;
+  color: #f4f7ff;
 }
 
 .textarea {

@@ -156,7 +156,7 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
         <header className={styles.hero}>
           <div className={styles.heroMedia}>
             <Image
-              src="/passes-page/logo.png"
+              src="/new_logo.png"
               alt=""
               fill
               priority

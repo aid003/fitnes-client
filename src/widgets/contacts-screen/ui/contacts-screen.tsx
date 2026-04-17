@@ -131,7 +131,7 @@ export function ContactsScreen() {
             </Link>
 
             <Image
-              src="/asset/logo.png"
+              src="/new_logo.png"
               alt="Эра Спорта"
               width={160}
               height={106}

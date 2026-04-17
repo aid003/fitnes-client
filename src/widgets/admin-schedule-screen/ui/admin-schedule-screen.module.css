@@ -1,5 +1,6 @@
 .screen {
   min-height: 100dvh;
+  color: #f4f7ff;
   background:
     radial-gradient(circle at 12% 12%, rgba(219, 145, 59, 0.18), transparent 28%),
     radial-gradient(circle at 88% 88%, rgba(48, 111, 122, 0.2), transparent 34%),
@@ -51,7 +52,7 @@
 .statusText,
 .modalText {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(244, 247, 255, 0.86);
   line-height: 1.5;
 }
 
@@ -132,6 +133,16 @@
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
   font: inherit;
+}
+
+select.input {
+  color-scheme: dark;
+  background-color: rgba(27, 39, 42, 0.95);
+}
+
+select.input option {
+  background: #1b272a;
+  color: #f4f7ff;
 }
 
 .gridScroller {
@@ -217,7 +228,7 @@
 }
 
 .timeRange {
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(244, 247, 255, 0.8);
   font-size: 14px;
   line-height: 1.2;
   font-weight: 700;
@@ -237,7 +248,7 @@
 }
 
 .dayLabel {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(244, 247, 255, 0.78);
   font-size: 11px;
   line-height: 1.1;
   font-weight: 700;
@@ -268,7 +279,7 @@
 }
 
 .emptyHint {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(244, 247, 255, 0.74);
   font-size: 13px;
   line-height: 1.4;
   font-weight: 700;
@@ -301,7 +312,7 @@
 }
 
 .slotChip span {
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(244, 247, 255, 0.82);
   font-size: 12px;
 }
 
@@ -315,7 +326,7 @@
   border-radius: 12px;
   border: 1px dashed rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.52);
+  color: rgba(244, 247, 255, 0.76);
   font-size: 12px;
   line-height: 1.35;
   font-weight: 700;

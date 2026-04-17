@@ -10,6 +10,58 @@
   pointer-events: none;
 }
 
+.viewportAdmin .toast {
+  border-color: rgba(244, 247, 255, 0.2);
+  background: rgba(20, 28, 36, 0.92);
+  box-shadow: 0 20px 44px rgba(4, 7, 12, 0.46);
+  backdrop-filter: blur(8px);
+}
+
+.viewportAdmin .toastSuccess {
+  border-color: rgba(116, 231, 183, 0.44);
+}
+
+.viewportAdmin .toastError {
+  border-color: rgba(255, 143, 143, 0.44);
+}
+
+.viewportAdmin .toastInfo {
+  border-color: rgba(122, 193, 255, 0.44);
+}
+
+.viewportAdmin .title {
+  color: #f4f7ff;
+}
+
+.viewportAdmin .description {
+  color: rgba(244, 247, 255, 0.82);
+}
+
+.viewportAdmin .iconWrap {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.viewportAdmin .iconSuccess {
+  color: #8ee9be;
+}
+
+.viewportAdmin .iconError {
+  color: #ff9da5;
+}
+
+.viewportAdmin .iconInfo {
+  color: #9dd0ff;
+}
+
+.viewportAdmin .closeButton {
+  color: rgba(244, 247, 255, 0.72);
+}
+
+.viewportAdmin .closeButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f4f7ff;
+}
+
 .toast {
   display: grid;
   grid-template-columns: auto 1fr auto;

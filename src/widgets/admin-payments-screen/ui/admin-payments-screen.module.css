@@ -1,5 +1,6 @@
 .screen {
   min-height: 100dvh;
+  color: #f4f7ff;
   background:
     radial-gradient(circle at 15% 10%, rgba(67, 180, 171, 0.22), transparent 26%),
     radial-gradient(circle at 85% 18%, rgba(243, 188, 84, 0.16), transparent 24%),
@@ -46,7 +47,7 @@
 
 .subtitle {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(244, 247, 255, 0.86);
   line-height: 1.55;
 }
 
@@ -124,6 +125,12 @@
   color: #ffffff;
   font: inherit;
   font-weight: 800;
+  color-scheme: dark;
+}
+
+.rangeSelect option {
+  background: #1b272a;
+  color: #f4f7ff;
 }
 
 .errorText {
@@ -184,7 +191,7 @@
 .rankEmpty,
 .emptyText {
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(244, 247, 255, 0.84);
 }
 
 .kpiTitle {
@@ -264,7 +271,7 @@
 .axisLabels,
 .comparisonLabel span,
 .ledgerCount {
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(244, 247, 255, 0.78);
   font-size: 12px;
   font-weight: 700;
 }
@@ -384,7 +391,7 @@
 }
 
 .table th {
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(244, 247, 255, 0.76);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;

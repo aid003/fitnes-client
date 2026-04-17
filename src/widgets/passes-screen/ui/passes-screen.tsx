@@ -63,7 +63,7 @@ export function PassesScreen() {
       <section className={styles.panel}>
         <header className={styles.header}>
           <Image
-            src="/asset/logo.png"
+            src="/new_logo.png"
             alt="Эра Спорта"
             width={190}
             height={126}

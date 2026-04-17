@@ -182,14 +182,16 @@ export function HomeScreen() {
 
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Image
-            src="/asset/logo.png"
-            alt="Эра Спорта"
-            width={190}
-            height={126}
-            priority
-            className={styles.logo}
-          />
+          <div className={styles.logoFrame}>
+            <Image
+              src="/new_logo.png"
+              alt="Эра Спорта"
+              width={190}
+              height={126}
+              priority
+              className={styles.logo}
+            />
+          </div>
 
           <div className={styles.greeting}>
             <span className={styles.greetingLine}>Привет,</span>

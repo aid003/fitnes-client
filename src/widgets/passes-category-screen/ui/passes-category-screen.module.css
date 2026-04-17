@@ -114,26 +114,6 @@
   padding-right: 74px;
 }
 
-.tabsSection::before,
-.tabsSection::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 18px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.tabsSection::before {
-  left: 0;
-  background: var(--pass-tabs-fade-edge-light-left);
-}
-
-.tabsSection::after {
-  right: 0;
-  background: var(--pass-tabs-fade-edge-light-right);
-}
 
 .tabs::-webkit-scrollbar {
   display: none;

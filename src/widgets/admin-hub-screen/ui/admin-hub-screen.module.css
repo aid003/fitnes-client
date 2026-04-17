@@ -1,5 +1,6 @@
 .screen {
   min-height: 100dvh;
+  color: #f4f7ff;
   background:
     radial-gradient(circle at 12% 12%, rgba(225, 143, 64, 0.18), transparent 28%),
     radial-gradient(circle at 88% 88%, rgba(56, 114, 122, 0.2), transparent 32%),
@@ -48,7 +49,7 @@
 
 .subtitle {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(244, 247, 255, 0.88);
   line-height: 1.55;
 }
 
@@ -164,7 +165,7 @@
 
 .cardText {
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(244, 247, 255, 0.9);
   line-height: 1.5;
 }
 

@@ -149,7 +149,7 @@ export function MembershipsScreen() {
             </Link>
 
             <Image
-              src="/asset/logo.png"
+              src="/new_logo.png"
               alt="Эра Спорта"
               width={170}
               height={112}
@@ -271,7 +271,7 @@ export function MembershipsScreen() {
                               Возврат оформлен. Абонемент закрыт и больше не может использоваться.
                             </p>
                           ) : null}
-                          {membership.hasQr ? (
+                          {membership.hasQr && membership.status !== "EXPIRED" && membership.status !== "REFUNDED" ? (
                             <button
                               type="button"
                               className={styles.historyQrButton}
@@ -370,7 +370,7 @@ function MembershipCard({
     >
       <div className={styles.cardHeader}>
         <span className={statusClassName}>{membership.statusLabel}</span>
-        {membership.hasQr ? (
+        {membership.hasQr && membership.status !== "EXPIRED" && membership.status !== "REFUNDED" ? (
           <button
             type="button"
             className={styles.qrButton}
@@ -405,7 +405,6 @@ function MembershipCard({
         ) : showsVisitCounter ? (
           <div className={styles.ring} style={{ "--progress": "100%" } as CSSProperties}>
             <div className={styles.ringInner}>
-              <span className={styles.ringCaption}>Осталось</span>
               <span className={styles.ringValue}>{membership.remainingVisits}</span>
               <span className={styles.ringUnit}>Посещ.</span>
             </div>

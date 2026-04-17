@@ -16,6 +16,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
+import { usePathname } from "next/navigation";
 import styles from "./toast-provider.module.css";
 
 type ToastVariant = "success" | "error" | "info";
@@ -42,6 +43,8 @@ const DEFAULT_DURATION_MS = 3500;
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: PropsWithChildren) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin") ?? false;
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
   const nextToastIdRef = useRef(0);
   const timeoutIdsRef = useRef<Map<number, number>>(new Map());
@@ -97,7 +100,11 @@ export function ToastProvider({ children }: PropsWithChildren) {
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      <div className={styles.viewport} aria-live="polite" aria-atomic="false">
+      <div
+        className={[styles.viewport, isAdminRoute ? styles.viewportAdmin : ""].filter(Boolean).join(" ")}
+        aria-live="polite"
+        aria-atomic="false"
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}

@@ -26,9 +26,16 @@
   padding: 0 4px;
 }
 
-.logo {
+.logoFrame {
   width: 146px;
+  overflow: hidden;
+}
+
+.logo {
+  width: 100%;
   height: auto;
+  transform: scale(1.36);
+  transform-origin: center;
 }
 
 .greeting {
@@ -276,7 +283,7 @@
     height: 50px;
   }
 
-  .logo {
+  .logoFrame {
     width: 132px;
   }
 

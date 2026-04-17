@@ -22,7 +22,7 @@ export function WelcomeScreen() {
       <section className={styles.panel}>
         <div className={styles.brand}>
           <Image
-            src="/asset/logo.png"
+            src="/new_logo.png"
             alt="Эра Спорта"
             width={318}
             height={210}
