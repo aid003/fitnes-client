@@ -23,9 +23,16 @@
   flex: 0 0 auto;
 }
 
-.logo {
+.logoFrame {
   width: 146px;
+  overflow: hidden;
+}
+
+.logo {
+  width: 100%;
   height: auto;
+  transform: scale(1.5);
+  transform-origin: center;
 }
 
 .greeting {
@@ -153,7 +160,7 @@
 }
 
 @media (max-width: 420px) {
-  .logo {
+  .logoFrame {
     width: 136px;
   }
 

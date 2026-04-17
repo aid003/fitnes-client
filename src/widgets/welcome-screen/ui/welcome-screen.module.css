@@ -25,9 +25,16 @@
   padding-bottom: 40px;
 }
 
-.logo {
+.logoFrame {
   width: min(100%, 324px);
+  overflow: hidden;
+}
+
+.logo {
+  width: 100%;
   height: auto;
+  transform: scale(1.5);
+  transform-origin: center;
 }
 
 .content {

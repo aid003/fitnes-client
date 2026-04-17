@@ -21,14 +21,16 @@ export function WelcomeScreen() {
     <main className={styles.screen}>
       <section className={styles.panel}>
         <div className={styles.brand}>
-          <Image
-            src="/new_logo.png"
-            alt="Эра Спорта"
-            width={318}
-            height={210}
-            className={styles.logo}
-            priority
-          />
+          <div className={styles.logoFrame}>
+            <Image
+              src="/new_logo.png"
+              alt="Эра Спорта"
+              width={318}
+              height={210}
+              className={styles.logo}
+              priority
+            />
+          </div>
         </div>
 
         <div className={styles.content}>

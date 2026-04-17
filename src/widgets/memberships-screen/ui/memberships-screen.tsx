@@ -148,14 +148,16 @@ export function MembershipsScreen() {
               <ChevronLeft size={24} strokeWidth={2.6} />
             </Link>
 
-            <Image
-              src="/new_logo.png"
-              alt="Эра Спорта"
-              width={170}
-              height={112}
-              priority
-              className={styles.logo}
-            />
+            <div className={styles.logoFrame}>
+              <Image
+                src="/new_logo.png"
+                alt="Эра Спорта"
+                width={170}
+                height={112}
+                priority
+                className={styles.logo}
+              />
+            </div>
           </div>
 
           <div className={styles.heroCopy}>

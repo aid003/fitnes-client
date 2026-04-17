@@ -47,13 +47,20 @@
   transform: translateX(-1px);
 }
 
-.logo {
+.logoFrame {
   width: 176px;
-  height: auto;
+  overflow: hidden;
 }
 
-.logoCompact {
+.logoFrameCompact {
   width: 150px;
+}
+
+.logo {
+  width: 100%;
+  height: auto;
+  transform: scale(1.5);
+  transform-origin: center;
 }
 
 .body {
@@ -79,11 +86,11 @@
     padding-right: 20px;
   }
 
-  .logo {
+  .logoFrame {
     width: 148px;
   }
 
-  .logoCompact {
+  .logoFrameCompact {
     width: 134px;
   }
 }

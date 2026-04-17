@@ -40,9 +40,16 @@
   text-decoration: none;
 }
 
-.logo {
+.logoFrame {
   width: 148px;
+  overflow: hidden;
+}
+
+.logo {
+  width: 100%;
   height: auto;
+  transform: scale(1.5);
+  transform-origin: center;
 }
 
 .heroTitle {

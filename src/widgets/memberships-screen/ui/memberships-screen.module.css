@@ -37,10 +37,18 @@
   background: var(--surface-glass);
 }
 
-.logo {
+.logoFrame {
   width: 148px;
+  overflow: hidden;
   height: auto;
   margin-right: -6px;
+}
+
+.logo {
+  width: 100%;
+  height: auto;
+  transform: scale(1.5);
+  transform-origin: center;
 }
 
 .heroCopy {

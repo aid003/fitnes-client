@@ -21,7 +21,7 @@ export function AuthScreen({
 }: AuthScreenProps) {
   const panelClassName = [styles.panel, contentClassName].filter(Boolean).join(" ");
   const headerClassNameValue = [styles.header, headerClassName].filter(Boolean).join(" ");
-  const logoClassName = [styles.logo, compactLogo ? styles.logoCompact : ""]
+  const logoFrameClassName = [styles.logoFrame, compactLogo ? styles.logoFrameCompact : ""]
     .filter(Boolean)
     .join(" ");
 
@@ -37,14 +37,16 @@ export function AuthScreen({
             <div className={styles.backPlaceholder} aria-hidden="true" />
           )}
 
-          <Image
-            src="/new_logo.png"
-            alt="Эра Спорта"
-            width={compactLogo ? 128 : 220}
-            height={compactLogo ? 84 : 144}
-            priority
-            className={logoClassName}
-          />
+          <div className={logoFrameClassName}>
+            <Image
+              src="/new_logo.png"
+              alt="Эра Спорта"
+              width={compactLogo ? 128 : 220}
+              height={compactLogo ? 84 : 144}
+              priority
+              className={styles.logo}
+            />
+          </div>
         </header>
 
         <div className={styles.body}>{children}</div>

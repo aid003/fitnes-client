@@ -66,14 +66,16 @@ export function NewsScreen() {
               <ChevronLeft size={28} strokeWidth={2.8} />
             </Link>
 
-            <Image
-              src="/new_logo.png"
-              alt="Эра Спорта"
-              width={160}
-              height={106}
-              priority
-              className={styles.logo}
-            />
+            <div className={styles.logoFrame}>
+              <Image
+                src="/new_logo.png"
+                alt="Эра Спорта"
+                width={160}
+                height={106}
+                priority
+                className={styles.logo}
+              />
+            </div>
           </div>
 
           <div className={styles.heroTitle}>Новости</div>
