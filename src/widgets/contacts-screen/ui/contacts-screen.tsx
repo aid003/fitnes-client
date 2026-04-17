@@ -89,12 +89,20 @@ const CONTACT_ITEMS: ContactItem[] = [
     iconAlt: "Telegram",
   },
   {
-    title: "Instagram/VK",
+    title: "Max",
+    value: "id272199175163_biz",
+    actionLabel: "Открыть",
+    href: "https://max.ru/id272199175163_biz",
+    iconSrc: "/about/max.png",
+    iconAlt: "Max",
+  },
+  {
+    title: "Нельзяграмм",
     value: "@era_sporta_apsheronsk",
     actionLabel: "Открыть",
     href: "https://instagram.com/era_sporta_apsheronsk",
     iconSrc: "/about/instagram.png",
-    iconAlt: "Instagram",
+    iconAlt: "Нельзяграмм",
   },
   {
     title: "E-mail",

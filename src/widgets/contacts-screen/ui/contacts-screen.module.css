@@ -180,6 +180,7 @@
   height: 50px;
   flex: 0 0 auto;
   border-radius: 14px;
+  overflow: hidden;
   background: var(--contacts-icon-bg);
   border: 1px solid var(--contacts-icon-border);
   box-shadow: var(--contacts-icon-inset);
@@ -189,6 +190,8 @@
   width: 48px;
   height: 48px;
   object-fit: contain;
+  transform: scale(1.2);
+  transform-origin: center;
 }
 
 .contactCopy {
