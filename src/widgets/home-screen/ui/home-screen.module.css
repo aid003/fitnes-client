@@ -133,11 +133,12 @@
   font-weight: 800;
   letter-spacing: -0.05em;
   margin: 0;
-  overflow-wrap: anywhere;
+  hyphens: none;
 }
 
 .tileLine {
   display: block;
+  white-space: nowrap;
 }
 
 .tileTitleDark {

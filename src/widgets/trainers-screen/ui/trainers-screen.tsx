@@ -81,7 +81,7 @@ export function TrainersScreen() {
           </div>
 
           <div className={styles.titleBlock}>
-            <h1 className={styles.title}>Наши тренера</h1>
+            <h1 className={styles.title}>Тренерский состав</h1>
             <p className={styles.subtitle}>Команда клуба и ключевые специализации.</p>
           </div>
         </header>
