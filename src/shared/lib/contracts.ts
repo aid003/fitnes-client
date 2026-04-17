@@ -4,6 +4,7 @@ export type AuthUser = {
   id: string;
   email: string;
   name: string;
+  phone: string | null;
   role: UserRole;
   isActive: boolean;
   createdAt: string;

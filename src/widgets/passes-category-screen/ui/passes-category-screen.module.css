@@ -416,6 +416,132 @@
   text-decoration: none;
 }
 
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 20px 14px max(20px, env(safe-area-inset-bottom));
+  background: var(--overlay-scrim);
+}
+
+.modalCard {
+  width: min(100%, 430px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 18px 20px;
+  border-radius: 28px;
+  background: var(--modal-surface-warm);
+  color: var(--modal-text);
+  box-shadow: var(--shadow-modal);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modalCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modalEyebrow {
+  margin: 0;
+  color: var(--modal-eyebrow);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 28px;
+  line-height: 0.98;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.modalSubtitle {
+  margin: 0;
+  color: var(--modal-text-muted);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.modalClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 14px;
+  background: var(--modal-control-bg);
+  color: var(--modal-text);
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.phoneLabel {
+  color: var(--modal-text);
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.phoneInput {
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 16px;
+  border: 1px solid var(--modal-qr-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--modal-text);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.phoneInput::placeholder {
+  color: var(--modal-text-faint);
+}
+
+.modalError {
+  margin: 0;
+  color: var(--color-error);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.modalAction {
+  min-height: 52px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pass-action-bg);
+  color: var(--pass-action-text);
+  font: inherit;
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 800;
+  box-shadow: var(--pass-action-shadow);
+}
+
 @media (max-width: 420px) {
   .hero {
     min-height: 256px;
@@ -486,5 +612,18 @@
 
   .planAction {
     width: 100%;
+  }
+
+  .modalOverlay {
+    padding-inline: 10px;
+  }
+
+  .modalCard {
+    border-radius: 24px;
+    padding: 20px 16px 18px;
+  }
+
+  .modalTitle {
+    font-size: 24px;
   }
 }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  X,
   ChevronLeft,
   ChevronRight,
   Dumbbell,
@@ -15,6 +16,7 @@ import {
   CalendarDays,
   Layers3,
 } from "lucide-react";
+import { useAuth } from "@/shared/auth/auth-context";
 import { useRequireAuth } from "@/shared/auth/auth-guards";
 import { apiFetch, ApiError } from "@/shared/lib/api";
 import type {
@@ -33,6 +35,7 @@ type PassesCategoryScreenProps = {
 };
 
 export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
+  const { refreshUser } = useAuth();
   const { canRender, isLoading, user } = useRequireAuth();
   const [category, setCategory] = useState<PassCategoryDetails | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
@@ -41,6 +44,11 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
+  const [phoneModalPlanId, setPhoneModalPlanId] = useState<string | null>(null);
+  const [phoneValue, setPhoneValue] = useState("");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [phoneSubmitError, setPhoneSubmitError] = useState<string | null>(null);
+  const [isPhoneSubmitting, setIsPhoneSubmitting] = useState(false);
   const [canScrollTabs, setCanScrollTabs] = useState(false);
   const [isTabsAtEnd, setIsTabsAtEnd] = useState(false);
   const tabsRef = useRef<HTMLElement | null>(null);
@@ -121,6 +129,93 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
       window.removeEventListener("resize", updateTabsState);
     };
   }, [category]);
+
+  const startPayment = async (planId: string) => {
+    try {
+      setPendingPlanId(planId);
+      setPaymentError(null);
+      setFeedback(null);
+
+      const session = await apiFetch<PaymentSessionResponse>(`/payments/passes/${planId}`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
+
+      window.location.href = session.formUrl;
+    } catch (paymentError) {
+      setPaymentError(
+        paymentError instanceof ApiError ? paymentError.message : "Не удалось перейти к оплате",
+      );
+    } finally {
+      setPendingPlanId(null);
+    }
+  };
+
+  const handlePlanSelect = async (planId: string) => {
+    if (user?.phone) {
+      await startPayment(planId);
+      return;
+    }
+
+    setPhoneModalPlanId(planId);
+    setPhoneValue(formatPhoneInput(user?.phone ?? ""));
+    setPhoneError(null);
+    setPhoneSubmitError(null);
+  };
+
+  const closePhoneModal = () => {
+    if (isPhoneSubmitting) {
+      return;
+    }
+
+    setPhoneModalPlanId(null);
+    setPhoneError(null);
+    setPhoneSubmitError(null);
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setPhoneValue(formatPhoneInput(value));
+    setPhoneError(null);
+    setPhoneSubmitError(null);
+  };
+
+  const handlePhoneSubmit = async () => {
+    const normalizedPhone = normalizeRussianPhone(phoneValue);
+
+    if (!normalizedPhone) {
+      setPhoneError("Введите номер в формате +7 (999) 123-45-67");
+      return;
+    }
+
+    if (!phoneModalPlanId) {
+      return;
+    }
+
+    try {
+      setIsPhoneSubmitting(true);
+      setPhoneSubmitError(null);
+
+      await apiFetch("/users/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          phone: normalizedPhone,
+        }),
+      });
+
+      await refreshUser();
+
+      setPhoneModalPlanId(null);
+      setPhoneValue(formatPhoneInput(normalizedPhone));
+
+      await startPayment(phoneModalPlanId);
+    } catch (error) {
+      setPhoneSubmitError(
+        error instanceof ApiError ? error.message : "Не удалось сохранить номер телефона",
+      );
+    } finally {
+      setIsPhoneSubmitting(false);
+    }
+  };
 
   if (isLoading) {
     return <SessionStatus title="Загрузка" text="Проверяем активную сессию." />;
@@ -241,31 +336,7 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
                           key={plan.id}
                           plan={plan}
                           isPending={pendingPlanId === plan.id}
-                          onSelect={async () => {
-                            try {
-                              setPendingPlanId(plan.id);
-                              setPaymentError(null);
-                              setFeedback(null);
-
-                              const session = await apiFetch<PaymentSessionResponse>(
-                                `/payments/passes/${plan.id}`,
-                                {
-                                  method: "POST",
-                                  body: JSON.stringify({}),
-                                },
-                              );
-
-                              window.location.href = session.formUrl;
-                            } catch (paymentError) {
-                              setPaymentError(
-                                paymentError instanceof ApiError
-                                  ? paymentError.message
-                                  : "Не удалось перейти к оплате",
-                              );
-                            } finally {
-                              setPendingPlanId(null);
-                            }
-                          }}
+                          onSelect={() => handlePlanSelect(plan.id)}
                         />
                       ))}
                     </div>
@@ -285,6 +356,18 @@ export function PassesCategoryScreen({ slug }: PassesCategoryScreenProps) {
 
         <BottomNav activeItem="passes" />
       </section>
+
+      {phoneModalPlanId ? (
+        <PhoneCaptureModal
+          value={phoneValue}
+          error={phoneError}
+          submitError={phoneSubmitError}
+          isSubmitting={isPhoneSubmitting}
+          onChange={handlePhoneChange}
+          onClose={closePhoneModal}
+          onSubmit={() => void handlePhoneSubmit()}
+        />
+      ) : null}
     </main>
   );
 }
@@ -411,3 +494,140 @@ const FEATURE_ICON_MAP = {
   POOL: Waves,
   COMBO: Layers3,
 } as const;
+
+function PhoneCaptureModal({
+  value,
+  error,
+  submitError,
+  isSubmitting,
+  onChange,
+  onClose,
+  onSubmit,
+}: {
+  value: string;
+  error: string | null;
+  submitError: string | null;
+  isSubmitting: boolean;
+  onChange: (value: string) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div className={styles.modalOverlay} role="presentation" onClick={onClose}>
+      <section
+        className={styles.modalCard}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="phone-capture-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={styles.modalHeader}>
+          <div className={styles.modalCopy}>
+            <p className={styles.modalEyebrow}>Перед оплатой</p>
+            <h2 id="phone-capture-title" className={styles.modalTitle}>
+              Укажите номер телефона
+            </h2>
+            <p className={styles.modalSubtitle}>
+              Номер нужен для оформления оплаты и сохранится в вашем профиле.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={styles.modalClose}
+            onClick={onClose}
+            aria-label="Закрыть"
+            disabled={isSubmitting}
+          >
+            <X size={18} strokeWidth={2.4} />
+          </button>
+        </div>
+
+        <div className={styles.modalBody}>
+          <label className={styles.phoneLabel} htmlFor="phone-capture-input">
+            Номер телефона
+          </label>
+          <input
+            id="phone-capture-input"
+            className={styles.phoneInput}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="+7 (___) ___-__-__"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            disabled={isSubmitting}
+          />
+
+          {error ? <p className={styles.modalError}>{error}</p> : null}
+          {submitError ? <p className={styles.modalError}>{submitError}</p> : null}
+
+          <button
+            type="button"
+            className={styles.modalAction}
+            onClick={onSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Сохраняем..." : "Сохранить и продолжить"}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function formatPhoneInput(value: string) {
+  const digits = extractRussianPhoneDigits(value);
+
+  if (digits.length === 0) {
+    return "+7";
+  }
+
+  let formatted = "+7";
+
+  if (digits.length > 1) {
+    formatted += ` (${digits.slice(1, 4)}`;
+  }
+
+  if (digits.length >= 5) {
+    formatted += `) ${digits.slice(4, 7)}`;
+  }
+
+  if (digits.length >= 8) {
+    formatted += `-${digits.slice(7, 9)}`;
+  }
+
+  if (digits.length >= 10) {
+    formatted += `-${digits.slice(9, 11)}`;
+  }
+
+  return formatted;
+}
+
+function normalizeRussianPhone(value: string) {
+  const digits = extractRussianPhoneDigits(value);
+
+  if (digits.length !== 11 || digits[0] !== "7") {
+    return null;
+  }
+
+  return `+${digits}`;
+}
+
+function extractRussianPhoneDigits(value: string) {
+  const digitsOnly = value.replace(/\D/g, "");
+
+  if (digitsOnly.length === 0) {
+    return "";
+  }
+
+  if (digitsOnly[0] === "8") {
+    return `7${digitsOnly.slice(1, 11)}`;
+  }
+
+  if (digitsOnly[0] !== "7") {
+    return `7${digitsOnly.slice(0, 10)}`;
+  }
+
+  return digitsOnly.slice(0, 11);
+}
