@@ -409,6 +409,8 @@ export type PaymentOrderStatus =
   | "EXPIRED"
   | "CANCELLED";
 
+export type AdminPaymentDiagnosisTone = "success" | "warning" | "danger" | "muted";
+
 export type PaymentSessionResponse = {
   paymentId: string;
   formUrl: string;
@@ -417,6 +419,7 @@ export type PaymentSessionResponse = {
 
 export type PaymentStatusResponse = {
   paymentId: string;
+  merchantOrderNumber: string;
   status: PaymentOrderStatus;
   statusLabel: string;
   statusTone: PaymentTone;
@@ -535,6 +538,11 @@ export type AdminPaymentLedgerItem = {
   };
   membershipId: string | null;
   membershipIssuedAt: string | null;
+  adminDiagnosis: string;
+  adminDiagnosisTone: AdminPaymentDiagnosisTone;
+  adminReason: string;
+  isCompletedPayment: boolean;
+  isIssueActionRequired: boolean;
 };
 
 export type AdminPaymentsLedgerPage = {
@@ -555,6 +563,11 @@ export type AdminPaymentEvent = {
 };
 
 export type AdminPaymentDetails = PaymentStatusResponse & {
+  adminDiagnosis: string;
+  adminDiagnosisTone: AdminPaymentDiagnosisTone;
+  adminReason: string;
+  isCompletedPayment: boolean;
+  isIssueActionRequired: boolean;
   gatewayOrderId: string | null;
   gatewayErrorCode: string | null;
   gatewayMessage: string | null;

@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, CreditCard, RefreshCcw, TrendingUp, Wallet } from "lucide-react";
 import { useRequireAdmin } from "@/shared/auth/auth-guards";
 import { useAuth } from "@/shared/auth/auth-context";
 import { apiFetch, ApiError } from "@/shared/lib/api";
 import type {
   AdminPaymentDetails,
+  AdminPaymentDiagnosisTone,
   AdminPaymentLedgerItem,
   AdminPaymentsLedgerPage,
   AdminPaymentsOverview,
@@ -33,7 +34,7 @@ export function AdminPaymentsScreen() {
   const [isRefundLoading, setIsRefundLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadWorkspace = async (selectedRange: "30d") => {
+  const loadWorkspace = useCallback(async (selectedRange: "30d") => {
     const [overviewData, ledgerData] = await Promise.all([
       apiFetch<AdminPaymentsOverview>(`/admin/payments/overview?range=${selectedRange}`, {
         cache: "no-store",
@@ -55,7 +56,7 @@ export function AdminPaymentsScreen() {
       });
       setSelectedPayment(details);
     }
-  };
+  }, [selectedPaymentId]);
 
   useEffect(() => {
     if (!canRender) {
@@ -72,7 +73,7 @@ export function AdminPaymentsScreen() {
       .finally(() => {
         setIsDataLoading(false);
       });
-  }, [canRender, range]);
+  }, [canRender, loadWorkspace, range]);
 
   const handleRefresh = async () => {
     try {
@@ -204,6 +205,15 @@ export function AdminPaymentsScreen() {
     ];
   }, [overview]);
 
+  const completedLedger = useMemo(
+    () => ledger.filter((item) => item.isCompletedPayment),
+    [ledger],
+  );
+  const pendingLedger = useMemo(
+    () => ledger.filter((item) => !item.isCompletedPayment),
+    [ledger],
+  );
+
   if (isLoading) {
     return <SessionStatus title="Загрузка" text="Проверяем права доступа." />;
   }
@@ -233,8 +243,8 @@ export function AdminPaymentsScreen() {
             <p className={styles.eyebrow}>Платежи и пополнения</p>
             <h1 className={styles.title}>Финансовая аналитика</h1>
             <p className={styles.subtitle}>
-              Выручка, динамика успешных продаж, популярные тарифы и ledger проведённых
-              транзакций.
+              Выручка, завершённые оплаты и отдельная очередь незавершённых или проблемных
+              заказов.
             </p>
           </div>
 
@@ -355,87 +365,28 @@ export function AdminPaymentsScreen() {
         <section className={styles.ledgerSection}>
           <div className={styles.cardHeader}>
             <div>
-              <h2 className={styles.cardTitle}>Ledger успешных транзакций</h2>
-              <p className={styles.cardText}>Только проведённые оплаты за выбранный период.</p>
+              <h2 className={styles.cardTitle}>Завершённые оплаты</h2>
+              <p className={styles.cardText}>
+                Только операции, где оплата уже завершена: подтверждённые оплаты и возвраты.
+              </p>
             </div>
-            <span className={styles.ledgerCount}>{ledger.length} строк</span>
+            <span className={styles.ledgerCount}>{completedLedger.length} строк</span>
           </div>
 
-          {ledger.length === 0 ? (
+          {completedLedger.length === 0 ? (
             <div className={styles.emptyState}>
-              <p className={styles.emptyTitle}>За выбранный период нет успешных платежей.</p>
+              <p className={styles.emptyTitle}>За выбранный период нет завершённых оплат.</p>
               <p className={styles.emptyText}>
-                Как только появятся проведённые оплаты, здесь отобразится полный ledger.
+                Как только появятся подтверждённые оплаты или возвраты, они отобразятся здесь.
               </p>
             </div>
           ) : (
             <>
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Дата</th>
-                      <th>Сумма</th>
-                      <th>Тариф</th>
-                      <th>Клиент</th>
-                      <th>Заказ</th>
-                      <th>Выдача</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ledger.map((item) => (
-                      <tr
-                        key={item.paymentId}
-                        onClick={() => void handleSelectPayment(item.paymentId)}
-                        className={selectedPaymentId === item.paymentId ? styles.rowActive : undefined}
-                      >
-                        <td>
-                          <div className={styles.primaryCell}>{formatDateTime(item.paidAt)}</div>
-                          <div className={styles.secondaryCell}>
-                            {item.status}
-                            {item.gatewayStatus ? ` · ${item.gatewayStatus}` : ""}
-                          </div>
-                        </td>
-                        <td>
-                          <div className={styles.primaryCell}>{formatCurrency(item.amount)}</div>
-                          <div className={styles.secondaryCell}>
-                            {item.currency}
-                            {item.refundedAmount > 0 ? ` · возврат ${formatCurrency(item.refundedAmount)}` : ""}
-                          </div>
-                        </td>
-                        <td>
-                          <div className={styles.primaryCell}>{item.plan.title}</div>
-                          <div className={styles.secondaryCell}>
-                            {[item.plan.categoryTitle, item.plan.variantTitle, item.plan.groupTitle]
-                              .filter(Boolean)
-                              .join(" / ")}
-                          </div>
-                        </td>
-                        <td>
-                          <div className={styles.primaryCell}>{item.user.name}</div>
-                          <div className={styles.secondaryCell}>{item.user.email}</div>
-                        </td>
-                        <td>
-                          <div className={styles.primaryCell}>{item.merchantOrderNumber}</div>
-                          <div className={styles.secondaryCell}>
-                            {item.gatewayPaymentId ?? item.paymentId}
-                          </div>
-                        </td>
-                        <td>
-                          <div className={styles.statusBadge}>
-                            {item.membershipIssuedAt ? "Выдан абонемент" : "Ожидает выдачи"}
-                          </div>
-                          <div className={styles.secondaryCell}>
-                            {item.membershipIssuedAt
-                              ? formatDateTime(item.membershipIssuedAt)
-                              : item.membershipId ?? "Без назначения"}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <LedgerTable
+                items={completedLedger}
+                selectedPaymentId={selectedPaymentId}
+                onSelectPayment={handleSelectPayment}
+              />
 
               {nextCursor ? (
                 <div className={styles.loadMoreWrap}>
@@ -453,12 +404,39 @@ export function AdminPaymentsScreen() {
           )}
         </section>
 
+        <section className={styles.ledgerSection}>
+          <div className={styles.cardHeader}>
+            <div>
+              <h2 className={styles.cardTitle}>Незавершённые и проблемные заказы</h2>
+              <p className={styles.cardText}>
+                Заказы, где платёж ещё не завершён, обрабатывается банком или не прошёл.
+              </p>
+            </div>
+            <span className={styles.ledgerCount}>{pendingLedger.length} строк</span>
+          </div>
+
+          {pendingLedger.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p className={styles.emptyTitle}>Нет незавершённых или проблемных заказов.</p>
+              <p className={styles.emptyText}>
+                Все заказы за выбранный период либо завершены, либо уже скрылись из выборки.
+              </p>
+            </div>
+          ) : (
+            <LedgerTable
+              items={pendingLedger}
+              selectedPaymentId={selectedPaymentId}
+              onSelectPayment={handleSelectPayment}
+            />
+          )}
+        </section>
+
         <section className={styles.chartCard}>
           <div className={styles.cardHeader}>
             <div>
               <h2 className={styles.cardTitle}>Детали платежа</h2>
               <p className={styles.cardText}>
-                Gateway-статусы, возврат и последние события по выбранной операции
+                Диагноз по оплате, расшифровка причин и последние события по выбранной операции
               </p>
             </div>
           </div>
@@ -467,6 +445,26 @@ export function AdminPaymentsScreen() {
             <p className={styles.cardText}>Загружаем детали платежа…</p>
           ) : selectedPayment ? (
             <div className={styles.detailsStack}>
+              <article
+                className={[
+                  styles.diagnosisCard,
+                  getToneClassName(selectedPayment.adminDiagnosisTone),
+                ].join(" ")}
+              >
+                <div className={styles.badgesRow}>
+                  <span className={styles.statusBadge}>{getPaymentStageLabel(selectedPayment.status)}</span>
+                  <span className={styles.statusBadge}>{getIssueStageLabel(selectedPayment)}</span>
+                </div>
+                <div className={styles.primaryCell}>{selectedPayment.adminDiagnosis}</div>
+                <p className={styles.cardText}>{selectedPayment.adminReason}</p>
+                {selectedPayment.isIssueActionRequired ? (
+                  <p className={styles.warningText}>
+                    Требуется ручная проверка: оплата подтверждена, но отметка о выдаче
+                    абонемента отсутствует.
+                  </p>
+                ) : null}
+              </article>
+
               <div className={styles.detailsGrid}>
                 <div>
                   <div className={styles.primaryCell}>{selectedPayment.plan.title}</div>
@@ -529,6 +527,20 @@ export function AdminPaymentsScreen() {
                 </div>
                 <div>
                   <div className={styles.primaryCell}>
+                    {selectedPayment.paidAt ? formatDateTime(selectedPayment.paidAt) : "Оплата ещё не подтверждена"}
+                  </div>
+                  <div className={styles.secondaryCell}>paidAt</div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>
+                    {selectedPayment.membershipIssuedAt
+                      ? formatDateTime(selectedPayment.membershipIssuedAt)
+                      : getIssueSecondaryText(selectedPayment)}
+                  </div>
+                  <div className={styles.secondaryCell}>membershipIssuedAt / выдача</div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>
                     {selectedPayment.lastNotificationAt
                       ? formatDateTime(selectedPayment.lastNotificationAt)
                       : "Webhook ещё не приходил"}
@@ -550,6 +562,18 @@ export function AdminPaymentsScreen() {
                     {selectedPayment.gatewayErrorCode ?? selectedPayment.gatewayDetails ?? "Без кода ошибки"}
                   </div>
                 </div>
+                <div>
+                  <div className={styles.primaryCell}>
+                    {selectedPayment.membershipId ?? "Абонемент ещё не создан"}
+                  </div>
+                  <div className={styles.secondaryCell}>membershipId</div>
+                </div>
+                <div>
+                  <div className={styles.primaryCell}>{selectedPayment.paymentId}</div>
+                  <div className={styles.secondaryCell}>
+                    {selectedPayment.merchantOrderNumber}
+                  </div>
+                </div>
               </div>
 
               <div className={styles.eventsList}>
@@ -566,11 +590,98 @@ export function AdminPaymentsScreen() {
               </div>
             </div>
           ) : (
-            <p className={styles.cardText}>Выберите строку в ledger, чтобы открыть детали.</p>
+            <p className={styles.cardText}>Выберите строку в списке, чтобы открыть детали.</p>
           )}
         </section>
       </section>
     </main>
+  );
+}
+
+function LedgerTable({
+  items,
+  selectedPaymentId,
+  onSelectPayment,
+}: {
+  items: AdminPaymentLedgerItem[];
+  selectedPaymentId: string | null;
+  onSelectPayment: (paymentId: string) => Promise<void>;
+}) {
+  return (
+    <div className={styles.tableWrap}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th>Тариф</th>
+            <th>Клиент</th>
+            <th>Заказ</th>
+            <th>Диагноз</th>
+            <th>Выдача</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item) => (
+            <tr
+              key={item.paymentId}
+              onClick={() => void onSelectPayment(item.paymentId)}
+              className={selectedPaymentId === item.paymentId ? styles.rowActive : undefined}
+            >
+              <td>
+                <div className={styles.primaryCell}>{formatDateTime(item.paidAt)}</div>
+                <div className={styles.secondaryCell}>
+                  {item.status}
+                  {item.gatewayStatus ? ` · ${item.gatewayStatus}` : ""}
+                </div>
+              </td>
+              <td>
+                <div className={styles.primaryCell}>{formatCurrency(item.amount)}</div>
+                <div className={styles.secondaryCell}>
+                  {item.currency}
+                  {item.refundedAmount > 0 ? ` · возврат ${formatCurrency(item.refundedAmount)}` : ""}
+                </div>
+              </td>
+              <td>
+                <div className={styles.primaryCell}>{item.plan.title}</div>
+                <div className={styles.secondaryCell}>
+                  {[item.plan.categoryTitle, item.plan.variantTitle, item.plan.groupTitle]
+                    .filter(Boolean)
+                    .join(" / ")}
+                </div>
+              </td>
+              <td>
+                <div className={styles.primaryCell}>{item.user.name}</div>
+                <div className={styles.secondaryCell}>{item.user.email}</div>
+              </td>
+              <td>
+                <div className={styles.primaryCell}>{item.merchantOrderNumber}</div>
+                <div className={styles.secondaryCell}>{item.gatewayPaymentId ?? item.paymentId}</div>
+              </td>
+              <td>
+                <div className={styles.badgesRow}>
+                  <span className={styles.statusBadge}>{getPaymentStageLabel(item.status)}</span>
+                  <span className={styles.statusBadge}>{getIssueStageLabel(item)}</span>
+                </div>
+                <div className={styles.primaryCell}>{item.adminDiagnosis}</div>
+                <div className={styles.secondaryCell}>{item.adminReason}</div>
+              </td>
+              <td>
+                <div
+                  className={[
+                    styles.statusBadge,
+                    getToneClassName(item.adminDiagnosisTone),
+                  ].join(" ")}
+                >
+                  {getIssueStageLabel(item)}
+                </div>
+                <div className={styles.secondaryCell}>{getIssueSecondaryText(item)}</div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -852,4 +963,70 @@ function getErrorMessage(error: unknown, fallback: string) {
   }
 
   return fallback;
+}
+
+function getPaymentStageLabel(status: AdminPaymentLedgerItem["status"] | AdminPaymentDetails["status"]) {
+  switch (status) {
+    case "PAID":
+      return "Оплата подтверждена";
+    case "REFUNDED":
+      return "Возврат";
+    case "PROCESSING":
+      return "Банк обрабатывает";
+    case "FAILED":
+    case "EXPIRED":
+    case "CANCELLED":
+      return "Оплата не прошла";
+    case "REDIRECT_READY":
+    case "REDIRECTED":
+      return "Ждём оплаты";
+    case "FORM_REGISTERED":
+    case "CREATED":
+    default:
+      return "Счёт создан";
+  }
+}
+
+function getIssueStageLabel(
+  payment: Pick<AdminPaymentLedgerItem, "status" | "membershipIssuedAt"> |
+    Pick<AdminPaymentDetails, "status" | "membershipIssuedAt">,
+) {
+  if (payment.status === "PAID" && payment.membershipIssuedAt) {
+    return "Выдан";
+  }
+
+  if (payment.status === "PAID") {
+    return "Не выдан";
+  }
+
+  return "Не применимо";
+}
+
+function getIssueSecondaryText(
+  payment: Pick<AdminPaymentLedgerItem, "status" | "membershipIssuedAt" | "membershipId"> |
+    Pick<AdminPaymentDetails, "status" | "membershipIssuedAt" | "membershipId">,
+) {
+  if (payment.status === "PAID" && payment.membershipIssuedAt) {
+    return formatDateTime(payment.membershipIssuedAt);
+  }
+
+  if (payment.status === "PAID") {
+    return payment.membershipId ?? "Требуется проверка выдачи";
+  }
+
+  return "Абонемент ещё не должен быть создан";
+}
+
+function getToneClassName(tone: AdminPaymentDiagnosisTone) {
+  switch (tone) {
+    case "success":
+      return styles.toneSuccess;
+    case "warning":
+      return styles.toneWarning;
+    case "danger":
+      return styles.toneDanger;
+    case "muted":
+    default:
+      return styles.toneMuted;
+  }
 }

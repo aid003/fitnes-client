@@ -379,7 +379,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 1180px;
 }
 
 .table th,
@@ -418,6 +418,33 @@
   font-weight: 800;
 }
 
+.badgesRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.toneSuccess {
+  background: rgba(111, 225, 214, 0.14);
+  color: #8ceddf;
+}
+
+.toneWarning {
+  background: rgba(242, 211, 137, 0.14);
+  color: #f5d48f;
+}
+
+.toneDanger {
+  background: rgba(208, 72, 93, 0.16);
+  color: #ffbec6;
+}
+
+.toneMuted {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.82);
+}
+
 .loadMoreWrap {
   display: flex;
   justify-content: center;
@@ -446,6 +473,21 @@
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.diagnosisCard {
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 10px;
+}
+
+.warningText {
+  margin: 0;
+  color: #ffbec6;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .emptyState {
