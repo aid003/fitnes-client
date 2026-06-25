@@ -32,7 +32,7 @@ const SERVICE_ITEMS: ServiceItem[] = [
   {
     iconSrc: "/service/1.png",
     iconAlt: "Групповые занятия",
-    title: "Групповые занятия: фитнес, йога, бокс, кроссфит и другое",
+    title: "Групповые занятия: фитнес, кроссфит и другое",
   },
   {
     iconSrc: "/service/1.png",

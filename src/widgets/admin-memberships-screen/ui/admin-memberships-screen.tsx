@@ -14,6 +14,7 @@ import type {
   PassCategoryDetails,
 } from "@/shared/lib/contracts";
 import { SessionStatus } from "@/shared/ui/session-status/session-status";
+import { SearchableSelect } from "@/shared/ui/searchable-select/searchable-select";
 import styles from "./admin-memberships-screen.module.css";
 
 type CreateMembershipFormState = {
@@ -74,6 +75,19 @@ export function AdminMembershipsScreen() {
         ),
       ),
     [categories],
+  );
+  const userOptions = useMemo(
+    () =>
+      users.map((entry) => ({
+        id: entry.id,
+        label: entry.name,
+        sublabel: [entry.email, entry.phone].filter(Boolean).join(" · "),
+      })),
+    [users],
+  );
+  const searchablePlanOptions = useMemo(
+    () => planOptions.map((plan) => ({ id: plan.id, label: plan.label })),
+    [planOptions],
   );
   const selectedCreatePlan = useMemo(
     () => planOptions.find((plan) => plan.id === createForm.passPlanId) ?? null,
@@ -229,40 +243,30 @@ export function AdminMembershipsScreen() {
             >
               <label className={styles.field}>
                 <span className={styles.fieldLabel}>Пользователь</span>
-                <select
-                  className={styles.fieldControl}
+                <SearchableSelect
+                  options={userOptions}
                   value={createForm.userId}
-                  onChange={(event) =>
-                    setCreateForm((current) => ({ ...current, userId: event.target.value }))
+                  onChange={(nextUserId) =>
+                    setCreateForm((current) => ({ ...current, userId: nextUserId }))
                   }
+                  placeholder="Выберите пользователя"
+                  searchPlaceholder="Поиск по имени, email или телефону"
                   required
-                >
-                  <option value="">Выберите пользователя</option>
-                  {users.map((entry) => (
-                    <option key={entry.id} value={entry.id}>
-                      {entry.name} · {entry.email}
-                    </option>
-                  ))}
-                </select>
+                />
               </label>
 
               <label className={styles.field}>
                 <span className={styles.fieldLabel}>Тариф</span>
-                <select
-                  className={styles.fieldControl}
+                <SearchableSelect
+                  options={searchablePlanOptions}
                   value={createForm.passPlanId}
-                  onChange={(event) =>
-                    setCreateForm((current) => ({ ...current, passPlanId: event.target.value }))
+                  onChange={(nextPassPlanId) =>
+                    setCreateForm((current) => ({ ...current, passPlanId: nextPassPlanId }))
                   }
+                  placeholder="Выберите тариф"
+                  searchPlaceholder="Поиск по категории, варианту или названию"
                   required
-                >
-                  <option value="">Выберите тариф</option>
-                  {planOptions.map((plan) => (
-                    <option key={plan.id} value={plan.id}>
-                      {plan.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </label>
 
               {createPlanIsVisitBased ? (
